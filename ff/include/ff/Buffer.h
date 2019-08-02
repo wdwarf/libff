@@ -27,6 +27,7 @@ public:
 	Buffer(unsigned int initSize);
 	Buffer(const char* data, unsigned int size);
 	Buffer(const Buffer& buffer);
+	Buffer(Buffer&& buffer);
 	virtual ~Buffer();
 
 	Buffer& operator=(const Buffer& buffer);

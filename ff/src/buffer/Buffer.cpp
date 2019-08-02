@@ -33,6 +33,14 @@ Buffer::Buffer(const Buffer& buffer) :
 		impl(new Buffer::BufferImpl(*buffer.impl)) {
 }
 
+Buffer::Buffer(Buffer&& buffer){
+	if(nullptr != this->impl)
+		delete this->impl;
+
+	this->impl = buffer.impl;
+	buffer.impl = nullptr;
+}
+
 Buffer& Buffer::operator=(const Buffer& buffer) {
 	*this->impl = *buffer.impl;
 	return *this;
@@ -77,7 +85,7 @@ const char& Buffer::operator[](unsigned index) const {
 }
 
 Buffer::~Buffer() {
-	if (NULL != this->impl) {
+	if (nullptr != this->impl) {
 		delete this->impl;
 	}
 }

@@ -8,21 +8,28 @@
 #include <ff/ErrNo.h>
 #include <iostream>
 #include <thread>
+#include <errno.h>
 
 using namespace std;
 using namespace NS_FF;
 
-void f(){}
+void f() {
+}
 
-TEST(TestErrNo, TestErrNo){
-	try{
-		thread t(&f);
-//		thread([](){
-//					//SetLastError(123, "err info");
-//						//cout << "last errno: " << GetLastErrNo() << endl;
-//						//cout << "last err info: " << GetLastErrInfo() << endl;
-//			});
-	}catch(exception& e){
-		cout << e.what() << endl;
-	}
+TEST(TestErrNo, TestErrNo) {
+	thread t1([]() {
+		SetLastError(123, "err info");
+		this_thread::sleep_for(std::chrono::seconds(1));
+		cout << "last errno: " << GetLastErrNo() << endl;
+		cout << "last err info: " << GetLastErrInfo() << endl;
+	});
+
+	thread t2([]() {
+		SetLastError(1234, "err info 2");
+		cout << "last errno: " << GetLastErrNo() << endl;
+		cout << "last err info: " << GetLastErrInfo() << endl;
+	});
+
+	t1.join();
+	t2.join();
 }
