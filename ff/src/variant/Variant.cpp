@@ -32,7 +32,7 @@ Variant::Variant(const Variant& v) {
 	}
 }
 
-Variant::Variant(Variant&& v){
+Variant::Variant(Variant&& v) {
 	this->vt = v.vt;
 	this->size = v.size;
 	this->value = v.value;
@@ -187,7 +187,8 @@ VariantTypeInfo Variant::TypeInfoFromString(const string& typeName) {
 		return TypeInfo(VariantType::USHORT);
 	}
 
-	if ("uint" == type || "uint32" == type || "unsigned" == type || "unsigned int" == type) {
+	if ("uint" == type || "uint32" == type || "unsigned" == type
+			|| "unsigned int" == type) {
 		return TypeInfo(VariantType::UINT);
 	}
 
@@ -266,91 +267,42 @@ static string _ToString(const T& t) {
 }
 
 string Variant::toString() const {
-	stringstream val;
-	switch (this->vt) {
-	case VariantType::UNKNOWN:
-		break;
-	case VariantType::BOOLEAN: {
-		val << this->value.valBool;
-		break;
-	}
-	case VariantType::UCHAR: {
-		val << (int) this->value.valUChar;
-		break;
-	}
-	case VariantType::USHORT: {
-		val << this->value.valUShort;
-		break;
-	}
-	case VariantType::UINT: {
-		val << this->value.valUInt;
-		break;
-	}
-	case VariantType::ULONG: {
-		val << this->value.valULong;
-		break;
-	}
-	case VariantType::ULONGLONG: {
-		val << this->value.valULongLong;
-		break;
-	}
-	case VariantType::CHAR: {
-		val << (int) this->value.valChar;
-		break;
-	}
-	case VariantType::SHORT: {
-		val << this->value.valShort;
-		break;
-	}
-	case VariantType::INT: {
-		val << this->value.valInt;
-		break;
-	}
-	case VariantType::LONG: {
-		val << this->value.valLong;
-		break;
-	}
-	case VariantType::LONGLONG: {
-		val << this->value.valLongLong;
-		break;
-	}
-	case VariantType::FLOAT: {
-		val << this->value.valFloat;
-		break;
-	}
-	case VariantType::DOUBLE: {
-		val << this->value.valDouble;
-		break;
-	}
-	case VariantType::CARRAY:
-	case VariantType::STRING: {
+	if (this->vt == VariantType::CARRAY || this->vt == VariantType::STRING) {
+		stringstream val;
 		if (this->value.valPtr && this->size > 0) {
 			val.write((const char*) this->value.valPtr, this->size);
 		}
-		break;
+		return val.str();
 	}
-	}
-	return val.str();
+
+	return this->vt == VariantType::BOOLEAN ? to_string(this->value.valBool)
+			: this->vt == VariantType::UCHAR ? to_string(this->value.valUChar)
+			: this->vt == VariantType::USHORT ? to_string(this->value.valUShort)
+			: this->vt == VariantType::UINT ? to_string(this->value.valUInt)
+			: this->vt == VariantType::ULONG ? to_string(this->value.valULong)
+			: this->vt == VariantType::ULONGLONG ? to_string(this->value.valULongLong)
+			: this->vt == VariantType::CHAR ? to_string(this->value.valChar)
+			: this->vt == VariantType::SHORT ? to_string(this->value.valShort)
+			: this->vt == VariantType::INT ? to_string(this->value.valInt)
+			: this->vt == VariantType::LONG ? to_string(this->value.valLong)
+			: this->vt == VariantType::LONGLONG ? to_string(this->value.valLongLong)
+			: this->vt == VariantType::FLOAT ? _ToString(this->value.valFloat)
+			: this->vt == VariantType::DOUBLE ? _ToString(this->value.valDouble)
+			: "";
 }
 
 Buffer Variant::toBuffer() const {
-	Buffer val;
-	switch (this->vt) {
-	case VariantType::UNKNOWN:
-		break;
-	case VariantType::CARRAY:
-	case VariantType::STRING: {
-		if (this->value.valPtr && this->size > 0) {
-			val.setData((const char*) this->value.valPtr, this->size);
-		}
-		break;
+	if(this->vt == VariantType::UNKNOWN)
+		return Buffer();
+
+	if (this->vt == VariantType::CARRAY || this->vt == VariantType::STRING) {
+		Buffer buf;
+		if (this->value.valPtr && this->size > 0)
+			buf.setData((const char*) this->value.valPtr, this->size);
+		return buf;
 	}
-	default: {
-		val.setData((const char*) &this->value, this->size);
-		break;
-	}
-	}
-	return val;
+
+	return Buffer((const char*) &this->value, this->size);
 }
 
 void Variant::clear() {
@@ -371,123 +323,72 @@ void Variant::clear() {
 }
 
 void Variant::zero() {
-	switch (this->vt) {
-	case VariantType::CARRAY:
-	case VariantType::STRING: {
+	if (this->vt == VariantType::CARRAY || this->vt == VariantType::STRING) {
 		if (this->value.valPtr) {
 			memset(this->value.valPtr, 0, this->size);
 		}
 		return;
 	}
-	default:
-		break;
-	}
 
 	memset(&this->value, 0, sizeof(this->value));
 }
 
+#define _OP_ASIGN_(valType, val)	this->clear();\
+this->vt = valType;\
+this->size = TypeInfo(this->vt).size;\
+this->value.val = v;\
+return *this
+
 Variant& Variant::operator=(bool v) {
-	this->clear();
-	this->vt = VariantType::BOOLEAN;
-	this->size = TypeInfo(this->vt).size;
-	this->value.valBool = v;
-	return *this;
+	_OP_ASIGN_(VariantType::BOOLEAN, valBool);
 }
 
 Variant& Variant::operator=(char v) {
-	this->clear();
-	this->vt = VariantType::CHAR;
-	this->size = TypeInfo(this->vt).size;
-	this->value.valChar = v;
-	return *this;
+	_OP_ASIGN_(VariantType::CHAR, valChar);
 }
 
 Variant& Variant::operator=(short v) {
-	this->clear();
-	this->vt = VariantType::SHORT;
-	this->size = TypeInfo(this->vt).size;
-	this->value.valShort = v;
-	return *this;
+	_OP_ASIGN_(VariantType::SHORT, valShort);
 }
 
 Variant& Variant::operator=(int v) {
-	this->clear();
-	this->vt = VariantType::INT;
-	this->size = TypeInfo(this->vt).size;
-	this->value.valInt = v;
-	return *this;
+	_OP_ASIGN_(VariantType::INT, valInt);
 }
 
 Variant& Variant::operator=(long v) {
-	this->clear();
-	this->vt = VariantType::LONG;
-	this->size = TypeInfo(this->vt).size;
-	this->value.valLong = v;
-	return *this;
+	_OP_ASIGN_(VariantType::LONG, valLong);
 }
 
 Variant& Variant::operator=(long long v) {
-	this->clear();
-	this->vt = VariantType::LONGLONG;
-	this->size = TypeInfo(this->vt).size;
-	this->value.valLongLong = v;
-	return *this;
+	_OP_ASIGN_(VariantType::LONGLONG, valLongLong);
 }
 
 Variant& Variant::operator=(unsigned char v) {
-	this->clear();
-	this->vt = VariantType::UCHAR;
-	this->size = TypeInfo(this->vt).size;
-	this->value.valUChar = v;
-	return *this;
+	_OP_ASIGN_(VariantType::UCHAR, valUChar);
 }
 
 Variant& Variant::operator=(unsigned short v) {
-	this->clear();
-	this->vt = VariantType::USHORT;
-	this->size = TypeInfo(this->vt).size;
-	this->value.valUShort = v;
-	return *this;
+	_OP_ASIGN_(VariantType::USHORT, valUShort);
 }
 
 Variant& Variant::operator=(unsigned int v) {
-	this->clear();
-	this->vt = VariantType::UINT;
-	this->size = TypeInfo(this->vt).size;
-	this->value.valUInt = v;
-	return *this;
+	_OP_ASIGN_(VariantType::UINT, valUInt);
 }
 
 Variant& Variant::operator=(unsigned long v) {
-	this->clear();
-	this->vt = VariantType::ULONG;
-	this->size = TypeInfo(this->vt).size;
-	this->value.valULong = v;
-	return *this;
+	_OP_ASIGN_(VariantType::ULONG, valULong);
 }
 
 Variant& Variant::operator=(unsigned long long v) {
-	this->clear();
-	this->vt = VariantType::ULONGLONG;
-	this->size = TypeInfo(this->vt).size;
-	this->value.valULongLong = v;
-	return *this;
+	_OP_ASIGN_(VariantType::ULONGLONG, valULongLong);
 }
 
 Variant& Variant::operator=(float v) {
-	this->clear();
-	this->vt = VariantType::FLOAT;
-	this->size = TypeInfo(this->vt).size;
-	this->value.valFloat = v;
-	return *this;
+	_OP_ASIGN_(VariantType::FLOAT, valFloat);
 }
 
 Variant& Variant::operator=(double v) {
-	this->clear();
-	this->vt = VariantType::DOUBLE;
-	this->size = TypeInfo(this->vt).size;
-	this->value.valDouble = v;
-	return *this;
+	_OP_ASIGN_(VariantType::DOUBLE, valDouble);
 }
 
 Variant& Variant::operator=(const char* v) {

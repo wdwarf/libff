@@ -40,14 +40,14 @@ public:
 	void zero();
 
 	std::string toString();
-	int read(void* buf, unsigned int size) const;
-	void resetReadPos() const;
+	int read(void* buf, unsigned int size);
+	void resetReadPos();
 
 private:
 	char* data;
 	unsigned int size;
 	unsigned int capacity;
-	mutable unsigned int readPos;
+	unsigned int readPos;
 };
 
 } /* namespace NS_FF */

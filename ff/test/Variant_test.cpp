@@ -18,4 +18,6 @@ TEST(TestVariant, TestVariant){
 	Variant v2 = v;
 	cout << (v == v2) << endl;
 	EXPECT_EQ(v, v2);
+
+	cout << "buf: " << v.toBuffer().toString() << endl;
 }

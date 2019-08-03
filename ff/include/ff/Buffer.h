@@ -52,8 +52,8 @@ public:
 	void zero();
 
 	std::string toString() const;
-	int read(void* buf, unsigned int size) const;
-	void resetReadPos() const;
+	int read(void* buf, unsigned int size);
+	void resetReadPos();
 
 	BUF_IN_OPERATOR_DEF(long long);
 	BUF_IN_OPERATOR_DEF(long);

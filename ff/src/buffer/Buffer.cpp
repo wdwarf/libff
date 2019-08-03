@@ -131,11 +131,11 @@ void Buffer::zero() {
 	this->impl->zero();
 }
 
-int Buffer::read(void* buf, unsigned int size) const {
+int Buffer::read(void* buf, unsigned int size) {
 	return this->impl->read(buf, size);
 }
 
-void Buffer::resetReadPos() const {
+void Buffer::resetReadPos() {
 	this->impl->resetReadPos();
 }
 

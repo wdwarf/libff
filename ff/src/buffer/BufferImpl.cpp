@@ -42,7 +42,7 @@ Buffer::BufferImpl::BufferImpl(const Buffer::BufferImpl& buffer) :
 	this->setData(buffer.getData(), buffer.getSize());
 }
 
-int Buffer::BufferImpl::read(void* buf, unsigned int size) const {
+int Buffer::BufferImpl::read(void* buf, unsigned int size) {
 	long avaliableSize = this->getSize() - this->readPos;
 	if (avaliableSize <= 0)
 		return 0;
@@ -59,7 +59,7 @@ void Buffer::BufferImpl::zero() {
 	}
 }
 
-void Buffer::BufferImpl::resetReadPos() const {
+void Buffer::BufferImpl::resetReadPos() {
 	this->readPos = 0;
 }
 
