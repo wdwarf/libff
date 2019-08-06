@@ -22,15 +22,15 @@ public:
 	IP(const std::string& ip);
 	virtual ~IP();
 
-	enum VERSION_TYPE {
-		IP_UNKNOWN, IP_V4, IP_V6
+	enum class VersionType {
+		UNKNOWN, V4, V6
 	};
 
 	void parse(const std::string& ip);
 	bool isValid() const;
 	std::string toString() const;
 	operator std::string() const;
-	VERSION_TYPE getVersion() const;
+	VersionType getVersion() const;
 	bool hasV6Scope() const;
 	unsigned int getV6Scope() const;
 	void clear();
@@ -45,7 +45,7 @@ private:
 	static const unsigned int IPV6_LENGTH_WITH_SCOPE = 20;
 	static const unsigned int BUFSIZE = 32;
 
-	VERSION_TYPE version;
+	VersionType version;
 	unsigned char addrBuffer[BUFSIZE];
 
 	bool parseV4(const std::string& ip);

@@ -31,12 +31,12 @@ using namespace std;
 namespace NS_FF {
 
 IP::IP() :
-		version(IP_UNKNOWN) {
+		version(VersionType::UNKNOWN) {
 	memset(this->addrBuffer, 0, sizeof(this->addrBuffer));
 }
 
 IP::IP(const std::string& ip) :
-		version(IP_UNKNOWN) {
+		version(VersionType::UNKNOWN) {
 	memset(this->addrBuffer, 0, sizeof(this->addrBuffer));
 	this->parse(ip);
 }
@@ -69,7 +69,7 @@ void IP::parse(const std::string& ip) {
 				memset(&protocolInfo, 0, sizeof(WSAPROTOCOL_INFOA));
 				protocolInfo.iAddressFamily = AF_INET6;
 				if(WSAAddressToStringA((LPSOCKADDR)&ipAddr, sizeof(ipAddr), &protocolInfo, ds, &len) && this->parseV6(ds))
-					return;
+				return;
 #else
 				if (inet_ntop(AF_INET6, &ipAddr, ds, 60) && this->parseV6(ds))
 					return;
@@ -140,7 +140,7 @@ bool IP::parseV4(const std::string& ip) {
 		addrBuffer[token_count++] = (unsigned char) number;
 	}
 
-	version = IP_V4;
+	version = VersionType::V4;
 	return true;
 }
 
@@ -226,7 +226,8 @@ bool IP::parseV6(const std::string& ip) {
 				// move digits to right
 				{
 					for (int i = 0; i < digit_count; i++) {
-						digits[digit_count - 1 - i] = HexAToI(digits[digit_count - 1 - i]);
+						digits[digit_count - 1 - i] = HexAToI(
+								digits[digit_count - 1 - i]);
 //						ATOI(digits[digit_count - 1 - i]);
 						digits[3 - i] = digits[digit_count - 1 - i];
 					}
@@ -277,7 +278,8 @@ bool IP::parseV6(const std::string& ip) {
 			{
 				// move digits to right
 				for (int i = 0; i < digit_count; i++) {
-					digits[digit_count - 1 - i] = HexAToI(digits[digit_count - 1 - i]);
+					digits[digit_count - 1 - i] = HexAToI(
+							digits[digit_count - 1 - i]);
 					digits[3 - i] = digits[digit_count - 1 - i];
 				}
 			}
@@ -327,7 +329,8 @@ bool IP::parseV6(const std::string& ip) {
 		int len_first = int(end_first_part - (char*) tmp_address_buffer);
 		int len_second = int(out_ptr - second);
 
-		for (unsigned int i = 0; i < IPV6_LENGTH_NO_SCOPE - (len_first + len_second); i++)
+		for (unsigned int i = 0;
+				i < IPV6_LENGTH_NO_SCOPE - (len_first + len_second); i++)
 			*end_first_part++ = 0;
 		for (int i = 0; i < len_second; i++)
 			*end_first_part++ = second[i];
@@ -340,11 +343,12 @@ bool IP::parseV6(const std::string& ip) {
 	if (end_first_part - (char*) tmp_address_buffer != IPV6_LENGTH_NO_SCOPE)
 		return false;
 
-	version = IP_V6;
+	version = VersionType::V6;
 
 	memcpy(addrBuffer, tmp_address_buffer, BUFSIZE);
 	if (have_scope) {
-		unsigned int *scope_p = (unsigned int*) (addrBuffer + IPV6_LENGTH_NO_SCOPE);
+		unsigned int *scope_p = (unsigned int*) (addrBuffer
+				+ IPV6_LENGTH_NO_SCOPE);
 		*scope_p = htonl(scope);
 	}
 
@@ -352,12 +356,12 @@ bool IP::parseV6(const std::string& ip) {
 }
 
 void IP::clear() {
-	this->version = IP_UNKNOWN;
+	this->version = VersionType::UNKNOWN;
 	memset(this->addrBuffer, 0, sizeof(this->addrBuffer));
 }
 
 bool IP::isValid() const {
-	return (IP_UNKNOWN != this->version);
+	return (VersionType::UNKNOWN != this->version);
 }
 
 bool IP::hasV6Scope() const {
@@ -365,28 +369,31 @@ bool IP::hasV6Scope() const {
 }
 
 unsigned int IP::getV6Scope() const {
-	unsigned int* pScope = (unsigned int*) (this->addrBuffer + IPV6_LENGTH_NO_SCOPE);
+	unsigned int* pScope = (unsigned int*) (this->addrBuffer
+			+ IPV6_LENGTH_NO_SCOPE);
 	return ntohl(*pScope);
 }
 
 std::string IP::toString() const {
 	if (this->isValid()) {
 		char buf[128] = { 0 };
-		if (IP_V4 == version)
-			sprintf((char *) buf, "%d.%d.%d.%d", addrBuffer[0], addrBuffer[1], addrBuffer[2],
-					addrBuffer[3]);
+		if (VersionType::V4 == version)
+			sprintf((char *) buf, "%d.%d.%d.%d", addrBuffer[0], addrBuffer[1],
+					addrBuffer[2], addrBuffer[3]);
 		else if (this->hasV6Scope())
 			sprintf((char *) buf, "%02x%02x:%02x%02x:%02x%02x:%02x%02x:"
-					"%02x%02x:%02x%02x:%02x%02x:%02x%02x%%%d", addrBuffer[0], addrBuffer[1],
-					addrBuffer[2], addrBuffer[3], addrBuffer[4], addrBuffer[5], addrBuffer[6],
-					addrBuffer[7], addrBuffer[8], addrBuffer[9], addrBuffer[10], addrBuffer[11],
-					addrBuffer[12], addrBuffer[13], addrBuffer[14], addrBuffer[15],
-					this->getV6Scope());
+					"%02x%02x:%02x%02x:%02x%02x:%02x%02x%%%d", addrBuffer[0],
+					addrBuffer[1], addrBuffer[2], addrBuffer[3], addrBuffer[4],
+					addrBuffer[5], addrBuffer[6], addrBuffer[7], addrBuffer[8],
+					addrBuffer[9], addrBuffer[10], addrBuffer[11],
+					addrBuffer[12], addrBuffer[13], addrBuffer[14],
+					addrBuffer[15], this->getV6Scope());
 		else
 			sprintf((char *) buf, "%02x%02x:%02x%02x:%02x%02x:%02x%02x:"
-					"%02x%02x:%02x%02x:%02x%02x:%02x%02x", addrBuffer[0], addrBuffer[1],
-					addrBuffer[2], addrBuffer[3], addrBuffer[4], addrBuffer[5], addrBuffer[6],
-					addrBuffer[7], addrBuffer[8], addrBuffer[9], addrBuffer[10], addrBuffer[11],
+					"%02x%02x:%02x%02x:%02x%02x:%02x%02x", addrBuffer[0],
+					addrBuffer[1], addrBuffer[2], addrBuffer[3], addrBuffer[4],
+					addrBuffer[5], addrBuffer[6], addrBuffer[7], addrBuffer[8],
+					addrBuffer[9], addrBuffer[10], addrBuffer[11],
 					addrBuffer[12], addrBuffer[13], addrBuffer[14],
 					addrBuffer[15]);
 		return buf;
@@ -399,13 +406,13 @@ IP::operator std::string() const {
 	return this->toString();
 }
 
-IP::VERSION_TYPE IP::getVersion() const {
+IP::VersionType IP::getVersion() const {
 	return version;
 }
 
 Buffer IP::toBuffer() const {
 	if (this->isValid()) {
-		if (IP_V4 == this->version) {
+		if (VersionType::V4 == this->version) {
 			return Buffer((const char*) addrBuffer, 4);
 		} else {
 			if (this->hasV6Scope()) {

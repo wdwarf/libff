@@ -33,7 +33,8 @@ public:
 	 * 注册后便可调用createObject方法构造类T的对象。
 	 */
 	template<typename T>
-	void regiesterCreator(std::string className, ObjectType objType) {
+	void regiesterCreator(std::string className, ObjectType objType)
+			_throws(FactoryException) {
 		std::lock_guard<std::mutex> lk(this->m_mutex);
 		CreatorMap::iterator it = this->m_creatorMap.find(className);
 		if (it != this->m_creatorMap.end())
@@ -61,7 +62,8 @@ public:
 
 	//创建对象，并强转为T类指针
 	template<typename T>
-	std::shared_ptr<T> createObject(std::string className) {
+	std::shared_ptr<T> createObject(std::string className)
+			_throws(FactoryException) {
 		std::lock_guard<std::mutex> lk(this->m_mutex);
 
 		CreatorMap::iterator it = this->m_creatorMap.find(className);
@@ -77,13 +79,13 @@ public:
 		return std::shared_ptr<T>(static_cast<T*>(creator->createObject()));
 	}
 
-	bool hasCreator(const std::string& className) const{
+	bool hasCreator(const std::string& className) const {
 		std::lock_guard<std::mutex> lk(this->m_mutex);
 		return (this->m_creatorMap.find(className) != this->m_creatorMap.end());
 	}
 
 	//查询指定类是否是单例
-	bool isSingletonObject(std::string className) {
+	bool isSingletonObject(std::string className) _throws(FactoryException) {
 		std::lock_guard<std::mutex> lk(this->m_mutex);
 		CreatorMap::iterator it = this->m_creatorMap.find(className);
 		if (it != this->m_creatorMap.end()) {
