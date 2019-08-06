@@ -24,4 +24,6 @@ typedef unsigned long long u64;
 
 }
 
+#define __USE_SQLITE3_DB__
+
 #endif /* FF_FF_CONFIG_H_ */
