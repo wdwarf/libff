@@ -15,7 +15,7 @@
 
 namespace NS_FF {
 
-EXCEPTION_DEF(DateTimeException)
+EXCEPTION_DEF(DateTimeException);
 
 class DateTime: public Object {
 public:

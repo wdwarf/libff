@@ -95,8 +95,8 @@ void Settings::saveToFile(const std::string& file) {
 
 	for (ValueMap::iterator it = this->m_values.begin();
 			it != this->m_values.end(); ++it) {
-		f << Base64::encrypt(it->first) << ":"
-				<< Base64::encrypt(it->second.toString()) << endl;
+		f << Base64::Encrypt(it->first) << ":"
+				<< Base64::Encrypt(it->second.toString()) << endl;
 	}
 
 	f.close();
@@ -126,8 +126,8 @@ void Settings::loadFromFile(const std::string& file) {
 		string value = line.substr(pos + 1);
 		stringstream strKey;
 		stringstream strValue;
-		Base64::decrypt(strKey, key);
-		Base64::decrypt(strValue, value);
+		Base64::Decrypt(strKey, key);
+		Base64::Decrypt(strValue, value);
 
 		key = strKey.str();
 		value = strValue.str();

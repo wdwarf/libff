@@ -16,13 +16,13 @@ using std::ostream;
 
 namespace NS_FF {
 
-class Base64: virtual public Object {
+class Base64 {
 public:
-	static string encrypt(string str);
-	static string encrypt(const char* buf, long len);
-	static void decrypt(char* des, long* desLen, string src);
-	static void decrypt(ostream& des, string src);
-	static void decrypt(char* des, long* desLen, const char* src, long srcLen);
+	static string Encrypt(string str);
+	static string Encrypt(const char* buf, unsigned int len);
+	static bool Decrypt(char* des, unsigned int* desLen, string src);
+	static bool Decrypt(ostream& des, string src);
+	static bool Decrypt(char* des, unsigned int* desLen, const char* src, unsigned int srcLen);
 
 private:
 	Base64(void);

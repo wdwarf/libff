@@ -13,7 +13,7 @@
 
 namespace NS_FF {
 
-EXCEPTION_DEF(TickException)
+EXCEPTION_DEF(TickException);
 
 class Tick: public Object {
 public:

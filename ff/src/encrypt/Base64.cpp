@@ -9,27 +9,27 @@ using namespace std;
 
 namespace NS_FF {
 
-static const char tbCode[] = { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J',
-		'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
-		'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l',
-		'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
-		'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/' };
+namespace {
 
-static char getCode(unsigned int iCode) {
+const char tbCode[] = { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K',
+		'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y',
+		'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
+		'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0',
+		'1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/' };
+
+char GetCode(unsigned int iCode) {
 	if (iCode > 63)
 		return 0;
 	return tbCode[iCode];
 }
 
-string Base64::encrypt(string str) {
-	if (!str.empty()) {
-		return Base64::encrypt(str.c_str(), str.length());
-	} else {
-		return "";
-	}
 }
 
-string Base64::encrypt(const char* buf, long len) {
+string Base64::Encrypt(string str) {
+	return str.empty() ? "" : Base64::Encrypt(str.c_str(), str.length());
+}
+
+string Base64::Encrypt(const char* buf, unsigned int len) {
 	string re;
 	if (NULL != buf && len > 0) {
 		int size = len / 3;
@@ -42,7 +42,7 @@ string Base64::encrypt(const char* buf, long len) {
 			des[2] = ((src[1] & 0x0F) << 2) | (src[2] >> 6);
 			des[3] = src[2] & 0x3F;
 			for (int n = 0; n < 4; n++) {
-				re += getCode(des[n]);
+				re += GetCode(des[n]);
 			}
 		}
 		if (size2 > 0) {
@@ -57,7 +57,7 @@ string Base64::encrypt(const char* buf, long len) {
 			des[2] = ((src[1] & 0x0F) << 2) | (src[2] >> 6);
 			des[3] = src[2] & 0x3F;
 			for (int n = 0; n < size; n++) {
-				re += getCode(des[n]);
+				re += GetCode(des[n]);
 			}
 
 			for (int i = 4 - size; i > 0; i--) {
@@ -68,9 +68,9 @@ string Base64::encrypt(const char* buf, long len) {
 	return re;
 }
 
-void Base64::decrypt(char* des, long* desLen, string src) {
+bool Base64::Decrypt(char* des, unsigned int* desLen, string src) {
 	if (0 == des || 0 == desLen || src.empty()) {
-		return;
+		return false;
 	}
 
 	*desLen = 0;
@@ -81,17 +81,26 @@ void Base64::decrypt(char* des, long* desLen, string src) {
 	int size = src.length() / 4;
 	int size2 = src.length() % 4;
 
-	vector<unsigned char> buf(src.length());
-	for (string::size_type i = 0; i < src.length(); i++) {
+	auto fillBuf = [](unsigned char* p, char c) -> bool {
 		for (unsigned char n = 0; n < 64; n++) {
-			if (tbCode[n] == src[i]) {
-				buf[i] = n;
-				break;
+			if (tbCode[n] == c) {
+				*p = n;
+				return true;
 			}
 		}
-		if ('=' == src[i]) {
-			buf[i] = 0;
+		if ('=' == c) {
+			*p = 0;
+			return true;
 		}
+
+		return false;
+	};
+
+	vector<unsigned char> buf(src.length());
+	for (string::size_type i = 0; i < src.length(); i++) {
+		char c = src[i];
+		if(!fillBuf(&buf[i], c))
+			return false;
 	}
 	for (int i = 0; i < size; i++) {
 		unsigned char* tmpBuf = &buf[0] + i * 4;
@@ -116,23 +125,31 @@ void Base64::decrypt(char* des, long* desLen, string src) {
 		memcpy(des + *desLen, tmpDes, size);
 		*desLen += size;
 	}
+
+	return true;
 }
 
-void Base64::decrypt(ostream& des, string src) {
+bool Base64::Decrypt(ostream& des, string src) {
 	vector<char> desBuf(src.length());
-	long desLen = 0;
+	unsigned int desLen = 0;
 	try {
-		Base64::decrypt(&desBuf[0], &desLen, src);
+		if(!Base64::Decrypt(&desBuf[0], &desLen, src))
+			return false;
+
 		if (desLen > 0) {
 			des.write(&desBuf[0], desLen);
 		}
+		return true;
 	} catch (...) {
 	}
+
+	return false;
 }
 
-void Base64::decrypt(char* des, long* desLen, const char* src, long srcLen) {
-	string s(src, srcLen);
-	Base64::decrypt(des, desLen, s);
+bool Base64::Decrypt(char* des, unsigned int* desLen, const char* src, unsigned int srcLen) {
+	if(nullptr == src || srcLen <= 0)
+		return false;
+	return Base64::Decrypt(des, desLen, string(src, srcLen));
 }
 
 }

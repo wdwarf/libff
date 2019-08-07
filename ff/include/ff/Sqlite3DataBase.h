@@ -22,7 +22,7 @@
 
 namespace NS_FF{
 
-EXCEPTION_DEF(Sqlite3Exception)
+EXCEPTION_DEF(Sqlite3Exception);
 
 class Statment {
 public:

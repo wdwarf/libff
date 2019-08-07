@@ -14,7 +14,7 @@
 
 namespace NS_FF {
 
-EXCEPTION_DEF(TimestampException)
+EXCEPTION_DEF(TimestampException);
 
 class Timestamp: public Object {
 public:

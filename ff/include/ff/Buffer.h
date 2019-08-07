@@ -16,7 +16,7 @@
 
 namespace NS_FF {
 
-EXCEPTION_DEF(BufferException)
+EXCEPTION_DEF(BufferException);
 
 #define BUF_IN_OPERATOR_DEF(T) Buffer& operator<<(const T& t)
 #define BUF_OUT_OPERATOR_DEF(T) Buffer& operator>>(T& t)
