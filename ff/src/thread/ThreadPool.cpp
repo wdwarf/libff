@@ -7,12 +7,29 @@
 
 #include <ff/ThreadPool.h>
 #include <functional>
-#include <iostream>
 
 using namespace std;
 using namespace std::placeholders;
 
 namespace NS_FF {
+
+class TaskThread : public Thread{
+public:
+	TaskThread(ThreadPool* threadPool);
+	~TaskThread();
+
+	void setTask(RunnablePtr task);
+	void stop();
+private:
+	void run() override;
+
+private:
+	std::mutex m_mutex;
+	std::condition_variable m_cond;
+	RunnablePtr m_task;
+	ThreadPool* m_threadPool;
+	std::atomic_bool m_exit;
+};
 
 TaskThread::TaskThread(ThreadPool* threadPool) :
 		m_threadPool(threadPool), m_exit(false) {
@@ -65,7 +82,6 @@ ThreadPool::~ThreadPool() {
 			lock_guard<mutex> lk(this->m_mutex);
 			if (this->m_busyThreads.empty())
 				break;
-			cout << this->m_busyThreads.size() << endl;
 		}
 
 		Thread::Sleep(100);
@@ -79,6 +95,14 @@ ThreadPool::~ThreadPool() {
 	for (auto& pThread : this->m_idelThreads) {
 		delete pThread;
 	}
+}
+
+void ThreadPool::exec(FRunnableFunc task){
+	this->exec(MakeRunnable(task));
+}
+
+void ThreadPool::exec(RunnableFunc task){
+	this->exec(MakeRunnable(task));
 }
 
 void ThreadPool::exec(RunnablePtr task) {
@@ -95,6 +119,7 @@ void ThreadPool::PutTaskThreadPtr(TaskThread* p) {
 	lock_guard<mutex> lk(this->m_mutex);
 	this->m_busyThreads.erase(p);
 	this->m_idelThreads.insert(p);
+	this->m_cond.notify_one();
 }
 
 TaskThread* ThreadPool::getThread() {
@@ -124,7 +149,9 @@ TaskThread* ThreadPool::getThread() {
 	}
 
 	while (!(threadPtr = getIdelThread())) {
-		Thread::Sleep(100);
+		//Thread::Sleep(100);
+		unique_lock<mutex> lk(this->m_mutex);
+		this->m_cond.wait(lk);
 	}
 
 	return threadPtr;

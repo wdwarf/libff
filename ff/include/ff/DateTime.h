@@ -60,11 +60,14 @@ public:
 	bool operator>=(const DateTime& t) const;
 	long operator-(const DateTime& t) const;
 
+	void setSystemTime();
+
 	static DateTime now();
 
 private:
 	time_t t;
 };
+
 
 } /* namespace NS_FF */
 

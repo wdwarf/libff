@@ -11,6 +11,7 @@
 #include <string>
 #include <sstream>
 #include <initializer_list>
+#include <ff/ff_config.h>
 
 namespace NS_FF {
 

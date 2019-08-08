@@ -202,5 +202,15 @@ DateTime DateTime::now() {
 	return DateTime(time(0));
 }
 
+void DateTime::setSystemTime() {
+	timeval val;
+	val.tv_sec = this->t;
+	val.tv_usec = 0;
+	if (0 != settimeofday(&val, nullptr)) {
+		THROW_EXCEPTION(DateTimeException,
+				string("set system time failed: ") + strerror(errno), errno);
+	}
+}
+
 } /* namespace NS_FF */
 

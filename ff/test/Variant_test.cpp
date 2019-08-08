@@ -7,6 +7,7 @@
 
 #include <ff/Variant.h>
 #include <gtest/gtest.h>
+#include "TestDef.h"
 #include <iostream>
 
 using namespace std;
@@ -16,8 +17,8 @@ TEST(TestVariant, TestVariant){
 	Variant v = 12;
 	EXPECT_EQ(VariantType::INT, v.getVt());
 	Variant v2 = v;
-	cout << (v == v2) << endl;
+	LDBG << (v == v2);
 	EXPECT_EQ(v, v2);
 
-	cout << "buf: " << v.toBuffer().toString() << endl;
+	LDBG << "buf: " << v.toBuffer().toString();
 }

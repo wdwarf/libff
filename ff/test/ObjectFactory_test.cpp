@@ -9,6 +9,7 @@
 #include <gtest/gtest.h>
 #include <string>
 #include <iostream>
+#include "TestDef.h"
 
 using namespace std;
 using namespace NS_FF;
@@ -22,18 +23,18 @@ TEST(TestObjectFactory, TestObjectFactory){
 	auto str = o.createObject<string>("str");
 	*str = "this is a test text";
 
-	cout << *str << endl;
+	LDBG << *str;
 
 	auto str2 = o.createObject<string>("str");
 
 	EXPECT_EQ(*str, *str2);
 
 	*o.createObject<string>("str") = "new string";
-	cout << *str << endl;
+	LDBG << *str;
 
 	try{
 		o.createObject<string>("class not exists");
 	}catch(std::exception& e){
-		cout << e.what() << endl;
+		LDBG << e.what();
 	}
 }

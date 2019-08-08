@@ -10,6 +10,7 @@
 
 #include <ff/Object.h>
 #include <ff/Thread.h>
+#include <ff/Noncopyable.h>
 #include <mutex>
 #include <condition_variable>
 #include <set>
@@ -18,13 +19,13 @@
 namespace NS_FF {
 
 class TaskThread;
-typedef std::shared_ptr<TaskThread> TaskThreadPtr;
-
-class ThreadPool: public ff::Object {
+class ThreadPool: public Noncopyable, public ff::Object {
 public:
 	ThreadPool(unsigned int maxSize);
 	virtual ~ThreadPool();
 
+	void exec(FRunnableFunc task);
+	void exec(RunnableFunc task);
 	void exec(RunnablePtr task);
 
 private:
@@ -36,28 +37,13 @@ private:
 	void PutTaskThreadPtr(TaskThread* p);
 private:
 	std::mutex m_mutex;
+	std::condition_variable m_cond;
 	unsigned int m_maxSize;
 	std::set<TaskThread*> m_idelThreads;
 	std::set<TaskThread*> m_busyThreads;
 };
 
-class TaskThread : public Thread{
-public:
-	TaskThread(ThreadPool* threadPool);
-	~TaskThread();
-
-	void setTask(RunnablePtr task);
-	void stop();
-private:
-	void run() override;
-
-private:
-	std::mutex m_mutex;
-	std::condition_variable m_cond;
-	RunnablePtr m_task;
-	ThreadPool* m_threadPool;
-	std::atomic_bool m_exit;
-};
+typedef std::shared_ptr<ThreadPool> ThreadPoolPtr;
 
 } /* namespace NS_FF */
 

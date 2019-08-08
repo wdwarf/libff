@@ -8,16 +8,17 @@
 #include <ff/Runnable.h>
 #include <gtest/gtest.h>
 #include <iostream>
+#include "TestDef.h"
 
 using namespace std;
 using namespace NS_FF;
 
 void func1() {
-	cout << __func__ << endl;
+	LDBG << __func__;
 }
 
 void func2(const std::string& info) {
-	cout << __func__ << ": " << info << endl;
+	LDBG << __func__ << ": " << info;
 }
 
 TEST(TestRunnable, TestRunnable) {

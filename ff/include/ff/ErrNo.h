@@ -9,6 +9,7 @@
 #define FF_ERRNO_H_
 
 #include <string>
+#include <ff/ff_config.h>
 
 namespace NS_FF {
 

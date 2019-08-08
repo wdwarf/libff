@@ -7,6 +7,7 @@
 
 #include <ff/Buffer.h>
 #include <gtest/gtest.h>
+#include "TestDef.h"
 #include <iostream>
 
 using namespace std;
@@ -16,12 +17,12 @@ TEST(BufferTest, BufferTest){
 	Buffer buf, buf2;
 	buf << '1';
 	buf2 << buf;
-	cout << buf.toString() << endl;
-	cout << (buf == buf2) << endl;
+	LDBG << buf.toString();
+	LDBG << (buf == buf2);
 	buf << buf;
-	cout << buf.toString() << endl;
+	LDBG << buf.toString();
 	buf << 0x12345678;
-	cout << buf.toString() << endl;
+	LDBG << buf.toString();
 	buf.reverse();
-	cout << buf.toString() << endl;
+	LDBG << buf.toString();
 }
