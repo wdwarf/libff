@@ -24,8 +24,7 @@ void StdoutAppender::log(const LogInfo& logInfo) {
 	if (logInfo.getLogLevel() >= LogLevel::WARNING)
 		o = &cerr;
 
-	(*o) << "[" <<  logInfo.getLogModule() << "][" << logInfo.getFunctionName() << "][" << logInfo.getLineNumber()
-			<< "] " << logInfo.getLogMessage() << endl;
+	(*o) << logInfo.toLogString() << endl;
 }
 
 } /* namespace NS_FF */

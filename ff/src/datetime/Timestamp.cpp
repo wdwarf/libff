@@ -7,8 +7,12 @@
 
 #include <ff/Timestamp.h>
 #include <cstring>
+#include <ctime>
+#include <vector>
 #include <sys/time.h>
 #include <iostream>
+#include <iomanip>
+#include <sstream>
 
 using namespace std;
 
@@ -62,6 +66,22 @@ public:
 			return this->operator ==(t);
 	}
 
+	string toLocalString() const {
+		string format = "%F %T";
+		vector<char> buf(format.length() * 4 + 10);
+		tm tm_t;
+		if (NULL == localtime_r(&this->ts.tv_sec, &tm_t)) {
+			THROW_EXCEPTION(DateTimeException,
+					string("localtime_r failed: ") + strerror(errno), errno);
+		}
+		strftime(&buf[0], buf.size(), format.c_str(), &tm_t);
+
+		stringstream str;
+		str << &buf[0] << "." << setw(3) << setfill('0')
+				<< (this->ts.tv_nsec / 1000000);
+		return str.str();
+	}
+
 private:
 	timespec ts;
 	friend class Timestamp;
@@ -88,6 +108,10 @@ Timestamp& Timestamp::operator=(const Timestamp& t) {
 
 DateTime Timestamp::toDateTime() const {
 	return DateTime(this->impl->ts.tv_sec);
+}
+
+string Timestamp::toLocalString() const {
+	return this->impl->toLocalString();
 }
 
 Timestamp Timestamp::now() {

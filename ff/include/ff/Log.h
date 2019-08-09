@@ -21,7 +21,7 @@
 
 namespace NS_FF {
 
-class Log: public Object, public Noncopyable {
+class Log: public std::stringstream, public Object, public Noncopyable {
 public:
 	Log();
 	Log(const std::string& module);
@@ -36,22 +36,22 @@ public:
 
 	template<class T>
 	Log& operator()(const T& logMsg){
-		this->m_logBuffer << logMsg;
+		(*this) << logMsg;
 		return *this;
 	}
 
 	Log& operator()(const LogLevel& logLevel);
 	Log& operator()(const LogType& logType);
 
-	template<class T>
-	Log& operator<<(const T& logMsg){
-		this->m_logBuffer << logMsg;
-		return *this;
-	}
-
-	Log& operator<<(const LogLevel& logLevel);
-
-	Log& operator<<(const LogType& logType);
+//	template<class T>
+//	Log& operator<<(const T& logMsg){
+//		this->m_logBuffer << logMsg;
+//		return *this;
+//	}
+//
+//	Log& operator<<(const LogLevel& logLevel);
+//
+//	Log& operator<<(const LogType& logType);
 	Log& done(const LogType& type);
 	Log& done(const std::string& type = "");
 
@@ -76,7 +76,7 @@ private:
 	unsigned int m_lineNumber;
 //	std::mutex m_mutex;
 	LoggerPtr m_logger;
-	std::stringstream m_logBuffer;
+//	std::stringstream m_logBuffer;
 
 private:
 	typedef std::map<std::string, LoggerPtr> LoggerMap;

@@ -89,32 +89,32 @@ Log& Log::operator()(const LogType& logType) {
 	return *this;
 }
 
-Log& Log::operator<<(const LogLevel& m_logLevel) {
-	this->setLogLevel(m_logLevel);
-	return *this;
-}
-
-Log& Log::operator<<(const LogType& logType) {
-	this->setLogType(logType);
-	return *this;
-}
+//Log& Log::operator<<(const LogLevel& m_logLevel) {
+//	this->setLogLevel(m_logLevel);
+//	return *this;
+//}
+//
+//Log& Log::operator<<(const LogType& logType) {
+//	this->setLogType(logType);
+//	return *this;
+//}
 
 Log& Log::done(const LogType& type) {
 	string logInfo;
 	{
 //		lock_guard<mutex> lk(this->m_mutex);
-		logInfo = this->m_logBuffer.str();
+		logInfo = this->str();
 
 		if (logInfo.empty())
 			return *this;
-		this->m_logBuffer.clear();
-		this->m_logBuffer.str("");
+		this->clear();
+		this->str("");
 	}
 
 	this->log(
 			LogInfo(this->m_logLevel, logInfo, this->m_module,
 					type.getName().empty() ? this->m_logType : type,
-					DateTime::now(), m_fileName, this->m_functionName,
+					Timestamp::now(), m_fileName, this->m_functionName,
 					this->m_lineNumber));
 
 	return *this;

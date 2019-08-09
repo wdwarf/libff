@@ -6,6 +6,7 @@
  */
 #include <gtest/gtest.h>
 #include <iostream>
+#include <iomanip>
 #include <ff/ThreadPool.h>
 #include "TestDef.h"
 
@@ -15,7 +16,7 @@ using namespace NS_FF;
 static void TestF(int n, int i){
 	static mutex m;
 	lock_guard<mutex> lk(m);
-	LDBG << __func__ << n << ": " << i;
+	LDBG << __func__ << n << ": 0x" << hex << setw(4) << setfill('0') << i;
 }
 
 TEST(TestThreadPool, TestThreadPool) {

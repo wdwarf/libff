@@ -14,12 +14,15 @@
 #include <ff/Object.h>
 //#include <ff/LogException.h>
 #include <ff/DateTime.h>
+#include <ff/Timestamp.h>
 
 namespace NS_FF {
 
 enum class LogLevel {
 	VERBOSE, DEBUG, INFO, WARNING, ERROR, FATAL
 };
+
+std::string LogLevel2Str(LogLevel ll);
 
 class LogType {
 public:
@@ -43,7 +46,7 @@ public:
 	LogInfo();
 	LogInfo(const LogLevel& logLevel, const std::string& logMessage,
 			const std::string& logModule, const LogType& logType,
-			DateTime logTime, const std::string& fileName,
+			const Timestamp& logTime, const std::string& fileName,
 			const std::string& functionName, unsigned int lineNumber);
 	virtual ~LogInfo();
 
@@ -59,20 +62,21 @@ public:
 	void setLogLevel(LogLevel logLevel);
 	const std::string& getLogModule() const;
 	void setLogModule(const std::string& logModule);
-	DateTime getLogTime() const;
-	void setLogTime(DateTime logTime);
+	Timestamp getLogTime() const;
+	void setLogTime(const Timestamp& logTime);
 	const LogType& getLogType() const;
 	void setLogType(const LogType& logType);
 
 	std::string toXml() const;
 	void fromXml(const std::string& xml);
 
+	std::string toLogString() const;
 private:
 	LogLevel m_logLevel;
 	std::string m_logMessage;
 	std::string m_logModule;
 	LogType m_logType;
-	DateTime m_logTime;
+	Timestamp m_logTime;
 
 	std::string m_fileName;
 	std::string m_functionName;

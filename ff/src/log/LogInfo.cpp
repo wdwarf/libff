@@ -6,8 +6,30 @@
  */
 
 #include <ff/LogInfo.h>
+#include <sstream>
+
+using namespace std;
 
 namespace NS_FF {
+
+std::string LogLevel2Str(LogLevel ll) {
+	switch (ll) {
+	case LogLevel::DEBUG:
+		return "D";
+	case LogLevel::ERROR:
+		return "E";
+	case LogLevel::FATAL:
+		return "F";
+	case LogLevel::INFO:
+		return "I";
+	case LogLevel::VERBOSE:
+		return "V";
+	case LogLevel::WARNING:
+		return "W";
+	default:
+		return "";
+	}
+}
 
 LogType::LogType() {
 }
@@ -47,12 +69,12 @@ bool LogType::operator==(const LogType& logType) const {
 }
 
 LogInfo::LogInfo() :
-		m_logLevel(LogLevel::INFO), m_logTime(time(0)), m_lineNumber(0) {
+		m_logLevel(LogLevel::INFO), m_logTime(Timestamp::now()), m_lineNumber(0) {
 	//
 }
 
 LogInfo::LogInfo(const LogLevel& _logLevel, const std::string& logMessage,
-		const std::string& logModule, const LogType& logType, DateTime logTime,
+		const std::string& logModule, const LogType& logType, const Timestamp& logTime,
 		const std::string& fileName, const std::string& functionName,
 		unsigned int lineNumber) :
 		m_logLevel(LogLevel::INFO) {
@@ -110,11 +132,11 @@ void LogInfo::setLogModule(const std::string& logModule) {
 	this->m_logModule = logModule;
 }
 
-DateTime LogInfo::getLogTime() const {
+Timestamp LogInfo::getLogTime() const {
 	return m_logTime;
 }
 
-void LogInfo::setLogTime(DateTime logTime) {
+void LogInfo::setLogTime(const Timestamp& logTime) {
 	this->m_logTime = logTime;
 }
 
@@ -140,6 +162,16 @@ std::string LogInfo::toXml() const {
 
 void LogInfo::fromXml(const std::string& xml) {
 	//
+}
+
+std::string LogInfo::toLogString() const {
+	stringstream str;
+	str << "[" << this->getLogTime().toLocalString() << "]["
+			<< LogLevel2Str(this->getLogLevel()) << "][" << this->getLogModule()
+			<< "][" << this->getFunctionName() << "][" << this->getLineNumber()
+			<< "] " << this->getLogMessage();
+
+	return str.str();
 }
 
 } /* namespace NS_FF */
