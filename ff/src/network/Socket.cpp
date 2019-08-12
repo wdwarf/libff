@@ -173,11 +173,7 @@ int Socket::connect(const std::string& host, int port, int msTimeout) {
 			socklen_t len = sizeof(int);
 			getsockopt(this->m_socketFd, SOL_SOCKET, SO_ERROR, (char *) &error,
 					&len);
-			if (0 == error) {
-				re = 0;
-			} else {
-				re = -1;
-			}
+			re = (0 == errno) ? 0 : -1;
 		} else {
 			re = -1;
 		}
