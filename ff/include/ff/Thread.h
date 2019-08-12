@@ -11,6 +11,7 @@
 #include <functional>
 #include <thread>
 #include <memory>
+#include <ff/ff_config.h>
 #include <ff/Runnable.h>
 #include <ff/Exception.h>
 #include <ff/Noncopyable.h>

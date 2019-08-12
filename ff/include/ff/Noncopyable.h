@@ -8,6 +8,8 @@
 #ifndef FF_NONCOPYABLE_H_
 #define FF_NONCOPYABLE_H_
 
+#include <ff/ff_config.h>
+
 namespace NS_FF {
 
 class Noncopyable {
