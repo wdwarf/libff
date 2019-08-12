@@ -56,14 +56,7 @@ Socket::Socket(int m_socketFd) :
 	this->m_socketFd = m_socketFd;
 }
 
-Socket::Socket(Socket&& sock) {
-	this->m_socketFd = sock.m_socketFd;
-	this->m_useSelect = sock.m_useSelect;
-	sock.m_socketFd = 0;
-}
-
 Socket::~Socket() {
-	this->close();
 }
 
 bool Socket::attach(int m_socketFd) {
@@ -237,13 +230,13 @@ void Socket::listen(int n) {
 	}
 }
 
-SocketPtr Socket::accept(sockaddr_in& addr) {
+Socket Socket::accept(sockaddr_in& addr) {
 	int s_fd = 0;
 	if (this->m_socketFd > 0) {
 		socklen_t addrLen = sizeof(addr);
 		s_fd = ::accept(this->m_socketFd, (sockaddr*) &addr, &addrLen);
 	}
-	return SocketPtr(new Socket(s_fd));
+	return s_fd;
 }
 
 int Socket::send(const char* buf, socklen_t bufLen) {

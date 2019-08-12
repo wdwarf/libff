@@ -24,11 +24,13 @@ TEST(TestSocket, TestSocket) {
 		sock.bind(65001);
 		sock.listen();
 		sockaddr_in addr;
-		SocketPtr clientSock = sock.accept(addr);
-		if(clientSock->getHandle() > 0) {
-			LDBG << "accept [" << clientSock->getHandle() << "]";
-			clientSock->send("welcom !", 8);
+		Socket clientSock = sock.accept(addr);
+		if(clientSock.getHandle() > 0) {
+			LDBG << "accept [" << clientSock.getHandle() << "]";
+			clientSock.send("welcom !", 8);
 		}
+		clientSock.close();
+		sock.close();
 	});
 
 	thread clientThread([] {
@@ -44,6 +46,7 @@ TEST(TestSocket, TestSocket) {
 			LDBG << "client disconnected";
 		}
 
+		sock.close();
 	});
 
 	acceptThread.join();

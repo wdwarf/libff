@@ -10,7 +10,6 @@
 
 #include <ff/Object.h>
 #include <ff/Exception.h>
-#include <ff/Noncopyable.h>
 #include <string>
 #include <memory>
 
@@ -58,14 +57,10 @@ enum class SocketType {
 
 typedef __socket_type SockType;
 
-class Socket;
-typedef std::shared_ptr<Socket> SocketPtr;
-
-class Socket: public Object, public Noncopyable {
+class Socket: public Object {
 public:
 	Socket();
 	Socket(int sockFd);
-	Socket(Socket&& sock);
 	virtual ~Socket();
 
 	int create(int af, int style, int protocol = 0);
@@ -94,7 +89,7 @@ public:
 	bool isConnected();
 	void bind(int port, const std::string& ip = "");
 	void listen(int n = 10);
-	SocketPtr accept(sockaddr_in& addr);
+	Socket accept(sockaddr_in& addr);
 
 	int send(const char* buf, socklen_t bufLen);
 	int read(char* buf, socklen_t readBytes, int timeoutMs = -1);
@@ -114,6 +109,8 @@ private:
 	SocketFd m_socketFd;
 	bool m_useSelect;
 };
+
+typedef std::shared_ptr<Socket> SocketPtr;
 
 } /* namespace NS_FF */
 
