@@ -71,15 +71,14 @@ int Socket::dettach() {
 	return oldSock;
 }
 
-int Socket::create(int af, int style, int protocol) {
+bool Socket::create(int af, int style, int protocol) {
 	if (this->m_socketFd > 0) {
 		this->close();
 	}
 	this->m_socketFd = socket(af, style, protocol);
 
 	if (this->m_socketFd <= 0) {
-		THROW_EXCEPTION(SocketException,
-				string("can't create socket.") + strerror(errno), errno);
+		return false;
 	}
 
 #ifdef WIN32
@@ -91,7 +90,7 @@ int Socket::create(int af, int style, int protocol) {
 	}
 #endif
 
-	return this->m_socketFd;
+	return true;
 }
 
 void Socket::setBlocking(bool nonBlocking) {
@@ -115,35 +114,36 @@ int Socket::shutdown(int type) {
 	return 0;
 }
 
-int Socket::close() {
+bool Socket::close() {
+	if (this->m_socketFd <= 0)
+		return true;
+
 	int re = 0;
-	if (this->m_socketFd > 0) {
-		this->shutdown();
+	this->shutdown();
 #if defined(WIN32) || defined(__MINGW32__)
 		re = ::closesocket(this->m_socketFd);
 #else
-		re = ::close(this->m_socketFd);
+	re = ::close(this->m_socketFd);
 #endif
-		this->m_socketFd = 0;
-	}
-	return re;
+	this->m_socketFd = 0;
+
+	return (0 == re);
 }
 
-int Socket::createTcp() {
+bool Socket::createTcp() {
 	return this->create(AF_INET, SOCK_STREAM);
 }
 
-int Socket::createUdp() {
+bool Socket::createUdp() {
 	return this->create(AF_INET, SOCK_DGRAM);
 }
 
-int Socket::connect(const std::string& host, int port, int msTimeout) {
+bool Socket::connect(const std::string& host, u16 port, int msTimeout) {
 	if (this->m_socketFd <= 0) {
-		return -1;
+		return false;
 	}
 
-	string ip;
-	int re = -1;
+	bool re = false;
 	sockaddr_in addr;
 	addr.sin_family = AF_INET;
 	addr.sin_port = htons(port);
@@ -152,8 +152,8 @@ int Socket::connect(const std::string& host, int port, int msTimeout) {
 	bool nonBlock = this->isNonBlocking();
 	this->setBlocking(true);
 
-	re = ::connect(this->m_socketFd, (sockaddr*) &addr, sizeof(sockaddr));
-	if (-1 == re) {
+	int ret = ::connect(this->m_socketFd, (sockaddr*) &addr, sizeof(sockaddr));
+	if (-1 == ret) {
 		timeval tm;
 		timeval* ptm = NULL;
 		fd_set set;
@@ -166,64 +166,50 @@ int Socket::connect(const std::string& host, int port, int msTimeout) {
 		FD_ZERO(&set);
 		FD_SET(this->m_socketFd, &set);
 		do {
-			re = select(this->m_socketFd + 1, NULL, &set, NULL, ptm);
-		} while (re < 0 && EINTR == errno);
+			ret = select(this->m_socketFd + 1, NULL, &set, NULL, ptm);
+		} while (ret < 0 && EINTR == errno);
 
-		if (1 == re) {
+		if (1 == ret) {
 			socklen_t len = sizeof(int);
 			getsockopt(this->m_socketFd, SOL_SOCKET, SO_ERROR, (char *) &error,
 					&len);
-			re = (0 == errno) ? 0 : -1;
-		} else {
-			re = -1;
+			re = (0 == error);
 		}
 	}
 	this->setBlocking(nonBlock);
 	return re;
 }
 
-void Socket::bind(int port, const std::string& ip) {
-	int re = -1;
-	if (this->m_socketFd > 0) {
-		if (port <= 0) {
-			THROW_EXCEPTION(SocketException,
-					string("invalid binding port: ") + (string)Variant(port) + "." + strerror(errno),
-					errno);
-		}
+bool Socket::bind(u16 port, const std::string& ip) {
+	if (this->m_socketFd <= 0)
+		return false;
 
-		sockaddr_in addr;
-		addr.sin_family = AF_INET;
-		addr.sin_port = htons(port);
-		if (!ip.empty()) {
+	sockaddr_in addr;
+	addr.sin_family = AF_INET;
+	addr.sin_port = htons(port);
+	if (!ip.empty()) {
 #if defined(WIN32) || defined(__MINGW32__)
 			addr.sin_addr.s_addr = inet_addr(ip.c_str());
 #else
-			inet_aton(ip.c_str(), &addr.sin_addr);
+		inet_aton(ip.c_str(), &addr.sin_addr);
 #endif
-		} else {
-			addr.sin_addr.s_addr = INADDR_ANY;
-		}
-
-		int flag = 1;
-		setsockopt(this->m_socketFd, SOL_SOCKET, SO_REUSEADDR, &flag,
-				sizeof(flag));
-
-		re = ::bind(this->m_socketFd, (sockaddr*) &addr, sizeof(sockaddr));
-		if (re < 0) {
-			THROW_EXCEPTION(SocketException,
-					"bind [" + ip+ ":" + (string)Variant(port) + "] failed." + strerror(errno),
-					errno);
-		}
+	} else {
+		addr.sin_addr.s_addr = INADDR_ANY;
 	}
+
+	int flag = 1;
+	setsockopt(this->m_socketFd, SOL_SOCKET, SO_REUSEADDR, &flag, sizeof(flag));
+
+	int re = ::bind(this->m_socketFd, (sockaddr*) &addr, sizeof(sockaddr));
+	if (re < 0) {
+		return false;
+	}
+
+	return true;
 }
 
-void Socket::listen(int n) {
-	if (this->m_socketFd > 0) {
-		if (0 != ::listen(this->m_socketFd, n)) {
-			THROW_EXCEPTION(SocketException,
-					string("listen failed.") + strerror(errno), errno);
-		}
-	}
+bool Socket::listen(int n) {
+	return (0 == ::listen(this->m_socketFd, n));
 }
 
 Socket Socket::accept(sockaddr_in& addr) {

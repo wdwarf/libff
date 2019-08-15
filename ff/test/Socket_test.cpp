@@ -36,7 +36,7 @@ TEST(TestSocket, TestSocket) {
 	thread clientThread([] {
 		Socket sock;
 		sock.createTcp();
-		if(0 == sock.connect("127.0.0.1", 65001)) {
+		if(sock.connect("127.0.0.1", 65001)) {
 			LDBG << "client connected";
 			char buf[1024] = {0};
 			while(sock.read(buf, 1024, 1000) > 0)

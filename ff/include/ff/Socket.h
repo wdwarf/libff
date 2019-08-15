@@ -39,7 +39,6 @@
 namespace NS_FF {
 
 typedef int SocketFd;
-EXCEPTION_DEF(SocketException);
 
 #if 0
 enum class SocketType {
@@ -63,11 +62,11 @@ public:
 	Socket(int sockFd);
 	virtual ~Socket();
 
-	int create(int af, int style, int protocol = 0);
-	int createTcp();
-	int createUdp();
+	bool create(int af, int style, int protocol = 0);
+	bool createTcp();
+	bool createUdp();
 	int getHandle();
-	int close();
+	bool close();
 	int shutdown(int type = SHUT_RDWR);
 	bool attach(int sockFd);
 	int dettach();
@@ -85,10 +84,10 @@ public:
 	int getSockOpt(int level, int optName, void* optVal, socklen_t* optLen);
 	int setsockOpt(int level, int optName, const void* optVal, socklen_t optLen);
 
-	int connect(const std::string& host, int port, int msTimeout = 3000);
+	bool connect(const std::string& host, u16 port, int msTimeout = 3000);
 	bool isConnected();
-	void bind(int port, const std::string& ip = "");
-	void listen(int n = 10);
+	bool bind(u16 port, const std::string& ip = "");
+	bool listen(int n = 10);
 	Socket accept(sockaddr_in& addr);
 
 	int send(const char* buf, socklen_t bufLen);
