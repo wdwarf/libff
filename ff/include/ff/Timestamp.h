@@ -25,7 +25,7 @@ public:
 	Timestamp& operator=(const Timestamp& t);
 
 	DateTime toDateTime() const;
-	std::string toLocalString() const;
+	std::string toLocalString(const std::string& f = "") const;
 
 	static Timestamp now();
 

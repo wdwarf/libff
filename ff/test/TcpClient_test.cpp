@@ -7,25 +7,49 @@
 
 #include <gtest/gtest.h>
 #include <iostream>
+#include <thread>
 #include <ff/TcpClient.h>
+#include <ff/Socket.h>
+#include "TestDef.h"
 
 using namespace std;
 using namespace NS_FF;
 
-class MyTcpClient : public TcpClient{
-	void onStartFailed(const std::string& errInfo){
-		cout << errInfo << endl;
+class MyTcpClient: public TcpClient {
+	void onStartFailed(const std::string &errInfo) {
+		LDBG << "error: " << errInfo;
 		this->stop();
 	}
 
-	void onStop(){
-		cout << "stoped" << endl;
+	void onStop() {
+		LDBG << "stoped";
+	}
+
+	void onRecv(const BufferPtr &buffer) {
+		LDBG << buffer->toString();
 	}
 };
 
-TEST(TestTcpClient, TestTcpClient){
+TEST(TestTcpClient, TestTcpClient) {
+	Socket svrSocket;
+	svrSocket.createTcp();
+	svrSocket.bind(5432);
+	svrSocket.listen();
+
+	thread t([&] {
+		sockaddr_in addr;
+		Socket sock = svrSocket.accept(addr);
+		sock.send("123", 3);
+		sock.close();
+	});
+
+	sleep(1);
 	MyTcpClient tcpClient;
+	tcpClient.setRemoteAddr("127.0.0.1");
+	tcpClient.setRemotePort(5432);
 	tcpClient.start();
 	sleep(3);
-	cout << "end " << endl;
+	svrSocket.close();
+	t.join();
+	LDBG << "end ";
 }

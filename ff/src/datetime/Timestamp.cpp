@@ -28,18 +28,18 @@ public:
 		clock_gettime(CLOCK_REALTIME, &ts);
 	}
 
-	bool operator==(const TimestampImpl& t) const {
+	bool operator==(const TimestampImpl &t) const {
 		if (t.ts.tv_sec == this->ts.tv_sec) {
 			return (t.ts.tv_nsec == this->ts.tv_nsec);
 		}
 		return false;
 	}
 
-	bool operator!=(const TimestampImpl& t) const {
+	bool operator!=(const TimestampImpl &t) const {
 		return !this->operator ==(t);
 	}
 
-	bool operator<(const TimestampImpl& t) const {
+	bool operator<(const TimestampImpl &t) const {
 		if (this->ts.tv_sec < t.ts.tv_sec) {
 			return true;
 		} else if (this->ts.tv_sec == t.ts.tv_sec) {
@@ -48,37 +48,29 @@ public:
 		return false;
 	}
 
-	bool operator<=(const TimestampImpl& t) const {
+	bool operator<=(const TimestampImpl &t) const {
 		if (this->ts.tv_sec < t.ts.tv_sec) {
 			return true;
 		} else
 			return this->operator ==(t);
 	}
 
-	bool operator>(const TimestampImpl& t) const {
+	bool operator>(const TimestampImpl &t) const {
 		return !this->operator <(t);
 	}
 
-	bool operator>=(const TimestampImpl& t) const {
+	bool operator>=(const TimestampImpl &t) const {
 		if (this->ts.tv_sec > t.ts.tv_sec) {
 			return true;
 		} else
 			return this->operator ==(t);
 	}
 
-	string toLocalString() const {
-		string format = "%F %T";
-		vector<char> buf(format.length() * 4 + 10);
-		tm tm_t;
-		if (NULL == localtime_r(&this->ts.tv_sec, &tm_t)) {
-			THROW_EXCEPTION(DateTimeException,
-					string("localtime_r failed: ") + strerror(errno), errno);
-		}
-		strftime(&buf[0], buf.size(), format.c_str(), &tm_t);
-
+	string toLocalString(const string &f = "") const {
+		string format = f.empty() ? "%F %T" : f;
 		stringstream str;
-		str << &buf[0] << "." << setw(3) << setfill('0')
-				<< (this->ts.tv_nsec / 1000000);
+		str << DateTime(this->ts.tv_sec).toLocalString(format) << "." << setw(3)
+				<< setfill('0') << (this->ts.tv_nsec / 1000000);
 		return str.str();
 	}
 
@@ -92,7 +84,7 @@ Timestamp::Timestamp() :
 	//
 }
 
-Timestamp::Timestamp(const Timestamp& t) :
+Timestamp::Timestamp(const Timestamp &t) :
 		impl(new TimestampImpl) {
 	*this->impl = *t.impl;
 }
@@ -101,7 +93,7 @@ Timestamp::~Timestamp() {
 	delete this->impl;
 }
 
-Timestamp& Timestamp::operator=(const Timestamp& t) {
+Timestamp& Timestamp::operator=(const Timestamp &t) {
 	*this->impl = *t.impl;
 	return *this;
 }
@@ -110,8 +102,8 @@ DateTime Timestamp::toDateTime() const {
 	return DateTime(this->impl->ts.tv_sec);
 }
 
-string Timestamp::toLocalString() const {
-	return this->impl->toLocalString();
+string Timestamp::toLocalString(const string &f) const {
+	return this->impl->toLocalString(f);
 }
 
 Timestamp Timestamp::now() {
@@ -120,27 +112,27 @@ Timestamp Timestamp::now() {
 	return t;
 }
 
-bool Timestamp::operator==(const Timestamp& t) const {
+bool Timestamp::operator==(const Timestamp &t) const {
 	return this->impl->operator==(*t.impl);
 }
 
-bool Timestamp::operator!=(const Timestamp& t) const {
+bool Timestamp::operator!=(const Timestamp &t) const {
 	return this->impl->operator!=(*t.impl);
 }
 
-bool Timestamp::operator<(const Timestamp& t) const {
+bool Timestamp::operator<(const Timestamp &t) const {
 	return this->impl->operator<(*t.impl);
 }
 
-bool Timestamp::operator<=(const Timestamp& t) const {
+bool Timestamp::operator<=(const Timestamp &t) const {
 	return this->impl->operator<=(*t.impl);
 }
 
-bool Timestamp::operator>(const Timestamp& t) const {
+bool Timestamp::operator>(const Timestamp &t) const {
 	return this->impl->operator>(*t.impl);
 }
 
-bool Timestamp::operator>=(const Timestamp& t) const {
+bool Timestamp::operator>=(const Timestamp &t) const {
 	return this->impl->operator>=(*t.impl);
 }
 

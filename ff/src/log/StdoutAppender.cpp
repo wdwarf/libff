@@ -19,8 +19,8 @@ StdoutAppender::StdoutAppender() {
 StdoutAppender::~StdoutAppender() {
 }
 
-void StdoutAppender::log(const LogInfo& logInfo) {
-	ostream* o = &cout;
+void StdoutAppender::log(const LogInfo &logInfo) {
+	ostream *o = &cout;
 	if (logInfo.getLogLevel() >= LogLevel::WARNING)
 		o = &cerr;
 
