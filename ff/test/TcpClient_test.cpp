@@ -20,9 +20,18 @@ class MyTcpClient: public TcpClient {
 		LDBG << "error: " << errInfo;
 		this->stop();
 	}
-
+	virtual void onStart() {
+		LDBG << __func__;
+	}
 	void onStop() {
-		LDBG << "stoped";
+		LDBG << "stoped=======================================";
+	}
+
+	virtual void onConnected() {
+		LDBG << __func__;
+	}
+	virtual void onDisconnected() {
+		LDBG << __func__;
 	}
 
 	void onRecv(const BufferPtr &buffer) {
@@ -48,8 +57,12 @@ TEST(TestTcpClient, TestTcpClient) {
 	tcpClient.setRemoteAddr("127.0.0.1");
 	tcpClient.setRemotePort(5432);
 	tcpClient.start();
+	sleep(2);
+	tcpClient.stop();
+	tcpClient.start();
 	sleep(3);
-	svrSocket.close();
+	tcpClient.stop();
+//	svrSocket.close();
 	t.join();
 	LDBG << "end ";
 }

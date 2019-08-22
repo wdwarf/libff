@@ -23,7 +23,7 @@
 namespace NS_FF {
 
 enum class NetEvent {
-	START, STOP, CONNECTED, DISCONNECTED, RECV, SEND
+	UNKNOWN, START, STOP, EXIT, CONNECTED, DISCONNECTED, RECV, SEND
 };
 
 class ClientEventContext {
@@ -50,13 +50,13 @@ public:
 	bool stop();
 	void send(const void* buf, u32 bufSize);
 
-	virtual void onStart(){}
-	virtual void onStartFailed(const std::string& errInfo){}
-	virtual void onStop(){}
-	virtual void onConnected(){}
-	virtual void onDisconnected(){}
-	virtual void onRecv(const BufferPtr& buffer){}
-	virtual void onSend(const BufferPtr& buffer){}
+	virtual void onStart();
+	virtual void onStartFailed(const std::string& errInfo);
+	virtual void onStop();
+	virtual void onConnected();
+	virtual void onDisconnected();
+	virtual void onRecv(const BufferPtr& buffer);
+	virtual void onSend(const BufferPtr& buffer);
 
 	const std::string& getLocalIp() const;
 	void setLocalIp(const std::string& localIp);
@@ -73,8 +73,7 @@ private:
 	std::string m_localIp;
 	unsigned int m_localPort;
 
-	std::atomic_bool m_eventStoped;
-	std::atomic_bool m_ioStoped;
+	std::atomic_bool m_stoped;
 	Socket m_socket;
 	std::thread m_recvThread;
 	std::thread m_sendThread;
