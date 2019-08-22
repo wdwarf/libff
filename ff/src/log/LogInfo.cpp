@@ -32,57 +32,19 @@ std::string LogLevel2Str(LogLevel ll) {
 	}
 }
 
-LogType::LogType() {
-}
-
-LogType::LogType(const std::string &name) {
-	this->m_name = name;
-}
-
-LogType::LogType(const char *name) {
-	if (NULL != name)
-		this->m_name = name;
-}
-
-const std::string& LogType::getName() const {
-	return m_name;
-}
-
-void LogType::setName(const std::string &name) {
-	this->m_name = name;
-}
-
-LogType::operator std::string() const {
-	return this->m_name;
-}
-
-LogType& LogType::operator=(const std::string &name) {
-	this->m_name = name;
-	return *this;
-}
-
-bool LogType::operator==(const std::string &name) const {
-	return (this->m_name == name);
-}
-
-bool LogType::operator==(const LogType &logType) const {
-	return (this->m_name == logType.m_name);
-}
-
 LogInfo::LogInfo() :
 		m_logLevel(LogLevel::INFO), m_logTime(Timestamp::now()), m_lineNumber(0) {
 	//
 }
 
 LogInfo::LogInfo(const LogLevel &_logLevel, const std::string &logMessage,
-		const std::string &logModule, const LogType &logType,
-		const Timestamp &logTime, const std::string &fileName,
-		const std::string &functionName, unsigned int lineNumber) :
+		const std::string &logModule, const Timestamp &logTime,
+		const std::string &fileName, const std::string &functionName,
+		unsigned int lineNumber) :
 		m_logLevel(LogLevel::INFO) {
 	this->m_logLevel = _logLevel;
 	this->m_logMessage = logMessage;
 	this->m_logModule = logModule;
-	this->m_logType = logType;
 	this->m_logTime = logTime;
 	this->m_fileName = fileName;
 	this->m_functionName = functionName;
@@ -141,14 +103,6 @@ void LogInfo::setLogTime(const Timestamp &logTime) {
 	this->m_logTime = logTime;
 }
 
-const LogType& LogInfo::getLogType() const {
-	return m_logType;
-}
-
-void LogInfo::setLogType(const LogType &logType) {
-	this->m_logType = logType;
-}
-
 const std::string& LogInfo::getLogMessage() const {
 	return m_logMessage;
 }
@@ -169,8 +123,8 @@ std::string LogInfo::toLogString() const {
 	stringstream str;
 	str << "[" << this->getLogTime().toLocalString("%y%m%d%H%M%S") << "]["
 			<< LogLevel2Str(this->getLogLevel()) << "][" << this->getLogModule()
-			<< "][" << File(this->getFileName()).getName() << "]["
-			<< this->getFunctionName() << "][" << this->getLineNumber() << "] "
+			<< "][" << File(this->getFileName()).getName() << ":"
+			<< this->getLineNumber() << "][" << this->getFunctionName() << "] "
 			<< this->getLogMessage();
 
 	return str.str();

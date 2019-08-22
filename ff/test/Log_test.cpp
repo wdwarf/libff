@@ -17,5 +17,5 @@ TEST(TestLog, TestLog){
 	auto logger = Log::CreateLogger("test");
 	logger->addAppender(make_shared<StdoutAppender>());
 
-	Log("test") << "this is a test text from log test.";
+	Log("test").setFileName(__FILE__) << "this is a test text from log test.";
 }

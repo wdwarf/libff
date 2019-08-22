@@ -24,59 +24,43 @@ namespace NS_FF {
 class Log: public std::stringstream, public Object, public Noncopyable {
 public:
 	Log();
-	Log(const std::string& module);
+	Log(const std::string &module);
 	virtual ~Log();
 
-	static LoggerPtr CreateLogger(const std::string& module);
-	static bool HasLogger(const std::string& module);
-	static LoggerPtr GetLogger(const std::string& module);
-	static void RemoveLogger(const std::string& module);
+	static LoggerPtr CreateLogger(const std::string &module, LogLevel logLevel =
+			LogLevel::INFO);
+	static bool HasLogger(const std::string &module);
+	static LoggerPtr GetLogger(const std::string &module);
+	static void RemoveLogger(const std::string &module);
 
-	void log(const LogInfo& logInfo);
+	void log(const LogInfo &logInfo);
 
 	template<class T>
-	Log& operator()(const T& logMsg){
+	Log& operator()(const T &logMsg) {
 		(*this) << logMsg;
 		return *this;
 	}
 
-	Log& operator()(const LogLevel& logLevel);
-	Log& operator()(const LogType& logType);
+	Log& operator()(const LogLevel &logLevel);
 
-//	template<class T>
-//	Log& operator<<(const T& logMsg){
-//		this->m_logBuffer << logMsg;
-//		return *this;
-//	}
-//
-//	Log& operator<<(const LogLevel& logLevel);
-//
-//	Log& operator<<(const LogType& logType);
-	Log& done(const LogType& type);
-	Log& done(const std::string& type = "");
+	Log& done();
 
 	const LogLevel& getLogLevel() const;
-	Log& setLogLevel(const LogLevel& logLevel);
-	const LogType& getLogType() const;
-	Log& setLogType(const LogType& logType);
-	Log& setLogType(const std::string& logType);
+	Log& setLogLevel(const LogLevel &logLevel);
+	Log& setLogType(const std::string &logType);
 	const std::string& getFileName() const;
-	Log& setFileName(const std::string& fileName);
+	Log& setFileName(const std::string &fileName);
 	const std::string& getFunctionName() const;
-	Log& setFunctionName(const std::string& functionName);
+	Log& setFunctionName(const std::string &functionName);
 	unsigned int getLineNumber() const;
 	Log& setLineNumber(unsigned int lineNumber);
 
 private:
 	std::string m_module;
 	LogLevel m_logLevel;
-	LogType m_logType;
 	std::string m_fileName;
 	std::string m_functionName;
 	unsigned int m_lineNumber;
-//	std::mutex m_mutex;
-	LoggerPtr m_logger;
-//	std::stringstream m_logBuffer;
 
 private:
 	typedef std::map<std::string, LoggerPtr> LoggerMap;

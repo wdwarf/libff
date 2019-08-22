@@ -16,41 +16,43 @@ using namespace std;
 using namespace NS_FF;
 
 class MyTcpClient: public TcpClient {
-	void onStartFailed(const std::string &errInfo) {
+	void onStartFailed(const std::string &errInfo) override {
 		LDBG << "error: " << errInfo;
 		this->stop();
 	}
-	virtual void onStart() {
+
+	virtual void onConnected() override{
 		LDBG << __func__;
+		Thread::Sleep(5000);
+		this->stop();
 	}
-	void onStop() {
-		LDBG << "stoped=======================================";
+	virtual void onDisconnected() override{
+		LDBG << __func__;
+		Thread::Sleep(5000);
+		this->start();
 	}
 
-	virtual void onConnected() {
-		LDBG << __func__;
-	}
-	virtual void onDisconnected() {
-		LDBG << __func__;
-	}
-
-	void onRecv(const BufferPtr &buffer) {
+	void onRecv(const BufferPtr &buffer) override{
 		LDBG << buffer->toString();
 	}
 };
 
 TEST(TestTcpClient, TestTcpClient) {
 	Socket svrSocket;
-	svrSocket.createTcp();
-	svrSocket.bind(5432);
-	svrSocket.listen();
+	thread t;
+	if (svrSocket.createTcp()
+			&& svrSocket.bind(5432)
+			&& svrSocket.listen()) {
 
-	thread t([&] {
-		sockaddr_in addr;
-		Socket sock = svrSocket.accept(addr);
-		sock.send("123", 3);
-		sock.close();
-	});
+		t = thread([&] {
+			LDBG << "accept thread started";
+			if(svrSocket.getHandle() <= 0) return;
+			sockaddr_in addr;
+			Socket sock = svrSocket.accept(addr);
+			sock.send("123", 3);
+			sock.close();
+		});
+	}
 
 	sleep(1);
 	MyTcpClient tcpClient;
@@ -59,10 +61,15 @@ TEST(TestTcpClient, TestTcpClient) {
 	tcpClient.start();
 	sleep(2);
 	tcpClient.stop();
-	tcpClient.start();
-	sleep(3);
+	sleep(2);
 	tcpClient.stop();
-//	svrSocket.close();
-	t.join();
+	sleep(2);
+
+	svrSocket.shutdown();
+	svrSocket.close();
+	if(t.joinable())
+		t.join();
+
+	MyTcpClient client2;
 	LDBG << "end ";
 }

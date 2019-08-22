@@ -24,60 +24,39 @@ enum class LogLevel {
 
 std::string LogLevel2Str(LogLevel ll);
 
-class LogType {
-public:
-	LogType();
-	explicit LogType(const std::string& name);
-	explicit LogType(const char* name);
-
-	const std::string& getName() const;
-	void setName(const std::string& name);
-
-	operator std::string() const;
-	LogType& operator=(const std::string& name);
-	bool operator==(const std::string& name) const;
-	bool operator==(const LogType& logType) const;
-private:
-	std::string m_name;
-};
-
 class LogInfo: public Object {
 public:
 	LogInfo();
-	LogInfo(const LogLevel& logLevel, const std::string& logMessage,
-			const std::string& logModule, const LogType& logType,
-			const Timestamp& logTime, const std::string& fileName,
-			const std::string& functionName, unsigned int lineNumber);
+	LogInfo(const LogLevel &logLevel, const std::string &logMessage,
+			const std::string &logModule, const Timestamp &logTime,
+			const std::string &fileName, const std::string &functionName,
+			unsigned int lineNumber);
 	virtual ~LogInfo();
 
 	const std::string& getFileName() const;
-	void setFileName(const std::string& fileName);
+	void setFileName(const std::string &fileName);
 	const std::string& getFunctionName() const;
-	void setFunctionName(const std::string& functionName);
+	void setFunctionName(const std::string &functionName);
 	unsigned int getLineNumber() const;
 	void setLineNumber(unsigned int lineNumber);
 	const std::string& getLogMessage() const;
-	void setLogMessage(const std::string& logMessage);
+	void setLogMessage(const std::string &logMessage);
 	LogLevel getLogLevel() const;
 	void setLogLevel(LogLevel logLevel);
 	const std::string& getLogModule() const;
-	void setLogModule(const std::string& logModule);
+	void setLogModule(const std::string &logModule);
 	Timestamp getLogTime() const;
-	void setLogTime(const Timestamp& logTime);
-	const LogType& getLogType() const;
-	void setLogType(const LogType& logType);
+	void setLogTime(const Timestamp &logTime);
 
 	std::string toXml() const;
-	void fromXml(const std::string& xml);
+	void fromXml(const std::string &xml);
 
 	std::string toLogString() const;
 private:
 	LogLevel m_logLevel;
 	std::string m_logMessage;
 	std::string m_logModule;
-	LogType m_logType;
 	Timestamp m_logTime;
-
 	std::string m_fileName;
 	std::string m_functionName;
 	unsigned int m_lineNumber;

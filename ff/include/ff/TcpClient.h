@@ -18,12 +18,13 @@
 #include <atomic>
 #include <list>
 #include <mutex>
+#include <memory>
 #include <condition_variable>
 
 namespace NS_FF {
 
 enum class NetEvent {
-	UNKNOWN, START, STOP, EXIT, CONNECTED, DISCONNECTED, RECV, SEND
+	UNKNOWN, START, EXIT, CONNECTED, DISCONNECTED, RECV, SEND
 };
 
 class ClientEventContext {
@@ -41,6 +42,20 @@ private:
 	BufferPtr m_buffer;
 };
 
+class ITcpClientEventListener{
+public:
+	ITcpClientEventListener() = default;
+	virtual ~ITcpClientEventListener() = default;
+
+	virtual void onStart() = 0;
+	virtual void onStartFailed(const std::string& errInfo) = 0;
+	virtual void onStop() = 0;
+	virtual void onConnected() = 0;
+	virtual void onDisconnected() = 0;
+	virtual void onRecv(const BufferPtr& buffer) = 0;
+	virtual void onSend(const BufferPtr& buffer) = 0;
+};
+
 class TcpClient: public ff::Object, public ff::Noncopyable {
 public:
 	TcpClient();
@@ -50,9 +65,7 @@ public:
 	bool stop();
 	void send(const void* buf, u32 bufSize);
 
-	virtual void onStart();
 	virtual void onStartFailed(const std::string& errInfo);
-	virtual void onStop();
 	virtual void onConnected();
 	virtual void onDisconnected();
 	virtual void onRecv(const BufferPtr& buffer);
@@ -95,6 +108,8 @@ private:
 	void doStart();
 	void doConnect() _throws(Exception);
 };
+
+typedef std::shared_ptr<TcpClient> TcpClientPtr;
 
 } /* namespace NS_FF */
 

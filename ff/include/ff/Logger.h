@@ -14,21 +14,26 @@
 #include <mutex>
 #include <ff/Object.h>
 #include <ff/IAppender.h>
+#include <ff/LogInfo.h>
 
 namespace NS_FF {
 
 class Logger: public ff::Object {
 public:
-	Logger(const std::string& module);
+	Logger(const std::string& module,
+			LogLevel logLevel = LogLevel::INFO);
 	virtual ~Logger();
 
 	const std::string& getModule() const;
 	void addAppender(AppenderPtr appender);
 	void log(const LogInfo& logInfo);
+	LogLevel getLogLevel() const;
+	void setLogLevel(LogLevel logLevel);
 
 private:
 	std::mutex m_mutex;
 	std::string m_module;
+	LogLevel m_logLevel;
 	std::set<AppenderPtr> m_appenders;
 };
 

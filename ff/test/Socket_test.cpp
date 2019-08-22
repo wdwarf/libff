@@ -14,26 +14,23 @@ using namespace std;
 using namespace NS_FF;
 
 TEST(TestSocket, TestSocket) {
-	Socket sock;
-	sock.createTcp();
-	EXPECT_GT(sock.getHandle(), 0);
+	Socket svrSock;
+	svrSock.createTcp();
+	EXPECT_GT(svrSock.getHandle(), 0);
+	svrSock.bind(65001);
+	svrSock.listen();
 
-	thread acceptThread([] {
-		Socket sock;
-		sock.createTcp();
-		sock.bind(65001);
-		sock.listen();
+	thread acceptThread([&] {
 		sockaddr_in addr;
-		Socket clientSock = sock.accept(addr);
+		Socket clientSock = svrSock.accept(addr);
 		if(clientSock.getHandle() > 0) {
 			LDBG << "accept [" << clientSock.getHandle() << "]";
 			clientSock.send("welcom !", 8);
 		}
 		clientSock.close();
-		sock.close();
 	});
 
-	thread clientThread([] {
+	thread clientThread([&] {
 		Socket sock;
 		sock.createTcp();
 		if(sock.connect("127.0.0.1", 65001)) {
@@ -47,6 +44,7 @@ TEST(TestSocket, TestSocket) {
 		}
 
 		sock.close();
+		svrSock.close();
 	});
 
 	acceptThread.join();

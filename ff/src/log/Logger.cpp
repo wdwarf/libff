@@ -11,11 +11,19 @@ using namespace std;
 
 namespace NS_FF {
 
-Logger::Logger(const std::string& module) :
-		m_module(module) {
+Logger::Logger(const std::string& module, LogLevel logLevel) :
+		m_module(module), m_logLevel(logLevel) {
 }
 
 Logger::~Logger() {
+}
+
+LogLevel Logger::getLogLevel() const {
+	return m_logLevel;
+}
+
+void Logger::setLogLevel(LogLevel logLevel) {
+	m_logLevel = logLevel;
 }
 
 const std::string& Logger::getModule() const {
@@ -28,6 +36,9 @@ void Logger::addAppender(AppenderPtr appender){
 }
 
 void Logger::log(const LogInfo& logInfo){
+	if(logInfo.getLogLevel() < this->m_logLevel)
+		return;
+
 	lock_guard<mutex> lk(this->m_mutex);
 	for(auto& appender : this->m_appenders){
 		appender->log(logInfo);
@@ -35,4 +46,3 @@ void Logger::log(const LogInfo& logInfo){
 }
 
 } /* namespace NS_FF */
-

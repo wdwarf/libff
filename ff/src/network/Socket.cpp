@@ -201,6 +201,7 @@ bool Socket::bind(u16 port, const std::string& ip) {
 	setsockopt(this->m_socketFd, SOL_SOCKET, SO_REUSEADDR, &flag, sizeof(flag));
 
 	int re = ::bind(this->m_socketFd, (sockaddr*) &addr, sizeof(sockaddr));
+	cout << "bind re: " << re << endl;
 	if (re < 0) {
 		return false;
 	}

@@ -8,6 +8,7 @@
 #ifndef FF_STDOUTAPPENDER_H_
 #define FF_STDOUTAPPENDER_H_
 
+#include <ff/ff_config.h>
 #include <ff/IAppender.h>
 
 namespace NS_FF {

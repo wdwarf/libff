@@ -15,7 +15,8 @@ using namespace std;
 
 namespace NS_FF {
 
-ClientEventContext::ClientEventContext() : m_event(NetEvent::UNKNOWN) {
+ClientEventContext::ClientEventContext() :
+		m_event(NetEvent::UNKNOWN) {
 
 }
 
@@ -47,21 +48,16 @@ TcpClient::TcpClient() :
 
 TcpClient::~TcpClient() {
 	this->stop();
+	while (!this->m_stoped) {
+		this_thread::yield();
+	}
 	this->addEvent(ClientEventContext(NetEvent::EXIT));
-	if (this->m_eventThread.joinable())
-	{
+	if (this->m_eventThread.joinable()) {
 		this->m_eventThread.join();
 	}
 }
 
-void TcpClient::onStart() {
-}
-
 void TcpClient::onStartFailed(const std::string &errInfo) {
-}
-
-void TcpClient::onStop() {
-	cout << "on stop" << endl;
 }
 
 void TcpClient::onConnected() {
@@ -87,15 +83,10 @@ bool TcpClient::start() {
 }
 
 bool TcpClient::stop() {
-	if(this->m_stoped)
+	if (this->m_stoped)
 		return true;
 
-	this->addEvent(ClientEventContext(NetEvent::STOP));
-
-	if (this->m_sendThread.joinable())
-		this->m_sendThread.join();
-	if (this->m_recvThread.joinable())
-		this->m_recvThread.join();
+	this->m_socket.shutdown();
 
 	return true;
 }
@@ -114,7 +105,6 @@ void TcpClient::addEvent(const ClientEventContext &evt) {
 }
 
 void TcpClient::eventThreadFunc() {
-	cout << __func__ << endl;
 	while (true) {
 		ClientEventContext event;
 		{
@@ -130,11 +120,11 @@ void TcpClient::eventThreadFunc() {
 			this->m_events.pop_front();
 		}
 
-		if(NetEvent::EXIT == event.getEvent()) {
+		if (NetEvent::EXIT == event.getEvent()) {
 			break;
 		}
 
-		if(this->m_stoped)
+		if (this->m_stoped)
 			continue;
 
 		switch (event.getEvent()) {
@@ -150,27 +140,27 @@ void TcpClient::eventThreadFunc() {
 			this->doStart();
 			break;
 		}
-		case NetEvent::STOP: {
-			{
-				unique_lock<mutex> lk(this->m_mutexSend);
-				this->m_stoped = true;
-				this->m_sendBufferList.clear();
-				this->m_condSend.notify_one();
-				this->m_socket.shutdown();
-			}
-
-			this->onStop();
-
-			this->m_socket.close();
-
-			break;
-		}
 		case NetEvent::CONNECTED: {
 			this->onConnected();
 			break;
 		}
 		case NetEvent::DISCONNECTED: {
+			{
+				unique_lock<mutex> lk(this->m_mutexSend);
+				this->m_sendBufferList.clear();
+				this->m_condSend.notify_one();
+			}
+
+			if (this->m_sendThread.joinable())
+				this->m_sendThread.join();
+			if (this->m_recvThread.joinable())
+				this->m_recvThread.join();
+
+			this->m_socket.close();
+
+			this->m_stoped = true;
 			this->onDisconnected();
+
 			break;
 		}
 		default: {
@@ -181,18 +171,16 @@ void TcpClient::eventThreadFunc() {
 }
 
 void TcpClient::doStart() {
-	cout << __func__ << endl;
 	try {
 		this->doConnect();
 	} catch (std::exception &e) {
+		this->m_stoped = true;
 		this->onStartFailed(e.what());
 		return;
 	}
 
 	this->m_recvThread = thread(&TcpClient::recvThreadFunc, this);
 	this->m_sendThread = thread(&TcpClient::sendThreadFunc, this);
-
-	this->onStart();
 }
 
 const std::string& TcpClient::getLocalIp() const {
@@ -260,11 +248,10 @@ void TcpClient::recvThreadFunc() {
 	}
 
 	this->addEvent(ClientEventContext(NetEvent::DISCONNECTED));
-	cout << "recv therad end" << endl;
 }
 
 void TcpClient::sendThreadFunc() {
-	while (!this->m_stoped) {
+	while (true) {
 		BufferPtr buffer;
 		{
 			unique_lock<mutex> lk(this->m_mutexSend);
@@ -272,11 +259,8 @@ void TcpClient::sendThreadFunc() {
 				this->m_condSend.wait(lk);
 			}
 
-			if(this->m_stoped)
-				break;
-
 			if (this->m_sendBufferList.empty())
-				continue;
+				break;
 
 			buffer = this->m_sendBufferList.front();
 			this->m_sendBufferList.pop_front();
@@ -289,7 +273,6 @@ void TcpClient::sendThreadFunc() {
 			this->addEvent(ClientEventContext(NetEvent::SEND, buffer));
 		}
 	}
-	cout << "send therad end" << endl;
 }
 
 } /* namespace NS_FF */

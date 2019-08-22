@@ -16,9 +16,11 @@
 #include <string>
 #include <list>
 #include <set>
+#include <memory>
 #include <ff/Exception.h>
 #include <ff/Variant.h>
 #include <ff/Buffer.h>
+#include <ff/Noncopyable.h>
 
 namespace NS_FF{
 
@@ -120,7 +122,7 @@ private:
 	std::set<ColumnInfo> columns;
 };
 
-class Sqlite3DataBase {
+class Sqlite3DataBase : protected Noncopyable{
 public:
 	Sqlite3DataBase();
 	virtual ~Sqlite3DataBase();
@@ -150,6 +152,8 @@ private:
 	sqlite3* db;
 	std::string dbFile;
 };
+
+typedef std::shared_ptr<Sqlite3DataBase> Sqlite3DataBasePtr;
 
 } /* namespace NS_FF */
 

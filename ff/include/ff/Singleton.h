@@ -8,7 +8,7 @@
 #ifndef FF_SINGLETON_H_
 #define FF_SINGLETON_H_
 
-#include "ff/Object.h"
+#include <ff/Object.h>
 
 namespace NS_FF {
 
