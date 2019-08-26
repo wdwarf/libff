@@ -16,10 +16,10 @@ using namespace NS_FF;
 void threadFunc() {
 	int n = 0;
 	while (++n <= 3) {
-		LDBG << __func__;
+		LOGD << __func__;
 		this_thread::sleep_for(std::chrono::seconds(1));
 	}
-	LDBG << __func__ << " end.";
+	LOGD << __func__ << " end.";
 }
 
 TEST(TestThread, TestThread) {
@@ -31,6 +31,6 @@ TEST(TestThread, TestThread) {
 	}
 //	Thread(MakeRunnable(threadFunc)).start();
 
-	LDBG << "test end";
+	LOGD << "test end";
 }
 

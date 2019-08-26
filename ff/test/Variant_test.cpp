@@ -17,8 +17,8 @@ TEST(TestVariant, TestVariant){
 	Variant v = 12;
 	EXPECT_EQ(VariantType::INT, v.getVt());
 	Variant v2 = v;
-	LDBG << (v == v2);
+	LOGD << (v == v2);
 	EXPECT_EQ(v, v2);
 
-	LDBG << "buf: " << v.toBuffer().toString();
+	LOGD << "buf: " << v.toBuffer().toString();
 }

@@ -102,6 +102,7 @@ private:
 	std::condition_variable m_condEvent;
 
 	std::list<BufferPtr> m_sendBufferList;
+	std::atomic_bool m_sendThreadStop;
 	std::mutex m_mutexSend;
 	std::condition_variable m_condSend;
 

@@ -15,11 +15,11 @@ using namespace std;
 using namespace NS_FF;
 
 TEST(TestStringWrapper, TestStringWrapper){
-	LDBG << SW("this")(" ")("is")(" ")("a text from StringWrapper").toString();
+	LOGD << SW("this")(" ")("is")(" ")("a text from StringWrapper").toString();
 	EXPECT_EQ("this is a text from StringWrapper", SW("this")(" ")("is")(" ")("a text from StringWrapper").toString());
 
 	SW sw;
 	sw << "this" << " " << "is " << "another" << " " << "text from StringWrapper";
-	LDBG << sw.toString();
+	LOGD << sw.toString();
 	EXPECT_EQ("this is another text from StringWrapper", sw.toString());
 }

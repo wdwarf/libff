@@ -14,11 +14,11 @@ using namespace std;
 using namespace NS_FF;
 
 void func1() {
-	LDBG << __func__;
+	LOGD << __func__;
 }
 
 void func2(const std::string& info) {
-	LDBG << __func__ << ": " << info;
+	LOGD << __func__ << ": " << info;
 }
 
 TEST(TestRunnable, TestRunnable) {

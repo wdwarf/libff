@@ -17,12 +17,12 @@ TEST(BufferTest, BufferTest){
 	Buffer buf, buf2;
 	buf << '1';
 	buf2 << buf;
-	LDBG << buf.toString();
-	LDBG << (buf == buf2);
+	LOGD << buf.toString();
+	LOGD << (buf == buf2);
 	buf << buf;
-	LDBG << buf.toString();
+	LOGD << buf.toString();
 	buf << 0x12345678;
-	LDBG << buf.toString();
+	LOGD << buf.toString();
 	buf.reverse();
-	LDBG << buf.toString();
+	LOGD << buf.toString();
 }

@@ -24,7 +24,7 @@ TEST(TestSocket, TestSocket) {
 		sockaddr_in addr;
 		Socket clientSock = svrSock.accept(addr);
 		if(clientSock.getHandle() > 0) {
-			LDBG << "accept [" << clientSock.getHandle() << "]";
+			LOGD << "accept [" << clientSock.getHandle() << "]";
 			clientSock.send("welcom !", 8);
 		}
 		clientSock.close();
@@ -34,13 +34,13 @@ TEST(TestSocket, TestSocket) {
 		Socket sock;
 		sock.createTcp();
 		if(sock.connect("127.0.0.1", 65001)) {
-			LDBG << "client connected";
+			LOGD << "client connected";
 			char buf[1024] = {0};
 			while(sock.read(buf, 1024, 1000) > 0)
 			{
-				LDBG << buf;
+				LOGD << buf;
 			}
-			LDBG << "client disconnected";
+			LOGD << "client disconnected";
 		}
 
 		sock.close();

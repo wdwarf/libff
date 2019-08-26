@@ -42,15 +42,12 @@ void ClientEventContext::setEvent(NetEvent event) {
 }
 
 TcpClient::TcpClient() :
-		m_remotePort(0), m_localPort(0), m_stoped(true) {
+		m_remotePort(0), m_localPort(0), m_stoped(true), m_sendThreadStop(true) {
 	this->m_eventThread = thread(&TcpClient::eventThreadFunc, this);
 }
 
 TcpClient::~TcpClient() {
 	this->stop();
-	while (!this->m_stoped) {
-		this_thread::yield();
-	}
 	this->addEvent(ClientEventContext(NetEvent::EXIT));
 	if (this->m_eventThread.joinable()) {
 		this->m_eventThread.join();
@@ -88,6 +85,11 @@ bool TcpClient::stop() {
 
 	this->m_socket.shutdown();
 
+	if (this_thread::get_id() != this->m_eventThread.get_id()) {
+		while (!this->m_stoped) {
+			this_thread::yield();
+		}
+	}
 	return true;
 }
 
@@ -121,7 +123,17 @@ void TcpClient::eventThreadFunc() {
 		}
 
 		if (NetEvent::EXIT == event.getEvent()) {
-			break;
+			if (this->m_stoped)
+				break;
+
+			this->addEvent(ClientEventContext(NetEvent::EXIT));
+			this->m_socket.close();
+			{
+				unique_lock<mutex> lk(this->m_mutexSend);
+				this->m_sendBufferList.clear();
+				this->m_sendThreadStop = true;
+				this->m_condSend.notify_one();
+			}
 		}
 
 		if (this->m_stoped)
@@ -148,6 +160,7 @@ void TcpClient::eventThreadFunc() {
 			{
 				unique_lock<mutex> lk(this->m_mutexSend);
 				this->m_sendBufferList.clear();
+				this->m_sendThreadStop = true;
 				this->m_condSend.notify_one();
 			}
 
@@ -174,11 +187,13 @@ void TcpClient::doStart() {
 	try {
 		this->doConnect();
 	} catch (std::exception &e) {
+		this->m_socket.close();
 		this->m_stoped = true;
 		this->onStartFailed(e.what());
 		return;
 	}
 
+	this->m_sendThreadStop = false;
 	this->m_recvThread = thread(&TcpClient::recvThreadFunc, this);
 	this->m_sendThread = thread(&TcpClient::sendThreadFunc, this);
 }
@@ -246,12 +261,11 @@ void TcpClient::recvThreadFunc() {
 				ClientEventContext(NetEvent::RECV,
 						make_shared<Buffer>(buf.getData(), readBytes)));
 	}
-
 	this->addEvent(ClientEventContext(NetEvent::DISCONNECTED));
 }
 
 void TcpClient::sendThreadFunc() {
-	while (true) {
+	while (!this->m_sendThreadStop) {
 		BufferPtr buffer;
 		{
 			unique_lock<mutex> lk(this->m_mutexSend);

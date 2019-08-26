@@ -15,7 +15,8 @@
 #define MKLOGFUNC(LV) NS_FF::Log(TEST_LOG_MODULE)(NS_FF::LogLevel::LV)\
 	.setLineNumber(__LINE__).setFileName(__FILE__).setFunctionName(__func__)
 
-#define LDBG MKLOGFUNC(DEBUG)
-#define LERR MKLOGFUNC(ERROR)
+#define LOGI MKLOGFUNC(INFO)
+#define LOGD MKLOGFUNC(DEBUG)
+#define LOGE MKLOGFUNC(ERROR)
 
 #endif /* TEST_TESTDEF_H_ */
