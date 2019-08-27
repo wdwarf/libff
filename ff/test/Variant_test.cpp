@@ -20,5 +20,5 @@ TEST(TestVariant, TestVariant){
 	LOGD << (v == v2);
 	EXPECT_EQ(v, v2);
 
-	LOGD << "buf: " << v.toBuffer().toString();
+	LOGD << "buf: " << v.toBuffer().toHexString();
 }

@@ -38,7 +38,7 @@ class MyTcpClient: public TcpClient {
 		LOGD << __func__;
 	}
 	void onRecv(const BufferPtr &buffer) override {
-		LOGD << buffer->toString();
+		LOGD << buffer->toHexString();
 		unique_lock<mutex> lk(m);
 
 		dataArrived = true;

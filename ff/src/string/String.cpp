@@ -260,5 +260,72 @@ std::vector<std::string> Split(const std::string& text,
 	return texts;
 }
 
+/////////////////////////////////////////////////////////////////
+/// class String
+/////////////////////////////////////////////////////////////////
+
+String String::trimLeft() const {
+	return TrimLeftCopy(*this);
+}
+
+String String::trimRight() const {
+	return TrimRightCopy(*this);
+}
+
+String String::trim() const {
+	return TrimCopy(*this);
+}
+
+String String::toLower() const {
+	return ToLowerCopy(*this);
+}
+
+String String::toUpper() const {
+	return ToUpperCopy(*this);
+}
+
+String String::replace(const String &find, const String &replace,
+		bool ignoreCase) const {
+	return ReplaceCopy(*this, find, replace, ignoreCase);
+}
+
+String String::replaceAll(const String &find, const String &replace,
+		bool ignoreCase) const {
+	return ReplaceAllCopy(*this, find, replace, ignoreCase);
+}
+
+int String::indexOf(const String &find, bool ignoreCase) const {
+	return IndexOf(*this, find, ignoreCase);
+}
+
+std::vector<String> String::split(const IDelimiter &delimiterChecker,
+		StringCompressType compressType) {
+	std::vector<String> texts;
+	std::string srcText = *this;
+
+	while (!srcText.empty()) {
+		int pos = delimiterChecker.Find(srcText);
+		if (pos >= 0) {
+			auto findStr = srcText.substr(0, pos);
+			srcText = srcText.substr(pos + delimiterChecker.DelimiterSize());
+
+			if (WithEmptyString == compressType) {
+				texts.push_back(findStr);
+				continue;
+			}
+
+			Trim(findStr);
+			if (!findStr.empty()) {
+				texts.push_back(findStr);
+			}
+			continue;
+		}
+
+		texts.push_back(srcText);
+		break;
+	}
+	return texts;
+}
+
 } /* namespace NS_FF */
 

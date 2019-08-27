@@ -10,7 +10,9 @@
 #include <iostream>
 #include <cstring>
 #include <sstream>
+#include <iomanip>
 #include <vector>
+#include <ff/String.h>
 
 using namespace std;
 
@@ -32,7 +34,7 @@ Buffer::BufferImpl::BufferImpl(unsigned int initSize) :
 	this->alloc(initSize);
 }
 
-Buffer::BufferImpl::BufferImpl(const char* data, unsigned int size) :
+Buffer::BufferImpl::BufferImpl(const void* data, unsigned int size) :
 		data(NULL), size(0), capacity(0), readPos(0) {
 	this->setData(data, size);
 }
@@ -77,13 +79,13 @@ Buffer::BufferImpl Buffer::BufferImpl::operator+(
 	return newBuffer;
 }
 
-void Buffer::BufferImpl::append(const char* data, unsigned int size) {
+void Buffer::BufferImpl::append(const void* data, unsigned int size) {
 	if ((NULL == data) || (size <= 0))
 		return;
 
 	unsigned int reserveSize = this->capacity - this->size;
 	if (size <= reserveSize) {
-		memcpy(this->data + this->size, data, size);
+		memcpy(static_cast<char*>(this->data) + this->size, data, size);
 		this->size += size;
 		return;
 	}
@@ -103,13 +105,13 @@ void Buffer::BufferImpl::append(const BufferImpl& buffer) {
 	this->append(buffer.data, buffer.size);
 }
 
-void Buffer::ReverseBytes(char* buf, int size) {
+void Buffer::BufferImpl::ReverseBytes(void* buf, int size) {
 	if (!buf || (size <= 0)) {
 		return;
 	}
 
-	char* pH = buf;
-	char* pE = buf + size - 1;
+	char* pH = static_cast<char*>(buf);
+	char* pE = static_cast<char*>(buf) + size - 1;
 	while (pH < pE) {
 		char c = *pH;
 		*pH = *pE;
@@ -117,6 +119,21 @@ void Buffer::ReverseBytes(char* buf, int size) {
 		++pH;
 		--pE;
 	}
+}
+
+String Buffer::BufferImpl::ToHexString(void* buf, int size)
+{
+	stringstream strBuf;
+	if (buf && size > 0) {
+		unsigned char* data = static_cast<unsigned char*>(buf);
+
+		strBuf.fill('0');
+		for (int i = 0; i < size; ++i) {
+			strBuf << setw(2) << hex << static_cast<int>(data[i]) << " ";
+		}
+	}
+
+	return strBuf.str();
 }
 
 void Buffer::BufferImpl::reverse() {
@@ -162,8 +179,8 @@ const char& Buffer::BufferImpl::operator[](unsigned index) const {
 	return this->data[index];
 }
 
-void Buffer::BufferImpl::setData(const char* data, unsigned int size) {
-	char* oldData = this->data;
+void Buffer::BufferImpl::setData(const void* data, unsigned int size) {
+	const char* oldData = static_cast<const char*>(this->data);
 	if ((NULL != data) && (size > 0)) {
 		this->size = size;
 		this->capacity = this->size * BUF_INC_RATIO;
@@ -189,7 +206,7 @@ Buffer::BufferImpl::~BufferImpl() {
 	this->clear();
 }
 
-void Buffer::setData(const char* data, unsigned int size) {
+void Buffer::setData(const void* data, unsigned int size) {
 	this->impl->setData(data, size);
 }
 
@@ -236,20 +253,32 @@ bool Buffer::BufferImpl::isEmpty() const {
 	return (NULL == this->data);
 }
 
-string Buffer::BufferImpl::toString() {
-	stringstream strBuf;
-	if (!this->isEmpty()) {
-		unsigned char* data = (unsigned char*) this->getData();
-		unsigned int size = this->getSize();
+String Buffer::BufferImpl::toHexString() {
+	return ToHexString(this->getData(), this->getSize());
+}
 
-		strBuf.fill('0');
-		for (unsigned int i = 0; i < size; ++i) {
-			strBuf.width(2);
-			strBuf << hex << (int) data[i] << " ";
+void Buffer::BufferImpl::fromHexString(const String& hexStr){
+	this->clear();
+
+	auto parseLine = [&](String& s){
+		s = s.replaceAll(" ", "").replaceAll("0x", "");
+		size_t len = s.length() / 2;
+		for(size_t i = 0; i < len; ++i){
+			stringstream str;
+			str << hex << string(s.c_str() + i * 2, 2);
+			unsigned int c = 0;
+			str >> hex >> c;
+			this->append(&c, 1);
 		}
-	}
+	};
 
-	return strBuf.str();
+	stringstream str;
+	str << hexStr.trim().toLower();
+	while(!str.eof()){
+		String line;
+		std::getline(str, line);
+		parseLine(line);
+	}
 }
 
 /* end of Buffer::BufferImpl */

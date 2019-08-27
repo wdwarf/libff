@@ -76,26 +76,43 @@ std::vector<std::string> Split(const std::string& text,
 		const IDelimiter& delimiterChecker, StringCompressType compressType =
 				WithEmptyString);
 
-template<class T>
-void SplitTo(const std::string& src, const std::string& find, T& t) {
-	std::string s;
-	for (std::string::size_type i = 0; i < src.length(); ++i) {
-		const char c = src[i];
-		if (find.find(c) != std::string::npos) {
-			t.insert(t.end(), s);
-			s = "";
-		} else {
-			s.push_back(c);
-		}
-	}
-	if (!s.empty() || (find.find(src[src.length() - 1]) != std::string::npos)) {
-		t.insert(t.end(), s);
-	}
-}
-
 //十六进制字符转数字
 unsigned int HexAToI(char x);
 char IToHexA(unsigned int x);
+
+class String : public std::string{
+public:
+	String() = default;
+	~String() = default;
+
+	template<typename T>
+	String(const T& str) : std::string(str){}
+
+	String(const String& str) : std::string(str){}
+	String& operator=(const String& str){
+		this->std::string::operator =(str);
+		return *this;
+	}
+
+	String(String&& str) : std::string(move(str)){}
+	String& operator=(String&& str){
+		this->std::string::operator =(move(str));
+		return *this;
+	}
+
+	String trimLeft() const;
+	String trimRight() const;
+	String trim() const;
+	String toLower() const;
+	String toUpper() const;
+	String replace(const String& find, const String& replace,
+			bool ignoreCase = false) const;
+	String replaceAll(const String& find, const String& replace,
+				bool ignoreCase = false) const;
+	int indexOf(const String& find, bool ignoreCase = false) const;
+	std::vector<String> split(const IDelimiter& delimiterChecker,
+			StringCompressType compressType = WithEmptyString);
+};
 
 } /* namespace NS_FF */
 

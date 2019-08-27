@@ -9,6 +9,7 @@
 #define BUFFER_BUFFERIMPL_H_
 
 #include <ff/Buffer.h>
+#include <ff/String.h>
 
 namespace NS_FF {
 
@@ -16,7 +17,7 @@ class Buffer::BufferImpl {
 public:
 	BufferImpl();
 	BufferImpl(unsigned int initSize);
-	BufferImpl(const char* data, unsigned int size);
+	BufferImpl(const void* data, unsigned int size);
 	BufferImpl(const BufferImpl& buffer);
 	virtual ~BufferImpl();
 
@@ -25,10 +26,10 @@ public:
 	char& operator[](unsigned index);
 	const char& operator[](unsigned index) const;
 
-	void append(const char* data, unsigned int size);
+	void append(const void* data, unsigned int size);
 	void append(const BufferImpl& buffer);
 
-	void setData(const char* data, unsigned int size);
+	void setData(const void* data, unsigned int size);
 	char* getData() const;
 	unsigned int getSize() const;
 	void resize(unsigned int size);
@@ -39,10 +40,13 @@ public:
 	unsigned int getCapacity() const;
 	void zero();
 
-	std::string toString();
+	String toHexString();
+	void fromHexString(const String& hexStr);
 	int read(void* buf, unsigned int size);
 	void resetReadPos();
 
+	static void ReverseBytes(void* buf, int size);
+	static String ToHexString(void* buf, int size);
 private:
 	char* data;
 	unsigned int size;

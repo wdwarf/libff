@@ -9,6 +9,7 @@
 #include <gtest/gtest.h>
 #include "TestDef.h"
 #include <iostream>
+#include <vector>
 
 using namespace std;
 using namespace NS_FF;
@@ -17,12 +18,19 @@ TEST(BufferTest, BufferTest){
 	Buffer buf, buf2;
 	buf << '1';
 	buf2 << buf;
-	LOGD << buf.toString();
+	LOGD << buf.toHexString();
 	LOGD << (buf == buf2);
 	buf << buf;
-	LOGD << buf.toString();
+	LOGD << buf.toHexString();
 	buf << 0x12345678;
-	LOGD << buf.toString();
+	LOGD << buf.toHexString();
 	buf.reverse();
-	LOGD << buf.toString();
+	LOGD << buf.toHexString();
+
+	string s = "12 34 56780x90\n 0xff 0xab cd";
+	LOGD << s;
+	Buffer buf3;
+	buf3.fromHexString(s);
+	LOGD << buf3.toHexString();
+
 }

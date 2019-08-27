@@ -25,7 +25,7 @@ Buffer::Buffer(unsigned int initSize) :
 		impl(new Buffer::BufferImpl(initSize)) {
 }
 
-Buffer::Buffer(const char* data, unsigned int size) :
+Buffer::Buffer(const void* data, unsigned int size) :
 		impl(new Buffer::BufferImpl(data, size)) {
 }
 
@@ -68,7 +68,7 @@ bool Buffer::operator==(const Buffer& buffer) {
 	return (0 == memcmp(this->getData(), buffer.getData(), this->getSize()));
 }
 
-void Buffer::append(const char* data, unsigned int size) {
+void Buffer::append(const void* data, unsigned int size) {
 	this->impl->append(data, size);
 }
 
@@ -110,8 +110,12 @@ bool Buffer::isEmpty() const {
 	return this->impl->isEmpty();
 }
 
-string Buffer::toString() const {
-	return this->impl->toString();
+String Buffer::toHexString() const {
+	return this->impl->toHexString();
+}
+
+void Buffer::fromHexString(const String& hexStr){
+	return this->impl->fromHexString(hexStr);
 }
 
 Buffer& Buffer::reverse() {
@@ -157,7 +161,16 @@ Buffer& Buffer::operator<<(istream& i) {
 	return *this;
 }
 
-Buffer& Buffer::operator<<(const string& s) {
+void Buffer::ReverseBytes(void* buf, int size) {
+	BufferImpl::ReverseBytes(buf, size);
+}
+
+String Buffer::ToHexString(void* buf, int size)
+{
+	return BufferImpl::ToHexString(buf, size);
+}
+
+Buffer& Buffer::operator<<(const String& s) {
 	this->append(s.c_str(), s.length());
 	return *this;
 }

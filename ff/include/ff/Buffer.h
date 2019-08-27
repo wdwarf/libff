@@ -13,6 +13,7 @@
 #include <memory>
 #include <ff/Object.h>
 #include <ff/Exception.h>
+#include <ff/String.h>
 
 namespace NS_FF {
 
@@ -25,7 +26,7 @@ class Buffer: virtual public Object {
 public:
 	Buffer();
 	Buffer(unsigned int initSize);
-	Buffer(const char* data, unsigned int size);
+	Buffer(const void* data, unsigned int size);
 	Buffer(const Buffer& buffer);
 	Buffer(Buffer&& buffer);
 	virtual ~Buffer();
@@ -37,10 +38,10 @@ public:
 	char& operator[](unsigned index);
 	const char& operator[](unsigned index) const;
 
-	void append(const char* data, unsigned int size);
+	void append(const void* data, unsigned int size);
 	void append(const Buffer& buffer);
 
-	void setData(const char* data, unsigned int size);
+	void setData(const void* data, unsigned int size);
 	char* getData() const;
 	unsigned int getSize() const;
 	void resize(unsigned int size);
@@ -51,7 +52,8 @@ public:
 	unsigned int getCapacity() const;
 	void zero();
 
-	std::string toString() const;
+	String toHexString() const;
+	void fromHexString(const String& hexStr);
 	int read(void* buf, unsigned int size);
 	void resetReadPos();
 
@@ -83,10 +85,11 @@ public:
 
 	Buffer& operator<<(const Buffer& in_buffer);
 	Buffer& operator<<(std::istream& i);
-	Buffer& operator<<(const std::string& s);
+	Buffer& operator<<(const String& s);
 
 	friend std::ostream& operator<<(std::ostream& o, const Buffer& buffer);
-	static void ReverseBytes(char* buf, int size);
+	static void ReverseBytes(void* buf, int size);
+	static String ToHexString(void* buf, int size);
 
 private:
 	class BufferImpl;
