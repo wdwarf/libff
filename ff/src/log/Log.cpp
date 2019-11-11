@@ -63,16 +63,17 @@ void Log::RemoveLogger(const std::string &m_module) {
 	}
 }
 
-void Log::log(const LogInfo &logInfo) {
+Log& Log::log(const LogInfo &logInfo) {
 	try {
 		LoggerPtr logger = Log::GetLogger(logInfo.getLogModule());
 		if (!logger)
-			return;
+			return *this;
 
 		logger->log(logInfo);
 	} catch (Exception &e) {
 		cout << e.what() << endl;
 	}
+	return *this;
 }
 
 Log& Log::operator()(const LogLevel &m_logLevel) {

@@ -31,6 +31,8 @@ public:
 	std::string toString() const;
 	operator std::string() const;
 	VersionType getVersion() const;
+	bool isV4() const;
+	bool isV6() const;
 	bool hasV6Scope() const;
 	unsigned int getV6Scope() const;
 	void clear();

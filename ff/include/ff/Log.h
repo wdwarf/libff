@@ -33,7 +33,7 @@ public:
 	static LoggerPtr GetLogger(const std::string &module);
 	static void RemoveLogger(const std::string &module);
 
-	void log(const LogInfo &logInfo);
+	Log& log(const LogInfo &logInfo);
 
 	template<class T>
 	Log& operator()(const T &logMsg) {

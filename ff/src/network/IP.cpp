@@ -35,7 +35,7 @@ IP::IP() :
 	memset(this->addrBuffer, 0, sizeof(this->addrBuffer));
 }
 
-IP::IP(const std::string& ip) :
+IP::IP(const std::string &ip) :
 		version(VersionType::UNKNOWN) {
 	memset(this->addrBuffer, 0, sizeof(this->addrBuffer));
 	this->parse(ip);
@@ -45,7 +45,7 @@ IP::~IP() {
 	//
 }
 
-void IP::parse(const std::string& ip) {
+void IP::parse(const std::string &ip) {
 	if (parseV4(ip)) {
 		return;
 	} else if (parseV6(ip)) {
@@ -57,11 +57,11 @@ void IP::parse(const std::string& ip) {
 			return;
 
 		char ds[61] = { 0 };
-		hostent* he = gethostbyname(tmpIp.c_str());
+		hostent *he = gethostbyname(tmpIp.c_str());
 		if (he) {
 			if (sizeof(in6_addr) == he->h_length) {
 				in6_addr ipAddr;
-				memcpy((void *) &ipAddr, (void *) he->h_addr, sizeof(in6_addr));
+				memcpy((void*) &ipAddr, (void*) he->h_addr, sizeof(in6_addr));
 
 #ifdef WIN32
 				DWORD len = 60;
@@ -77,7 +77,7 @@ void IP::parse(const std::string& ip) {
 
 			} else if (sizeof(in_addr) == he->h_length) {
 				in_addr ipAddr;
-				memcpy((void *) &ipAddr, (void *) he->h_addr, sizeof(in_addr));
+				memcpy((void*) &ipAddr, (void*) he->h_addr, sizeof(in_addr));
 				strcpy(ds, inet_ntoa(ipAddr));
 
 				if (this->parseV4(ds))
@@ -87,7 +87,7 @@ void IP::parse(const std::string& ip) {
 	}
 }
 
-bool IP::parseV4(const std::string& ip) {
+bool IP::parseV4(const std::string &ip) {
 	this->clear();
 	int token_count = 0;
 	string tmpIp = TrimCopy(ip);
@@ -144,7 +144,7 @@ bool IP::parseV4(const std::string& ip) {
 	return true;
 }
 
-bool IP::parseV6(const std::string& ip) {
+bool IP::parseV6(const std::string &ip) {
 	this->clear();
 
 	unsigned char tmp_address_buffer[256];
@@ -369,7 +369,7 @@ bool IP::hasV6Scope() const {
 }
 
 unsigned int IP::getV6Scope() const {
-	unsigned int* pScope = (unsigned int*) (this->addrBuffer
+	unsigned int *pScope = (unsigned int*) (this->addrBuffer
 			+ IPV6_LENGTH_NO_SCOPE);
 	return ntohl(*pScope);
 }
@@ -378,10 +378,10 @@ std::string IP::toString() const {
 	if (this->isValid()) {
 		char buf[128] = { 0 };
 		if (VersionType::V4 == version)
-			sprintf((char *) buf, "%d.%d.%d.%d", addrBuffer[0], addrBuffer[1],
+			sprintf((char*) buf, "%d.%d.%d.%d", addrBuffer[0], addrBuffer[1],
 					addrBuffer[2], addrBuffer[3]);
 		else if (this->hasV6Scope())
-			sprintf((char *) buf, "%02x%02x:%02x%02x:%02x%02x:%02x%02x:"
+			sprintf((char*) buf, "%02x%02x:%02x%02x:%02x%02x:%02x%02x:"
 					"%02x%02x:%02x%02x:%02x%02x:%02x%02x%%%d", addrBuffer[0],
 					addrBuffer[1], addrBuffer[2], addrBuffer[3], addrBuffer[4],
 					addrBuffer[5], addrBuffer[6], addrBuffer[7], addrBuffer[8],
@@ -389,7 +389,7 @@ std::string IP::toString() const {
 					addrBuffer[12], addrBuffer[13], addrBuffer[14],
 					addrBuffer[15], this->getV6Scope());
 		else
-			sprintf((char *) buf, "%02x%02x:%02x%02x:%02x%02x:%02x%02x:"
+			sprintf((char*) buf, "%02x%02x:%02x%02x:%02x%02x:%02x%02x:"
 					"%02x%02x:%02x%02x:%02x%02x:%02x%02x", addrBuffer[0],
 					addrBuffer[1], addrBuffer[2], addrBuffer[3], addrBuffer[4],
 					addrBuffer[5], addrBuffer[6], addrBuffer[7], addrBuffer[8],
@@ -410,6 +410,14 @@ IP::VersionType IP::getVersion() const {
 	return version;
 }
 
+bool IP::isV4() const {
+	return (VersionType::V4 == this->version);
+}
+
+bool IP::isV6() const {
+	return (VersionType::V6 == this->version);
+}
+
 Buffer IP::toBuffer() const {
 	if (this->isValid()) {
 		if (VersionType::V4 == this->version) {
@@ -425,7 +433,7 @@ Buffer IP::toBuffer() const {
 	return Buffer();
 }
 
-std::ostream& operator<<(std::ostream& o, const IP& ip) {
+std::ostream& operator<<(std::ostream &o, const IP &ip) {
 	o << ip.toString();
 	return o;
 }
