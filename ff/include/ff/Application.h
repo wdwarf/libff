@@ -19,7 +19,7 @@ namespace NS_FF {
 
 EXCEPTION_DEF(ApplicationException);
 
-class Application: public Object {
+class FFDLL Application: public Object {
 public:
 	Application(int argc, char** argv);
 	virtual ~Application();
@@ -53,7 +53,7 @@ private:
 	ApplicationImpl* impl;
 };
 
-Application* GetApplication();
+FFDLL Application* GetApplication();
 
 } /* namespace NS_FF */
 

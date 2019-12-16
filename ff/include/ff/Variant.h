@@ -36,7 +36,7 @@ enum class VariantType : unsigned char {
 	STRING
 };
 
-struct VariantTypeInfo: public Object {
+struct FFDLL VariantTypeInfo {
 	VariantType type;
 	long size;
 
@@ -45,7 +45,7 @@ struct VariantTypeInfo: public Object {
 	}
 };
 
-class Variant: public Object {
+class FFDLL Variant: public Object {
 public:
 	Variant();
 	Variant(const Variant& v);
@@ -127,9 +127,9 @@ public:
 	Variant operator ==(const bool& v) const;
 	Variant operator !=(const bool& v) const;
 
-	friend std::ostream& operator<<(std::ostream& o, const Variant& v);
+	FFDLL friend std::ostream& operator<<(std::ostream& o, const Variant& v);
 
-#define _VARIANT_OPT_DEF_(T, OP) friend  Variant operator OP(const T& p1, const Variant& p2);
+#define _VARIANT_OPT_DEF_(T, OP) FFDLL friend  Variant operator OP(const T& p1, const Variant& p2);
 
 #define _VARIANT_OPT_DEF(OP) _VARIANT_OPT_DEF_(char, OP)\
 _VARIANT_OPT_DEF_(short, OP)\
@@ -191,11 +191,11 @@ _VARIANT_OPT_DEF2_(double, OP)
 	_VARIANT_OPT_DEF_FLOAT2(==)
 	_VARIANT_OPT_DEF_FLOAT2(!=)
 
-	friend Variant operator +(const char* p1, const Variant& p2);
-	friend Variant operator +(const std::string& p1, const Variant& p2);
+	FFDLL friend Variant operator +(const char* p1, const Variant& p2);
+	FFDLL friend Variant operator +(const std::string& p1, const Variant& p2);
 
-	friend Variant operator ==(const bool& p1, const Variant& p2);
-	friend Variant operator !=(const bool& p1, const Variant& p2);
+	FFDLL friend Variant operator ==(const bool& p1, const Variant& p2);
+	FFDLL friend Variant operator !=(const bool& p1, const Variant& p2);
 
 private:
 	VariantType vt;

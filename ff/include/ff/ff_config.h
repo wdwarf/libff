@@ -10,6 +10,20 @@
 
 #define NS_FF ff
 
+#ifndef FFDLL
+#ifdef _WIN32
+
+#if defined(FF_LIB) && defined(FF_DLL)
+#define FFDLL __declspec(dllexport)
+#else
+#define FFDLL __declspec(dllimport)
+#endif
+
+#else
+#define FFDLL
+#endif
+#endif
+
 namespace NS_FF {
 
 typedef char i8;

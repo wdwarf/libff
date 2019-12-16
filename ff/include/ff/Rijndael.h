@@ -22,7 +22,7 @@ namespace NS_FF {
 //Java code authors: Raif S. Naffah, Paulo S. L. M. Barreto
 //This Implementation was tested against KAT test published by the authors of the method and the
 //results were identical.
-class CRijndael: public Object {
+class FFDLL CRijndael: public Object {
 public:
 	//Operation Modes
 	//The Electronic Code Book (ECB), Cipher Block Chaining (CBC) and Cipher Feedback Block (CFB) modes

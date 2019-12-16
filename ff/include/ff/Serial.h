@@ -33,7 +33,7 @@ enum class StopBit {
 	_2,			//2
 };
 
-class Serial: protected Noncopyable, public Object {
+class FFDLL Serial: protected Noncopyable {
 public:
 	Serial();
 	virtual ~Serial();

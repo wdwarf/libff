@@ -12,7 +12,7 @@
 
 namespace NS_FF {
 
-class Noncopyable {
+class FFDLL Noncopyable {
 public:
 	Noncopyable() = default;
 	virtual ~Noncopyable() = default;

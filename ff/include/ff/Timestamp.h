@@ -16,7 +16,7 @@ namespace NS_FF {
 
 EXCEPTION_DEF(TimestampException);
 
-class Timestamp: public Object {
+class FFDLL Timestamp: public Object {
 public:
 	Timestamp();
 	Timestamp(const Timestamp& t);

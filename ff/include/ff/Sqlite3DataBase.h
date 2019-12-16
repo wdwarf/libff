@@ -26,7 +26,7 @@ namespace NS_FF{
 
 EXCEPTION_DEF(Sqlite3Exception);
 
-class Statment {
+class FFDLL Statment {
 public:
 	Statment();
 	virtual ~Statment();
@@ -69,7 +69,7 @@ private:
 	sqlite3_stmt* stmt;
 };
 
-class ColumnInfo{
+class FFDLL ColumnInfo{
 public:
 	ColumnInfo();
 	ColumnInfo(const std::string& columnName, const std::string& dataType, bool primaryKey = false,
@@ -104,7 +104,7 @@ private:
 	std::string dataType;
 };
 
-class TableInfo{
+class FFDLL TableInfo{
 public:
 	TableInfo();
 	TableInfo(const std::string& tableName);
@@ -122,7 +122,7 @@ private:
 	std::set<ColumnInfo> columns;
 };
 
-class Sqlite3DataBase : protected Noncopyable{
+class FFDLL Sqlite3DataBase : protected Noncopyable{
 public:
 	Sqlite3DataBase();
 	virtual ~Sqlite3DataBase();

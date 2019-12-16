@@ -27,7 +27,7 @@ enum class NetEvent {
 	UNKNOWN, START, EXIT, CONNECTED, DISCONNECTED, RECV, SEND
 };
 
-class ClientEventContext {
+class FFDLL ClientEventContext {
 public:
 	ClientEventContext();
 	ClientEventContext(NetEvent event, BufferPtr buffer = nullptr);
@@ -42,7 +42,7 @@ private:
 	BufferPtr m_buffer;
 };
 
-class ITcpClientEventListener{
+class FFDLL ITcpClientEventListener{
 public:
 	ITcpClientEventListener() = default;
 	virtual ~ITcpClientEventListener() = default;
@@ -56,7 +56,7 @@ public:
 	virtual void onSend(const BufferPtr& buffer) = 0;
 };
 
-class TcpClient: public ff::Object, public ff::Noncopyable {
+class FFDLL TcpClient: public ff::Object, public ff::Noncopyable {
 public:
 	TcpClient();
 	virtual ~TcpClient();

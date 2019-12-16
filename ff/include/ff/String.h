@@ -17,34 +17,34 @@ using std::string;
 
 namespace NS_FF {
 
-std::string& ToLower(std::string& str);
-std::string ToLowerCopy(const std::string& str);
-std::string& ToUpper(std::string& str);
-std::string ToUpperCopy(const std::string& str);
-std::string& TrimLeft(std::string& str);
-std::string TrimLeftCopy(const std::string& str);
-std::string& TrimRight(std::string& str);
-std::string TrimRightCopy(const std::string& str);
-std::string& Trim(std::string& str);
-std::string TrimCopy(const std::string& str);
+FFDLL std::string& ToLower(std::string& str);
+FFDLL std::string ToLowerCopy(const std::string& str);
+FFDLL std::string& ToUpper(std::string& str);
+FFDLL std::string ToUpperCopy(const std::string& str);
+FFDLL std::string& TrimLeft(std::string& str);
+FFDLL std::string TrimLeftCopy(const std::string& str);
+FFDLL std::string& TrimRight(std::string& str);
+FFDLL std::string TrimRightCopy(const std::string& str);
+FFDLL std::string& Trim(std::string& str);
+FFDLL std::string TrimCopy(const std::string& str);
 
-std::string& Replace(std::string& src, const std::string& find,
+FFDLL std::string& Replace(std::string& src, const std::string& find,
 		const std::string& replace, bool ignoreCase = false);
-std::string ReplaceCopy(const std::string& src, const std::string& find,
+FFDLL std::string ReplaceCopy(const std::string& src, const std::string& find,
 		const std::string& replace, bool ignoreCase = false);
-std::string& ReplaceAll(std::string& src, const std::string& find,
+FFDLL std::string& ReplaceAll(std::string& src, const std::string& find,
 		const std::string& replace, bool ignoreCase = false);
-std::string ReplaceAllCopy(const std::string& src, const std::string& find,
+FFDLL std::string ReplaceAllCopy(const std::string& src, const std::string& find,
 		const std::string& replace, bool ignoreCase = false);
 
-int IndexOf(const std::string& src, const std::string& find, bool ignoreCase =
+FFDLL int IndexOf(const std::string& src, const std::string& find, bool ignoreCase =
 		false);
 
 enum StringCompressType {
 	WithEmptyString, RemoveEmptyString
 };
 
-class IDelimiter {
+class FFDLL IDelimiter {
 public:
 	IDelimiter(const std::string& delimiterStr);
 	virtual ~IDelimiter();
@@ -56,7 +56,7 @@ protected:
 	std::string m_delimiterStr;
 };
 
-class IsAnyOf: public IDelimiter {
+class FFDLL IsAnyOf: public IDelimiter {
 public:
 	IsAnyOf(const std::string& delimiter);
 
@@ -64,7 +64,7 @@ public:
 	int DelimiterSize() const;
 };
 
-class IsStringOf: public IDelimiter {
+class FFDLL IsStringOf: public IDelimiter {
 public:
 	IsStringOf(const std::string& delimiter);
 
@@ -72,15 +72,15 @@ public:
 	int DelimiterSize() const;
 };
 
-std::vector<std::string> Split(const std::string& text,
+FFDLL std::vector<std::string> Split(const std::string& text,
 		const IDelimiter& delimiterChecker, StringCompressType compressType =
 				WithEmptyString);
 
 //十六进制字符转数字
-unsigned int HexAToI(char x);
-char IToHexA(unsigned int x);
+FFDLL unsigned int HexAToI(char x);
+FFDLL char IToHexA(unsigned int x);
 
-class String : public std::string{
+class FFDLL String : public std::string{
 public:
 	String() = default;
 	~String() = default;

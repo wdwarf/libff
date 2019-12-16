@@ -56,7 +56,7 @@ enum class SocketType {
 
 typedef __socket_type SockType;
 
-class Socket: public Object {
+class FFDLL Socket: public Object {
 public:
 	Socket();
 	Socket(int sockFd);

@@ -18,7 +18,7 @@
 
 namespace NS_FF {
 
-class Logger: public ff::Object {
+class FFDLL Logger: public ff::Object {
 public:
 	Logger(const std::string& module,
 			LogLevel logLevel = LogLevel::INFO);

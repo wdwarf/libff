@@ -17,7 +17,7 @@ namespace NS_FF {
 
 EXCEPTION_DEF(RunnableException);
 
-class Runnable: public Object {
+class FFDLL Runnable: virtual public Object {
 public:
 	Runnable() = default;
 	virtual ~Runnable() = default;
@@ -29,8 +29,8 @@ typedef std::shared_ptr<Runnable> RunnablePtr;
 typedef void (*FRunnableFunc)();
 typedef std::function<void()> RunnableFunc;
 
-RunnablePtr MakeRunnable(FRunnableFunc func);
-RunnablePtr MakeRunnable(RunnableFunc func);
+FFDLL RunnablePtr MakeRunnable(FRunnableFunc func);
+FFDLL RunnablePtr MakeRunnable(RunnableFunc func);
 
 } /* namespace NS_FF */
 

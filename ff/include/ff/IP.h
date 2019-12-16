@@ -16,7 +16,7 @@
 
 namespace NS_FF {
 
-class IP: public Object {
+class FFDLL IP: public Object {
 public:
 	IP();
 	IP(const std::string& ip);

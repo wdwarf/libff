@@ -22,7 +22,7 @@ EXCEPTION_DEF(BufferException);
 #define BUF_IN_OPERATOR_DEF(T) Buffer& operator<<(const T& t)
 #define BUF_OUT_OPERATOR_DEF(T) Buffer& operator>>(T& t)
 
-class Buffer: virtual public Object {
+class FFDLL Buffer: virtual public Object {
 public:
 	Buffer();
 	Buffer(unsigned int initSize);

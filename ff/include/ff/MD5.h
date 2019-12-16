@@ -16,7 +16,7 @@ using std::stringstream;
 
 namespace NS_FF {
 
-class MD5: virtual public Object {
+class FFDLL MD5: virtual public Object {
 public:
 	struct MD5Result {
 		unsigned char result[16];

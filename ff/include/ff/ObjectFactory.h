@@ -18,7 +18,7 @@ enum class ObjectType {
 };
 
 // 工厂类接口
-class ObjectFactory: public Object {
+class FFDLL ObjectFactory: public Object {
 public:
 	ObjectFactory() {
 	}

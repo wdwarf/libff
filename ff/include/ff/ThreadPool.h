@@ -19,7 +19,7 @@
 namespace NS_FF {
 
 class TaskThread;
-class ThreadPool: public Noncopyable, public ff::Object {
+class FFDLL ThreadPool: public Noncopyable, public ff::Object {
 public:
 	ThreadPool(unsigned int maxSize);
 	virtual ~ThreadPool();

@@ -20,7 +20,7 @@ namespace NS_FF {
 
 EXCEPTION_DEF(SettingsException);
 
-class Settings: virtual public Object {
+class FFDLL Settings {
 public:
 	Settings();
 	virtual ~Settings();

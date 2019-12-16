@@ -21,7 +21,7 @@ namespace NS_FF {
 
 #define _throws(x)
 
-class Exception: public std::exception, public Object {
+class FFDLL Exception: public std::exception, public Object {
 public:
 	Exception(const std::string& msg, int errNo = 0, int lineNumber = 0,
 			const std::string& functionName = "", const std::string& fileName =
@@ -43,7 +43,7 @@ private:
 	std::string msg;
 };
 
-#define EXCEPTION_DEF(exceptionName) class exceptionName : public NS_FF::Exception{\
+#define EXCEPTION_DEF(exceptionName) class FFDLL exceptionName : public NS_FF::Exception{\
 	public:\
 	exceptionName(const std::string& msg, int errNo = 0, int lineNumber = 0, \
 			const std::string& functionName = "", const std::string& fileName = "") _GLIBCXX_USE_NOEXCEPT \
@@ -51,7 +51,7 @@ private:
 	virtual ~exceptionName() _GLIBCXX_USE_NOEXCEPT{}\
 }
 
-#define EXCEPTION_DEF2(exceptionName, parentClass) class exceptionName : public parentClass{\
+#define EXCEPTION_DEF2(exceptionName, parentClass) class FFDLL exceptionName : public parentClass{\
 	public:\
 	exceptionName(const std::string& msg, int errNo = 0, int lineNumber = 0, \
 			const std::string& functionName = "", const std::string& fileName = "") _GLIBCXX_USE_NOEXCEPT \

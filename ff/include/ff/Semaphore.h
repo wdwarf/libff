@@ -16,7 +16,7 @@ namespace NS_FF {
 
 using std::string;
 
-class Semaphore: virtual public Object {
+class FFDLL Semaphore {
 public:
 	Semaphore();
 	Semaphore(const string& name, int flag, ...);

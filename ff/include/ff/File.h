@@ -20,7 +20,7 @@ namespace NS_FF {
 
 EXCEPTION_DEF(FileException);
 
-class File : virtual public Object {
+class FFDLL File : virtual public Object {
 public:
 	File();
 	File(const std::string& path);

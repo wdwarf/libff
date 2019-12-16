@@ -13,7 +13,7 @@
 
 namespace NS_FF {
 
-class Object {
+class FFDLL Object {
 public:
 	virtual std::string getClassName() const;
 	virtual std::string getFullClassName() const;

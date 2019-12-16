@@ -13,9 +13,9 @@
 
 namespace NS_FF {
 
-void SetLastError(int errNo, const std::string& errInfo = "");
-int GetLastErrNo();
-std::string& GetLastErrInfo();
+FFDLL void SetLastError(int errNo, const std::string& errInfo = "");
+FFDLL int GetLastErrNo();
+FFDLL std::string& GetLastErrInfo();
 
 } /* namespace NS_FF */
 
