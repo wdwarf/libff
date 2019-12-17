@@ -37,7 +37,10 @@ int Application::ApplicationImpl::run() {
 	this->m_app->onInitialize();
 	this->m_app->run();
 
-	this->m_sem.wait();
+	{
+		std::unique_lock<mutex> lk(this->m_mutex);
+		this->m_cond.wait(lk, [&]{ return (false == this->m_running); });
+	}
 
 	this->m_app->onUninitialize();
 
@@ -53,7 +56,7 @@ void Application::ApplicationImpl::exit(int code) {
 		return;
 	this->m_running = false;
 	this->m_exitCode = code;
-	this->m_sem.release();
+	this->m_cond.notify_one();
 }
 
 int Application::ApplicationImpl::getExitCode() const {

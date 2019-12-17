@@ -24,8 +24,7 @@ class FFDLL Thread: public Runnable, public Noncopyable {
 public:
 	Thread();
 	Thread(RunnablePtr runnable);
-	Thread(FRunnableFunc runnableFunc);
-	Thread(RunnableFunc runnableFunc);
+	template<class Func> Thread(Func func) : Thread(MakeRunnable(func)){}
 	virtual ~Thread();
 
 	void start();

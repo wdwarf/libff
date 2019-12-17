@@ -15,7 +15,7 @@ namespace NS_FF {
 
 EXCEPTION_DEF(TickException);
 
-class FFDLL Tick: public Object {
+class FFDLL Tick {
 public:
 	Tick();
 	virtual ~Tick();

@@ -19,14 +19,16 @@
 namespace NS_FF {
 
 class TaskThread;
-class FFDLL ThreadPool: public Noncopyable, public ff::Object {
+class FFDLL ThreadPool: public Noncopyable{
 public:
 	ThreadPool(unsigned int maxSize);
 	virtual ~ThreadPool();
 
-	void exec(FRunnableFunc task);
-	void exec(RunnableFunc task);
 	void exec(RunnablePtr task);
+
+	template<class Func> void exec(Func func){
+		this->exec(MakeRunnable(func));
+	}
 
 private:
 	friend class TaskThread;

@@ -99,6 +99,7 @@ public:
 		this->std::string::operator =(move(str));
 		return *this;
 	}
+	bool equals(const String& str, bool isEgnoreCase = false) const;
 
 	String trimLeft() const;
 	String trimRight() const;

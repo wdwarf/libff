@@ -21,7 +21,7 @@
 
 namespace NS_FF {
 
-class FFDLL Log: public std::stringstream, public Object, public Noncopyable {
+class FFDLL Log: public std::stringstream, public Noncopyable {
 public:
 	Log();
 	Log(const std::string &module);

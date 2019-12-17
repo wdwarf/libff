@@ -20,14 +20,6 @@ Thread::Thread(RunnablePtr runnable) {
 	this->m_runnable = runnable;
 }
 
-Thread::Thread(FRunnableFunc runnableFunc) {
-	this->m_runnable = MakeRunnable(runnableFunc);
-}
-
-Thread::Thread(RunnableFunc runnableFunc) {
-	this->m_runnable = MakeRunnable(runnableFunc);
-}
-
 Thread::~Thread() {
 	this->join();
 }

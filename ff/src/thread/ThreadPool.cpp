@@ -97,14 +97,6 @@ ThreadPool::~ThreadPool() {
 	}
 }
 
-void ThreadPool::exec(FRunnableFunc task){
-	this->exec(MakeRunnable(task));
-}
-
-void ThreadPool::exec(RunnableFunc task){
-	this->exec(MakeRunnable(task));
-}
-
 void ThreadPool::exec(RunnablePtr task) {
 	auto threadPtr = this->getThread();
 	threadPtr->setTask(task);

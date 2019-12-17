@@ -24,7 +24,7 @@ enum class LogLevel {
 
 FFDLL std::string LogLevel2Str(LogLevel ll);
 
-class FFDLL LogInfo: public Object {
+class FFDLL LogInfo {
 public:
 	LogInfo();
 	LogInfo(const LogLevel &logLevel, const std::string &logMessage,

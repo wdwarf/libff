@@ -45,7 +45,7 @@ struct FFDLL VariantTypeInfo {
 	}
 };
 
-class FFDLL Variant: public Object {
+class FFDLL Variant {
 public:
 	Variant();
 	Variant(const Variant& v);

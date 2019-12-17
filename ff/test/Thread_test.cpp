@@ -22,11 +22,24 @@ void threadFunc() {
 	LOGD << __func__ << " end.";
 }
 
+class Func{
+public:
+	Func& operator()(){
+		cout << "Functor operate" << endl;
+		return *this;
+	}
+};
+
 TEST(TestThread, TestThread) {
 	{
 		Thread t(&threadFunc);
 		t.start();
 		t.detach();
+
+		Thread t2((Func()));
+		t2.start();
+		t2.join();
+
 		sleep(1);
 	}
 //	Thread(MakeRunnable(threadFunc)).start();

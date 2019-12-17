@@ -6,6 +6,7 @@
  */
 
 #include <string>
+#include <cstring>
 #include <sstream>
 #include <algorithm>
 #include <ff/Exception.h>
@@ -263,6 +264,12 @@ std::vector<std::string> Split(const std::string& text,
 /////////////////////////////////////////////////////////////////
 /// class String
 /////////////////////////////////////////////////////////////////
+
+bool String::equals(const String& str, bool isEgnoreCase) const
+{
+	return (isEgnoreCase ? 0 == strcasecmp(this->c_str(), str.c_str())
+			: 0 == strcmp(this->c_str(), str.c_str()));
+}
 
 String String::trimLeft() const {
 	return TrimLeftCopy(*this);

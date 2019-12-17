@@ -9,12 +9,12 @@
 #define FF_IAPPENDER_H_
 
 #include <memory>
-#include <ff/Object.h>
+#include <ff/ff_config.h>
 
 namespace NS_FF {
 
 class LogInfo;
-class FFDLL IAppender: public ff::Object {
+class FFDLL IAppender {
 public:
 	IAppender() = default;
 	virtual ~IAppender() = default;

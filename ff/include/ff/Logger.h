@@ -15,10 +15,11 @@
 #include <ff/Object.h>
 #include <ff/IAppender.h>
 #include <ff/LogInfo.h>
+#include <ff/Noncopyable.h>
 
 namespace NS_FF {
 
-class FFDLL Logger: public ff::Object {
+class FFDLL Logger: public Noncopyable {
 public:
 	Logger(const std::string& module,
 			LogLevel logLevel = LogLevel::INFO);

@@ -12,6 +12,7 @@
 #include <ff/Object.h>
 #include <ff/Noncopyable.h>
 #include <ff/Exception.h>
+#include <ff/Synchronizable.h>
 #include <string>
 #include <memory>
 #include <termios.h>
@@ -33,7 +34,7 @@ enum class StopBit {
 	_2,			//2
 };
 
-class FFDLL Serial: protected Noncopyable {
+class FFDLL Serial: public Synchronizable, protected Noncopyable {
 public:
 	Serial();
 	virtual ~Serial();

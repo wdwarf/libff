@@ -6,6 +6,7 @@
  */
 
 #include <gtest/gtest.h>
+#include <iostream>
 #include "TestDef.h"
 #include <ff/Log.h>
 #include <ff/StdoutAppender.h>

@@ -12,7 +12,7 @@
 
 namespace NS_FF {
 
-class FFDLL CRC: virtual public Object {
+class FFDLL CRC {
 public:
 	static unsigned short CRC16(const unsigned char* ptr, unsigned int len);
 

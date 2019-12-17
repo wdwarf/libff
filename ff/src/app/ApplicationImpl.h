@@ -10,10 +10,10 @@
 
 #include <ff/Application.h>
 #include <ff/Settings.h>
-#include <ff/Semaphore.h>
 #include <string>
 #include <list>
 #include <mutex>
+#include <condition_variable>
 #include <unistd.h>
 
 namespace NS_FF {
@@ -46,7 +46,7 @@ private:
 	Settings m_settings;
 	std::vector<std::string> m_cmdLines;
 	std::mutex m_mutex;
-	Semaphore m_sem;
+	std::condition_variable m_cond;
 	int m_exitCode;
 	bool m_running;
 };
