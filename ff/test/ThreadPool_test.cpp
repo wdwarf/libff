@@ -25,12 +25,14 @@ TEST(TestThreadPool, TestThreadPool) {
 	thread t1([&]{
 		for(int i = 0; i < 100; ++i){
 				tp.exec(MakeRunnable(bind(TestF, 1, i)));
+				cout << "active thread cnt: " << tp.getActiveThreadCount() << endl;
 			}
 	});
 
 	thread t2([&]{
 		for(int i = 0; i < 100; ++i){
 				tp.exec(MakeRunnable(bind(TestF, 2, i)));
+				cout << "active thread cnt: " << tp.getActiveThreadCount() << endl;
 			}
 	});
 
