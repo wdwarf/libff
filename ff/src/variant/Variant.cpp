@@ -37,8 +37,6 @@ Variant::Variant(Variant&& v) {
 	this->size = v.size;
 	this->value = v.value;
 	v.vt = VariantType::UNKNOWN;
-//	v.size = 0;
-//	memset(&this->value, 0, sizeof(this->value));
 }
 
 Variant::Variant(bool v) {

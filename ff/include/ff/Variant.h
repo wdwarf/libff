@@ -67,7 +67,7 @@ public:
 	Variant(const char* v);
 	Variant(const std::string& v);
 	Variant(const Buffer& v);
-	virtual ~Variant();
+	~Variant();
 
 	std::string toString() const;
 	Buffer toBuffer() const;

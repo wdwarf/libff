@@ -19,8 +19,8 @@ namespace NS_FF {
 class FFDLL Base64 {
 public:
 	static string Encrypt(string str);
-	static string Encrypt(const char* buf, unsigned int len);
-	static bool Decrypt(char* des, unsigned int* desLen, string src);
+	static string Encrypt(const void* buf, unsigned int len);
+	static bool Decrypt(void* des, unsigned int* desLen, string src);
 	static bool Decrypt(ostream& des, string src);
 	static bool Decrypt(char* des, unsigned int* desLen, const char* src, unsigned int srcLen);
 

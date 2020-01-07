@@ -16,7 +16,7 @@ using namespace std;
 
 namespace NS_FF {
 
-static Application* __app = NULL;
+static Application* __app = nullptr;
 
 Application* GetApplication() {
 	return __app;
@@ -24,8 +24,8 @@ Application* GetApplication() {
 
 Application::Application(int argc, char** argv) :
 		impl(new Application::ApplicationImpl(this, argc, argv)) {
-	assert(NULL == __app);
-	if (NULL != __app) {
+	assert(nullptr == __app);
+	if (nullptr != __app) {
 		THROW_EXCEPTION(ApplicationException,
 				"There is anther application on running.", -1);
 	}
@@ -34,7 +34,7 @@ Application::Application(int argc, char** argv) :
 
 Application::~Application() {
 	if (this == __app) {
-		__app = NULL;
+		__app = nullptr;
 	}
 	delete this->impl;
 }
