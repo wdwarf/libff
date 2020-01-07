@@ -85,13 +85,13 @@ void Buffer::BufferImpl::append(const void* data, unsigned int size) {
 
 	unsigned int reserveSize = this->capacity - this->size;
 	if (size <= reserveSize) {
-		memcpy(static_cast<char*>(this->data) + this->size, data, size);
+		memcpy(static_cast<unsigned char*>(this->data) + this->size, data, size);
 		this->size += size;
 		return;
 	}
 
 	this->capacity = (this->size + size) * BUF_INC_RATIO;
-	char* newData = new char[this->capacity];
+	auto newData = new unsigned char[this->capacity];
 	memcpy(newData, this->data, this->size);
 	memcpy(newData + this->size, data, size);
 
@@ -110,8 +110,8 @@ void Buffer::BufferImpl::ReverseBytes(void* buf, int size) {
 		return;
 	}
 
-	char* pH = static_cast<char*>(buf);
-	char* pE = static_cast<char*>(buf) + size - 1;
+	auto pH = static_cast<unsigned char*>(buf);
+	auto pE = static_cast<unsigned char*>(buf) + size - 1;
 	while (pH < pE) {
 		char c = *pH;
 		*pH = *pE;
@@ -151,7 +151,7 @@ void Buffer::BufferImpl::alloc(unsigned int size) {
 
 	this->size = size;
 	this->capacity = this->size * BUF_INC_RATIO;
-	this->data = new char[this->capacity];
+	this->data = new unsigned char[this->capacity];
 	if (!this->data) {
 		this->size = 0;
 		throw MK_EXCEPTION(BufferException, "Alloc buffer failed", size);
@@ -165,14 +165,14 @@ unsigned int Buffer::BufferImpl::getCapacity() const {
 	return this->capacity;
 }
 
-char& Buffer::BufferImpl::operator[](unsigned index) {
+unsigned char& Buffer::BufferImpl::at(unsigned int index) {
 	if (index >= this->size) {
 		THROW_EXCEPTION(BufferException, "Index out of bound.", this->size);
 	}
 	return this->data[index];
 }
 
-const char& Buffer::BufferImpl::operator[](unsigned index) const {
+const unsigned char& Buffer::BufferImpl::at(unsigned int index) const {
 	if (index >= this->size) {
 		THROW_EXCEPTION(BufferException, "Index out of bound.", this->size);
 	}
@@ -180,11 +180,11 @@ const char& Buffer::BufferImpl::operator[](unsigned index) const {
 }
 
 void Buffer::BufferImpl::setData(const void* data, unsigned int size) {
-	const char* oldData = static_cast<const char*>(this->data);
+	auto oldData = static_cast<const unsigned char*>(this->data);
 	if ((NULL != data) && (size > 0)) {
 		this->size = size;
 		this->capacity = this->size * BUF_INC_RATIO;
-		this->data = new char[this->capacity];
+		this->data = new unsigned char[this->capacity];
 		if (!this->data) {
 			this->size = 0;
 			throw MK_EXCEPTION(BufferException, "Alloc buffer failed", size);
@@ -210,7 +210,7 @@ void Buffer::setData(const void* data, unsigned int size) {
 	this->impl->setData(data, size);
 }
 
-char* Buffer::BufferImpl::getData() const {
+unsigned char* Buffer::BufferImpl::getData() const {
 	return this->data;
 }
 
@@ -225,7 +225,7 @@ void Buffer::BufferImpl::resize(unsigned int size) {
 	}
 
 	this->capacity = size * BUF_INC_RATIO;
-	char* newData = new char[this->capacity];
+	auto newData = new unsigned char[this->capacity];
 	if (!newData) {
 		this->size = 0;
 		throw MK_EXCEPTION(BufferException, "Alloc buffer failed", size);

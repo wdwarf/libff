@@ -23,14 +23,14 @@ public:
 
 	BufferImpl& operator=(const BufferImpl& buffer);
 	BufferImpl operator+(const BufferImpl& buffer) const;
-	char& operator[](unsigned index);
-	const char& operator[](unsigned index) const;
+	unsigned char& at(unsigned int index);
+	const unsigned char& at(unsigned int index) const;
 
 	void append(const void* data, unsigned int size);
 	void append(const BufferImpl& buffer);
 
 	void setData(const void* data, unsigned int size);
-	char* getData() const;
+	unsigned char* getData() const;
 	unsigned int getSize() const;
 	void resize(unsigned int size);
 	void clear();
@@ -48,7 +48,7 @@ public:
 	static void ReverseBytes(void* buf, int size);
 	static String ToHexString(void* buf, int size);
 private:
-	char* data;
+	unsigned char* data;
 	unsigned int size;
 	unsigned int capacity;
 	unsigned int readPos;

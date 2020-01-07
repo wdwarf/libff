@@ -29,7 +29,7 @@ namespace NS_FF {
 
 namespace {
 
-unsigned int Host2Ip(const std::string& host){
+unsigned int Host2Ip(const std::string& host) {
 	hostent* he = gethostbyname(host.c_str());
 	if (he && (he->h_length > 0)) {
 		unsigned char* pAddr = (unsigned char*) he->h_addr_list[0];
@@ -121,7 +121,7 @@ bool Socket::close() {
 	int re = 0;
 	this->shutdown();
 #if defined(WIN32) || defined(__MINGW32__)
-		re = ::closesocket(this->m_socketFd);
+	re = ::closesocket(this->m_socketFd);
 #else
 	re = ::close(this->m_socketFd);
 #endif
@@ -189,7 +189,7 @@ bool Socket::bind(u16 port, const std::string& ip) {
 	addr.sin_port = htons(port);
 	if (!ip.empty()) {
 #if defined(WIN32) || defined(__MINGW32__)
-			addr.sin_addr.s_addr = inet_addr(ip.c_str());
+		addr.sin_addr.s_addr = inet_addr(ip.c_str());
 #else
 		inet_aton(ip.c_str(), &addr.sin_addr);
 #endif
@@ -213,79 +213,78 @@ bool Socket::listen(int n) {
 }
 
 Socket Socket::accept(sockaddr_in& addr) {
-	int s_fd = 0;
-	if (this->m_socketFd > 0) {
-		socklen_t addrLen = sizeof(addr);
-		s_fd = ::accept(this->m_socketFd, (sockaddr*) &addr, &addrLen);
-	}
-	return s_fd;
+	if (this->m_socketFd <= 0)
+		return 0;
+
+	socklen_t addrLen = sizeof(addr);
+	return ::accept(this->m_socketFd, (sockaddr*) &addr, &addrLen);
 }
 
-int Socket::send(const char* buf, socklen_t bufLen) {
-	int re = -1;
-	if (this->m_socketFd > 0) {
-		if (this->m_useSelect) {
-			fd_set fs_send;
-			timeval tv;
-			tv.tv_sec = 5;
-			tv.tv_usec = 0;
-			FD_ZERO(&fs_send);
-			FD_SET(this->m_socketFd, &fs_send);
-			re = ::select(this->m_socketFd + 1, 0, &fs_send, 0, &tv);
-			if (re <= 0) {
-				return re;
-			}
+int Socket::send(const void* buf, socklen_t bufLen) {
+	if (this->m_socketFd <= 0)
+		return -1;
+
+	if (this->m_useSelect) {
+		fd_set fs_send;
+		timeval tv;
+		tv.tv_sec = 5;
+		tv.tv_usec = 0;
+		FD_ZERO(&fs_send);
+		FD_SET(this->m_socketFd, &fs_send);
+		int re = ::select(this->m_socketFd + 1, 0, &fs_send, 0, &tv);
+		if (re <= 0) {
+			return re;
 		}
-		re = ::send(this->m_socketFd, buf, bufLen, 0);
 	}
-	return re;
+	return ::send(this->m_socketFd, buf, bufLen, 0);
 }
 
-int Socket::read(char* buf, socklen_t readBytes, int timeoutMs) {
+int Socket::read(void* buf, socklen_t readBytes, int timeoutMs) {
+	if (this->m_socketFd <= 0)
+		return -1;
 	int re = -1;
-	if (this->m_socketFd > 0) {
-		if (this->m_useSelect) {
-			fd_set fs_read;
-			timeval tv;
-			tv.tv_sec = timeoutMs / 1000;
-			tv.tv_usec = (timeoutMs % 1000) * 1000;
-			FD_ZERO(&fs_read);
-			FD_SET(this->m_socketFd, &fs_read);
-			re = ::select(this->m_socketFd + 1, &fs_read, 0, 0,
-					(-1 == timeoutMs ? 0 : &tv));
-			if (re <= 0) {
-				return re;
-			}
+
+	if (this->m_useSelect) {
+		fd_set fs_read;
+		timeval tv;
+		tv.tv_sec = timeoutMs / 1000;
+		tv.tv_usec = (timeoutMs % 1000) * 1000;
+		FD_ZERO(&fs_read);
+		FD_SET(this->m_socketFd, &fs_read);
+		re = ::select(this->m_socketFd + 1, &fs_read, 0, 0,
+				(-1 == timeoutMs ? 0 : &tv));
+		if (re <= 0) {
+			return re;
 		}
+	}
 
 #if defined(WIN32) || defined(__MINGW32__)
-		re = ::recv(this->m_socketFd, buf, readBytes, 0);
+	re = ::recv(this->m_socketFd, buf, readBytes, 0);
 #else
-		re = ::read(this->m_socketFd, buf, readBytes);
+	re = ::read(this->m_socketFd, buf, readBytes);
 #endif
-	}
+
 	return re;
 }
 
 int Socket::sendTo(const char* buf, socklen_t bufLen, const sockaddr_in& addr) {
-	int re = -1;
-	if (this->m_socketFd > 0) {
-		if (this->m_useSelect) {
-			fd_set fs_send;
-			timeval tv;
-			tv.tv_sec = 5;
-			tv.tv_usec = 0;
-			FD_ZERO(&fs_send);
-			FD_SET(this->m_socketFd, &fs_send);
-			re = ::select(this->m_socketFd + 1, 0, &fs_send, 0, &tv);
-			if (re <= 0) {
-				return re;
-			}
+	if (this->m_socketFd <= 0)
+		return -1;
+
+	if (this->m_useSelect) {
+		fd_set fs_send;
+		timeval tv;
+		tv.tv_sec = 5;
+		tv.tv_usec = 0;
+		FD_ZERO(&fs_send);
+		FD_SET(this->m_socketFd, &fs_send);
+		int re = ::select(this->m_socketFd + 1, 0, &fs_send, 0, &tv);
+		if (re <= 0) {
+			return re;
 		}
-		re = ::sendto(this->m_socketFd, buf, bufLen, 0, (sockaddr*) &addr,
-				sizeof(sockaddr));
 	}
-	return re;
+	return ::sendto(this->m_socketFd, buf, bufLen, 0, (sockaddr*) &addr,
+			sizeof(sockaddr));
 }
 
 bool Socket::isConnected() {
@@ -361,28 +360,27 @@ int Socket::sendTo(const char* buf, socklen_t bufLen, const string& host,
 
 int Socket::recvFrom(char* buf, socklen_t readBytes, sockaddr_in& addr,
 		int timeoutMs) {
-	int re = -1;
-	if (this->m_socketFd > 0) {
-		if (this->m_useSelect) {
-			fd_set fs_read;
-			timeval tv;
-			tv.tv_sec = timeoutMs / 1000;
-			tv.tv_usec = (timeoutMs % 1000) * 1000;
-			FD_ZERO(&fs_read);
-			FD_SET(this->m_socketFd, &fs_read);
-			re = ::select(this->m_socketFd + 1, &fs_read, 0, 0,
-					(-1 == timeoutMs ? 0 : &tv));
-			if (re <= 0) {
-				return re;
-			}
-		}
+	if (this->m_socketFd <= 0)
+		return -1;
 
-		memset(&addr, 0, sizeof(addr));
-		socklen_t addrSize = sizeof(addr);
-		re = ::recvfrom(this->m_socketFd, buf, readBytes, 0, (sockaddr*) &addr,
-				&addrSize);
+	if (this->m_useSelect) {
+		fd_set fs_read;
+		timeval tv;
+		tv.tv_sec = timeoutMs / 1000;
+		tv.tv_usec = (timeoutMs % 1000) * 1000;
+		FD_ZERO(&fs_read);
+		FD_SET(this->m_socketFd, &fs_read);
+		int re = ::select(this->m_socketFd + 1, &fs_read, 0, 0,
+				(-1 == timeoutMs ? 0 : &tv));
+		if (re <= 0) {
+			return re;
+		}
 	}
-	return re;
+
+	memset(&addr, 0, sizeof(addr));
+	socklen_t addrSize = sizeof(addr);
+	return ::recvfrom(this->m_socketFd, buf, readBytes, 0, (sockaddr*) &addr,
+			&addrSize);
 }
 
 int Socket::recvFrom(char* buf, socklen_t readBytes, string& ip, int& port,

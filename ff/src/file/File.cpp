@@ -29,6 +29,69 @@ static const char* PATH_SEPARATER = "\\";
 static const char* PATH_SEPARATER = "/";
 #endif
 
+class FileIterator::FileIteratorImpl {
+public:
+	FileIteratorImpl(const std::string& path) :
+			m_path(path) {
+		this->m_dir = opendir(path.c_str());
+	}
+
+	~FileIteratorImpl() {
+		if (nullptr != this->m_dir)
+			closedir(this->m_dir);
+	}
+
+	bool valid() const {
+		return (nullptr != this->m_dirent);
+	}
+
+	bool next() {
+		while (nullptr != (this->m_dirent = readdir(this->m_dir))) {
+			string name = this->m_dirent->d_name;
+			if ("." == name || ".." == name)
+				continue;
+			return true;
+		}
+
+		return false;
+	}
+
+	File getFile() {
+		if (this->valid()) {
+			return File(this->m_path, this->m_dirent->d_name);
+		}
+
+		return File();
+	}
+private:
+	string m_path;
+	DIR* m_dir;
+	struct dirent* m_dirent = NULL;
+};
+
+FileIterator::FileIterator(const std::string& path) :
+		m_impl(new FileIterator::FileIteratorImpl(path)) {
+}
+
+FileIterator::FileIterator(FileIterator&& it) {
+	this->m_impl = it.m_impl;
+	it.m_impl = nullptr;
+}
+
+FileIterator::~FileIterator() {
+	delete this->m_impl;
+}
+
+bool FileIterator::next() {
+	return this->m_impl->next();
+}
+
+File FileIterator::getFile() {
+	return this->m_impl->getFile();
+}
+
+//==========================================================
+
 File::File() {
 }
 
@@ -299,6 +362,10 @@ void File::remove(bool recursive) const {
 		THROW_EXCEPTION(FileException,
 				"remove[" + path + "] failed, " + strerror(errno), errno);
 	}
+}
+
+FileIterator File::iterator() const {
+	return FileIterator(this->getPath());
 }
 
 std::list<File> File::list() const {

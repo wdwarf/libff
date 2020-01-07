@@ -90,8 +90,8 @@ public:
 	bool listen(int n = 10);
 	Socket accept(sockaddr_in& addr);
 
-	int send(const char* buf, socklen_t bufLen);
-	int read(char* buf, socklen_t readBytes, int timeoutMs = -1);
+	int send(const void* buf, socklen_t bufLen);
+	int read(void* buf, socklen_t readBytes, int timeoutMs = -1);
 
 	int sendTo(const char* buf, socklen_t bufLen, const sockaddr_in& addr);
 	int sendTo(const char* buf, socklen_t bufLen, const std::string& host,

@@ -76,12 +76,12 @@ void Buffer::append(const Buffer& buffer) {
 	this->impl->append(*buffer.impl);
 }
 
-char& Buffer::operator[](unsigned index) {
-	return this->impl->operator [](index);
+unsigned char& Buffer::operator[](unsigned int index) {
+	return this->impl->at(index);
 }
 
-const char& Buffer::operator[](unsigned index) const {
-	return this->impl->operator [](index);
+const unsigned char& Buffer::operator[](unsigned int index) const {
+	return this->impl->at(index);
 }
 
 Buffer::~Buffer() {
@@ -90,7 +90,7 @@ Buffer::~Buffer() {
 	}
 }
 
-char* Buffer::getData() const {
+unsigned char* Buffer::getData() const {
 	return this->impl->getData();
 }
 
@@ -212,7 +212,7 @@ BUF_OUT_OPERATOR_IMPL(float);
 BUF_OUT_OPERATOR_IMPL(double);
 
 ostream& operator<<(ostream& o, const NS_FF::Buffer& buffer) {
-	o.write(buffer.getData(), buffer.getSize());
+	o.write((const char*)buffer.getData(), buffer.getSize());
 	return o;
 }
 

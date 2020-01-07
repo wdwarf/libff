@@ -35,14 +35,14 @@ public:
 	Buffer& operator+=(const Buffer& buffer);
 	Buffer operator+(const Buffer& buffer) const;
 	bool operator==(const Buffer& buffer);
-	char& operator[](unsigned index);
-	const char& operator[](unsigned index) const;
+	unsigned char& operator[](unsigned int index);
+	const unsigned char& operator[](unsigned int index) const;
 
 	void append(const void* data, unsigned int size);
 	void append(const Buffer& buffer);
 
 	void setData(const void* data, unsigned int size);
-	char* getData() const;
+	unsigned char* getData() const;
 	unsigned int getSize() const;
 	void resize(unsigned int size);
 	void clear();

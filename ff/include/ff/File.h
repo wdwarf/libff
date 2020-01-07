@@ -15,10 +15,26 @@
 #include <ff/Object.h>
 #include <ff/Exception.h>
 #include <ff/DateTime.h>
+#include <ff/Noncopyable.h>
 
 namespace NS_FF {
 
 EXCEPTION_DEF(FileException);
+
+class File;
+class FFDLL FileIterator : public Noncopyable{
+public:
+	FileIterator(const std::string& path);
+	FileIterator(FileIterator&& it);
+	~FileIterator();
+
+	bool next();
+	File getFile();
+
+private:
+	class FileIteratorImpl;
+	FileIteratorImpl* m_impl;
+};
 
 class FFDLL File {
 public:
@@ -39,14 +55,15 @@ public:
 	bool isReadable() const;
 	bool isWritable() const;
 	bool isExecutable() const;
-	void mkdir()const;
-	void mkdirs()const;
-	void remove(bool recursive = false)const;
+	void mkdir() const;
+	void mkdirs() const;
+	void remove(bool recursive = false) const;
 	long long getSize() const;
 	void rename(const std::string& path) const;
 	void copyTo(const std::string& path, bool forceReplace = false) const;
 	void moveTo(const std::string& path, bool forceReplace = false) const;
 
+	FileIterator iterator() const;
 	std::list<File> list() const;
 	File cut(int count = 1) const;
 	DateTime getModifyTime() const;
@@ -57,7 +74,6 @@ public:
 
 	operator std::string() const;
 	std::string getSeparater() const;
-
 
 	friend std::ostream& operator<<(std::ostream& o, const File& file);
 
