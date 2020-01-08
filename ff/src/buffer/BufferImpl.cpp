@@ -180,7 +180,7 @@ const unsigned char& Buffer::BufferImpl::at(unsigned int index) const {
 }
 
 void Buffer::BufferImpl::setData(const void* data, unsigned int size) {
-	auto oldData = static_cast<const unsigned char*>(this->data);
+	auto oldData = this->data;
 	if ((NULL != data) && (size > 0)) {
 		this->size = size;
 		this->capacity = this->size * BUF_INC_RATIO;
