@@ -25,13 +25,13 @@ struct placeholader_trais: placeholader_trais<N - 1, N - 1, I...> {};
 template<int ...I>
 struct placeholader_trais<1, I...> {
 	template<typename R, typename ...Args>
-	static auto bind(R (*_Func)(Args...)) -> decltype(std::bind(_Func, __placeholder<I> {}...)) {
-		return std::bind(_Func, __placeholder<I> {}...);
+	static auto bind(R (*F)(Args...)) -> decltype(std::bind(F, __placeholder<I> {}...)) {
+		return std::bind(F, __placeholder<I> {}...);
 	}
 
 	template<typename T, typename R, typename ...Args>
-	static auto bind(T* obj, R (T::*_Func)(Args...)) -> decltype(std::bind(_Func, obj, __placeholder<I> {}...)) {
-		return std::bind(_Func, obj, __placeholder<I> {}...);
+	static auto bind(T* obj, R (T::*F)(Args...)) -> decltype(std::bind(F, obj, __placeholder<I> {}...)) {
+		return std::bind(F, obj, __placeholder<I> {}...);
 	}
 };
 
