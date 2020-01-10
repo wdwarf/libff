@@ -24,21 +24,23 @@ public:
 	ThreadPool(unsigned int maxSize);
 	virtual ~ThreadPool();
 
-	void exec(RunnablePtr task);
+	void exec(RunnablePtr runnable);
 
 	template<class Func> void exec(Func func){
 		this->exec(MakeRunnable(func));
 	}
 
+	unsigned int getIdelThreadCount() const;
+	unsigned int getActiveThreadCount() const;
+
 private:
 	friend class TaskThread;
 
 	TaskThread* getThread();
-	unsigned int getActiveThreadCount();
 
 	void PutTaskThreadPtr(TaskThread* p);
 private:
-	std::mutex m_mutex;
+	mutable std::mutex m_mutex;
 	std::condition_variable m_cond;
 	unsigned int m_maxSize;
 	std::set<TaskThread*> m_idelThreads;

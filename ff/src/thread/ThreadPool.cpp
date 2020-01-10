@@ -97,12 +97,17 @@ ThreadPool::~ThreadPool() {
 	}
 }
 
-void ThreadPool::exec(RunnablePtr task) {
+void ThreadPool::exec(RunnablePtr runnable) {
 	auto threadPtr = this->getThread();
-	threadPtr->setTask(task);
+	threadPtr->setTask(runnable);
 }
 
-unsigned int ThreadPool::getActiveThreadCount() {
+unsigned int ThreadPool::getIdelThreadCount() const{
+	lock_guard<mutex> lk(this->m_mutex);
+	return this->m_idelThreads.size();
+}
+
+unsigned int ThreadPool::getActiveThreadCount() const {
 	lock_guard<mutex> lk(this->m_mutex);
 	return this->m_idelThreads.size() + this->m_busyThreads.size();
 }

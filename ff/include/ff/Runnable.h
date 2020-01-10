@@ -37,7 +37,7 @@ public:
 	void run() override {
 		try {
 			this->m_func();
-		} catch (std::exception& e) {
+		} catch (std::exception &e) {
 			throw;
 		}
 	}
@@ -47,7 +47,7 @@ private:
 };
 
 template<class Func>
-RunnablePtr MakeRunnable(Func func){
+RunnablePtr MakeRunnable(Func func) {
 	return std::make_shared<_FuncRunnable<Func> >(func);
 }
 
