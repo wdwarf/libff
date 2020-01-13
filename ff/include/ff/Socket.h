@@ -68,13 +68,13 @@ public:
 	bool createUdp();
 	int getHandle();
 	bool close();
-	int shutdown(int type = SHUT_RDWR);
-	bool attach(int sockFd);
+	Socket& shutdown(int type = SHUT_RDWR);
+	Socket& attach(int sockFd);
 	int dettach();
-	void setBlocking(bool nonBlocking);
+	Socket& setBlocking(bool nonBlocking);
 	bool isNonBlocking() const;
 	bool isUseSelect() const;
-	void setUseSelect(bool useSelect);
+	Socket& setUseSelect(bool useSelect);
 
 	std::string getLocalAddress();
 	int getLocalPort();

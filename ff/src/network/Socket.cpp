@@ -67,10 +67,10 @@ Socket::~Socket() {
 	this->close();
 }
 
-bool Socket::attach(int m_socketFd) {
+Socket& Socket::attach(int m_socketFd) {
 	this->close();
 	this->m_socketFd = m_socketFd;
-	return true;
+	return *this;
 }
 
 int Socket::dettach() {
@@ -101,10 +101,11 @@ bool Socket::create(int af, int style, int protocol) {
 	return true;
 }
 
-void Socket::setBlocking(bool nonBlocking) {
+Socket& Socket::setBlocking(bool nonBlocking) {
 	if (this->m_socketFd > 0) {
 		Socket::SetBlocking(this->m_socketFd, nonBlocking);
 	}
+	return *this;
 }
 
 bool Socket::isNonBlocking() const {
@@ -115,11 +116,11 @@ int Socket::getHandle() {
 	return this->m_socketFd;
 }
 
-int Socket::shutdown(int type) {
+Socket& Socket::shutdown(int type) {
 	if (this->m_socketFd > 0) {
-		return ::shutdown(this->m_socketFd, type);
+		::shutdown(this->m_socketFd, type);
 	}
-	return 0;
+	return *this;
 }
 
 bool Socket::close() {
@@ -443,8 +444,9 @@ bool Socket::isUseSelect() const {
 	return m_useSelect;
 }
 
-void Socket::setUseSelect(bool m_useSelect) {
+Socket& Socket::setUseSelect(bool m_useSelect) {
 	this->m_useSelect = m_useSelect;
+	return *this;
 }
 
 } /* namespace NS_FF */
