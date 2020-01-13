@@ -130,7 +130,7 @@ private:
 class CrcCalculator {
 public:
 	CrcCalculator(CrcAlgorithms crcAlgorithms);
-	uint64_t calc(const void* buf, int offset, int length);
+	uint64_t calc(const void* buf, int length);
 	const CrcParamInfo* getCrcParamInfo() const;
 
 private:
@@ -140,25 +140,10 @@ private:
 	uint64_t m_table[256];
 	void createTable();
 	uint64_t createTableEntry(int index);
-	uint64_t computeCrc(uint64_t init, const void* buf, int offset, int length);
+	uint64_t computeCrc(uint64_t init, const void* buf, int length);
 };
 
-#if 0
-class FFDLL CRC {
-public:
-	static unsigned short CRC16(const void* buf, unsigned int len);
-	static unsigned short CRC16_X25(const void *buf, unsigned int len);
-
-private:
-	static unsigned short CRC16_1(const void *buf, unsigned int len);
-	static unsigned short CRC16_2(const void *buf, unsigned int len);
-	static unsigned short CRC16_3(const void *buf, unsigned int len);
-
-	CRC();
-	virtual ~CRC();
-};
-#endif
-
-} /* namespace NS_FF */
+}
+/* namespace NS_FF */
 
 #endif /* FF_CRC_H_ */
