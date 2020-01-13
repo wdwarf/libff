@@ -5,19 +5,21 @@
  *      Author: u16
  */
 
-#ifndef EPOLL_H_
-#define EPOLL_H_
+#ifndef FF_EPOLL_H_
+#define FF_EPOLL_H_
 
 #include <functional>
 #include <mutex>
 #include <map>
 #include <list>
 #include <vector>
+#include <thread>
 #include <poll.h>
+#include <ff/ff_config.h>
 
 namespace NS_FF {
 
-typedef std::function<void(int)> FdUpdateFunc;
+typedef std::function<void(int, int)> FdUpdateFunc;
 
 class EPoll {
 public:
@@ -28,6 +30,7 @@ public:
 	bool delFd(int fd);
 	bool addEvents(int fd, int events);
 	bool delEvents(int fd, int events);
+	void update(int pollTimeout);
 
 private:
 	int m_epFd;
@@ -54,12 +57,36 @@ private:
 	bool setEvent2Fd(int fd, int events);
 
 	void createNativePolls();
-	void update(int pollTimeout);
-	void onPipeEvents(int events);
+	void onPipeEvents(int fd, int events);
 	bool doPoll(std::vector<pollfd>& ofds, int epFd,
 			pollfd *fds, nfds_t nfds, int timeout);
 };
 
+class PollMgr
+{
+public:
+	PollMgr();
+	~PollMgr();
+
+	static PollMgr& instance(){
+		static PollMgr g_pollMgr;
+		static std::once_flag onceFlag;
+		std::call_once(onceFlag, [&]{ g_pollMgr.start(); });
+		return g_pollMgr;
+	}
+
+	void start();
+	void stop();
+
+	EPoll& getEPoll();
+
+private:
+	EPoll m_ep;
+	bool m_stoped;
+	std::thread m_pollThread;
+	void pollThreadFunc();
+};
+
 } /* namespace NS_FF */
 
-#endif /* EPOLL_H_ */
+#endif /* FF_EPOLL_H_ */

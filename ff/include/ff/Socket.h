@@ -60,7 +60,8 @@ class FFDLL Socket {
 public:
 	Socket();
 	Socket(int sockFd);
-	virtual ~Socket();
+	Socket(Socket&& sock);
+	~Socket();
 
 	bool create(int af, int style, int protocol = 0);
 	bool createTcp();

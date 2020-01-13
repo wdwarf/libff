@@ -56,7 +56,15 @@ Socket::Socket(int m_socketFd) :
 	this->m_socketFd = m_socketFd;
 }
 
+Socket::Socket(Socket&& sock){
+	this->close();
+	this->m_socketFd = sock.m_socketFd;
+	this->m_useSelect = sock.m_useSelect;
+	sock.m_socketFd = 0;
+}
+
 Socket::~Socket() {
+	this->close();
 }
 
 bool Socket::attach(int m_socketFd) {

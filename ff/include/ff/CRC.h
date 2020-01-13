@@ -13,10 +13,15 @@
 #include <string>
 #include <map>
 
+/**
+ * 用法：
+ * CrcCalculator c(CrcAlgorithms::Crc16Arc);
+ * cout << hex << c.calc(buf, bufSize) << endl;
+ */
+
 namespace NS_FF {
 
 enum class CrcAlgorithms {
-	Undefined,
 	Crc8,
 	Crc8Cdma2000,
 	Crc8Darc,
@@ -130,7 +135,8 @@ private:
 class CrcCalculator {
 public:
 	CrcCalculator(CrcAlgorithms crcAlgorithms);
-	uint64_t calc(const void* buf, int length);
+	CrcCalculator(const CrcParamInfo* crcParamInfo);
+	uint64_t calc(const void* buf, int length) const;
 	const CrcParamInfo* getCrcParamInfo() const;
 
 private:
@@ -138,9 +144,9 @@ private:
 	unsigned char m_hashSize;
 	uint64_t m_mask;
 	uint64_t m_table[256];
-	void createTable();
-	uint64_t createTableEntry(int index);
-	uint64_t computeCrc(uint64_t init, const void* buf, int length);
+	void initTable();
+	uint64_t tableEntry(int index);
+	uint64_t calcCrc(uint64_t init, const void* buf, int length) const;
 };
 
 }

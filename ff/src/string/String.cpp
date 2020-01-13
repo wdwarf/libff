@@ -265,6 +265,10 @@ std::vector<std::string> Split(const std::string& text,
 /// class String
 /////////////////////////////////////////////////////////////////
 
+String::String(const char* str, size_t len) : string(str, len){
+
+}
+
 bool String::equals(const String& str, bool isEgnoreCase) const
 {
 	return (isEgnoreCase ? 0 == strcasecmp(this->c_str(), str.c_str())

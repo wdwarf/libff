@@ -7,10 +7,19 @@
 
 #include <ff/CRC.h>
 #include <ff/Buffer.h>
-#include <iostream>
-using namespace std;
 
 namespace NS_FF {
+
+static uint64_t ReverseBits(uint64_t ul, int valueLength) {
+	uint64_t newValue = 0;
+
+	for (int i = valueLength - 1; i >= 0; i--) {
+		newValue |= (ul & 1) << i;
+		ul >>= 1;
+	}
+
+	return newValue;
+}
 
 CrcParamInfo::CrcParamInfo(const std::string& name, int hashSize, uint64_t poly,
 		uint64_t init, bool refIn, bool refOut, uint64_t xorOut, uint64_t check) :
@@ -147,7 +156,6 @@ const CrcParamInfo* CrcParams::getCrcParamInfo(
 	if (it == this->m_crcParamInfos.end())
 		return nullptr;
 
-	cout << it->second.getName() << endl;
 	return &it->second;
 }
 
@@ -161,26 +169,24 @@ CrcCalculator::CrcCalculator(CrcAlgorithms crcAlgorithms) :
 	if (this->m_hashSize < 64) {
 		this->m_mask = (1L << this->m_hashSize) - 1;
 	}
-	this->createTable();
+	this->initTable();
 }
 
-void CrcCalculator::createTable() {
-	for (size_t i = 0; i < 255; i++)
-		this->m_table[i] = createTableEntry(i);
-}
-
-static uint64_t ReverseBits(uint64_t ul, int valueLength) {
-	uint64_t newValue = 0;
-
-	for (int i = valueLength - 1; i >= 0; i--) {
-		newValue |= (ul & 1) << i;
-		ul >>= 1;
+CrcCalculator::CrcCalculator(const CrcParamInfo* crcParamInfo) :
+		m_crcParamInfo(crcParamInfo), m_hashSize(m_crcParamInfo->getHashSize()), m_mask(
+				0xFFFFFFFFFFFFFFFFull) {
+	if (this->m_hashSize < 64) {
+		this->m_mask = (1L << this->m_hashSize) - 1;
 	}
-
-	return newValue;
+	this->initTable();
 }
 
-uint64_t CrcCalculator::createTableEntry(int index) {
+void CrcCalculator::initTable() {
+	for (size_t i = 0; i < 255; i++)
+		this->m_table[i] = this->tableEntry(i);
+}
+
+uint64_t CrcCalculator::tableEntry(int index) {
 	uint64_t r = (uint64_t) index;
 
 	if (this->m_crcParamInfo->isRefIn())
@@ -203,13 +209,13 @@ uint64_t CrcCalculator::createTableEntry(int index) {
 	return r & this->m_mask;
 }
 
-uint64_t CrcCalculator::calc(const void* data, int length) {
+uint64_t CrcCalculator::calc(const void* data, int length) const {
 	uint64_t init =
 			this->m_crcParamInfo->isRefOut() ?
 					ReverseBits(this->m_crcParamInfo->getInit(),
 							this->m_hashSize) :
 					this->m_crcParamInfo->getInit();
-	uint64_t hash = computeCrc(init, data, length);
+	uint64_t hash = this->calcCrc(init, data, length);
 	return (hash ^ this->m_crcParamInfo->getXorOut()) & this->m_mask;
 }
 
@@ -217,7 +223,8 @@ const CrcParamInfo* CrcCalculator::getCrcParamInfo() const {
 	return m_crcParamInfo;
 }
 
-uint64_t CrcCalculator::computeCrc(uint64_t init, const void* buf, int length) {
+uint64_t CrcCalculator::calcCrc(uint64_t init, const void* buf,
+		int length) const {
 	uint64_t crc = init;
 
 	auto data = (const uint8_t*) buf;

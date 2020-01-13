@@ -5,17 +5,18 @@
  *      Author: u16
  */
 
-#include "EPoll.h"
+#include <ff/EPoll.h>
 #include <cstring>
 #include <memory>
+#include <iostream>
 #include <algorithm>
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/epoll.h>
 #include <errno.h>
+#include <ff/Bind.h>
 
 using namespace std;
-using namespace std::placeholders;
 
 namespace NS_FF {
 
@@ -23,7 +24,7 @@ EPoll::EPoll() :
 		m_epFd(epoll_create1(0)), m_fdChanged(false) {
 	this->initSignalPipe();
 
-	this->addFd(this->m_signalPipe[0], bind(&EPoll::onPipeEvents, this, _1));
+	this->addFd(this->m_signalPipe[0], Bind(&EPoll::onPipeEvents, this));
 	this->addEvents(this->m_signalPipe[0], POLLIN);
 }
 
@@ -238,7 +239,7 @@ void EPoll::update(int pollTimeout) {
 			}
 
 			if (!skip) {
-				updateFunc(revents & (events | POLLERR | POLLHUP | POLLNVAL));
+				updateFunc(fd, revents & (events | POLLERR | POLLHUP | POLLNVAL));
 			}
 		}
 	}
@@ -248,8 +249,46 @@ void EPoll::update(int pollTimeout) {
 
 }
 
-void EPoll::onPipeEvents(int events) {
+void EPoll::onPipeEvents(int fd, int events) {
+	if (events & POLLIN) {
+		char b;
+		while (read(fd, &b, 1) > 0) {
+		};
+	}
+}
 
+PollMgr::PollMgr() :
+		m_stoped(true) {
+
+}
+
+PollMgr::~PollMgr() {
+	this->stop();
+}
+
+EPoll& PollMgr::getEPoll(){
+	return this->m_ep;
+}
+
+void PollMgr::start() {
+	this->m_stoped = false;
+	this->m_pollThread = thread(&PollMgr::pollThreadFunc, this);
+}
+
+void PollMgr::stop() {
+	if(this->m_stoped)
+		return;
+
+	this->m_stoped = true;
+	if(this_thread::get_id() != this->m_pollThread.get_id()){
+		this->m_pollThread.join();
+	}
+}
+
+void PollMgr::pollThreadFunc() {
+	while(!this->m_stoped){
+		this->m_ep.update(100);
+	}
 }
 
 } /* namespace NS_FF */

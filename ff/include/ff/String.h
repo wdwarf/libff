@@ -99,6 +99,9 @@ public:
 		this->std::string::operator =(move(str));
 		return *this;
 	}
+
+	String(const char* str, size_t len);
+
 	bool equals(const String& str, bool isEgnoreCase = false) const;
 
 	String trimLeft() const;
