@@ -79,6 +79,14 @@ Buffer::BufferImpl Buffer::BufferImpl::operator+(
 	return newBuffer;
 }
 
+void Buffer::BufferImpl::attach(void* data, unsigned int size){
+	this->clear();
+	this->capacity = size;
+	this->size = size;
+	this->data = (unsigned char*)data;
+	this->readPos = 0;
+}
+
 void Buffer::BufferImpl::append(const void* data, unsigned int size) {
 	if ((NULL == data) || (size <= 0))
 		return;
@@ -121,11 +129,11 @@ void Buffer::BufferImpl::ReverseBytes(void* buf, int size) {
 	}
 }
 
-String Buffer::BufferImpl::ToHexString(void* buf, int size)
+String Buffer::BufferImpl::ToHexString(const void* buf, int size)
 {
 	stringstream strBuf;
 	if (buf && size > 0) {
-		unsigned char* data = static_cast<unsigned char*>(buf);
+		const unsigned char* data = static_cast<const unsigned char*>(buf);
 
 		strBuf.fill('0');
 		for (int i = 0; i < size; ++i) {

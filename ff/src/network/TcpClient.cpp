@@ -7,6 +7,7 @@
 
 #include <ff/TcpClient.h>
 #include <ff/StringWrapper.h>
+#include <ff/Bind.h>
 #include <cstring>
 #include <errno.h>
 #include <iostream>
@@ -15,46 +16,16 @@ using namespace std;
 
 namespace NS_FF {
 
-ClientEventContext::ClientEventContext() :
-		m_event(NetEvent::UNKNOWN) {
-
-}
-
-ClientEventContext::ClientEventContext(NetEvent event, BufferPtr buffer) :
-		m_event(event), m_buffer(buffer) {
-
-}
-
-const BufferPtr& ClientEventContext::getBuffer() const {
-	return m_buffer;
-}
-
-void ClientEventContext::setBuffer(const BufferPtr &buffer) {
-	m_buffer = buffer;
-}
-
-NetEvent ClientEventContext::getEvent() const {
-	return m_event;
-}
-
-void ClientEventContext::setEvent(NetEvent event) {
-	m_event = event;
-}
-
 TcpClient::TcpClient() :
-		m_remotePort(0), m_localPort(0), m_stoped(true), m_sendThreadStop(true) {
-	this->m_eventThread = thread(&TcpClient::eventThreadFunc, this);
+		m_remotePort(0), m_localPort(0), m_readBuffer(1024), m_closed(true) {
+}
+
+TcpClient::TcpClient(uint32_t recvBufSize) :
+		m_remotePort(0), m_localPort(0), m_readBuffer(recvBufSize), m_closed(true) {
 }
 
 TcpClient::~TcpClient() {
 	this->stop();
-	this->addEvent(ClientEventContext(NetEvent::EXIT));
-	if (this->m_eventThread.joinable()) {
-		this->m_eventThread.join();
-	}
-}
-
-void TcpClient::onStartFailed(const std::string &errInfo) {
 }
 
 void TcpClient::onConnected() {
@@ -63,139 +34,92 @@ void TcpClient::onConnected() {
 void TcpClient::onDisconnected() {
 }
 
-void TcpClient::onRecv(const BufferPtr &buffer) {
+void TcpClient::onRecv(const uint8_t* buf, int bufLen) {
 }
 
-void TcpClient::onSend(const BufferPtr &buffer) {
+void TcpClient::onSend(const uint8_t* buf, int bufLen) {
 }
 
-bool TcpClient::start() {
-	if (!this->m_stoped)
-		return true;
+void TcpClient::start() {
+	if (this->m_socket.createTcp() <= 0)
+		THROW_EXCEPTION(Exception, "Create socket failed.", errno);
 
-	this->m_stoped = false;
+	if (this->m_localPort > 0) {
+		if (!this->m_socket.bind(this->m_localPort, this->m_localIp))
+			THROW_EXCEPTION(Exception,
+					SW("Bind to ")(this->m_remoteAddr)(":") (this->m_remotePort)(" failed. ")(strerror(errno)),
+					errno);
+	}
 
-	this->addEvent(ClientEventContext(NetEvent::START));
-	return true;
+	if (!this->m_socket.connect(this->m_remoteAddr, this->m_remotePort, 5000)) {
+		THROW_EXCEPTION(Exception,
+				SW("Connect to ")(this->m_remoteAddr)(":")(this->m_remotePort)(
+						" failed."), errno);
+	}
+
+	this->m_closed = false;
+	PollMgr::instance().getEPoll().addFd(this->m_socket.getHandle(),
+			Bind(&TcpClient::onSocketUpdate, this));
+
+	this->onConnected();
+
+	PollMgr::instance().getEPoll().addEvents(this->m_socket.getHandle(),
+			POLLIN | POLLHUP);
 }
 
-bool TcpClient::stop() {
-	if (this->m_stoped)
-		return true;
-
+void TcpClient::stop() {
 	this->m_socket.shutdown();
+}
 
-	if (this_thread::get_id() != this->m_eventThread.get_id()) {
-		while (!this->m_stoped) {
-			this_thread::yield();
+void TcpClient::onSocketUpdate(int fd, int events) {
+	if (events & POLLIN) {
+		int readBytes = this->m_socket.read(m_readBuffer.getData(),
+				m_readBuffer.getSize());
+		if (readBytes <= 0) {
+			this->m_socket.shutdown();
+		} else {
+			this->onRecv((const uint8_t*) m_readBuffer.getData(), readBytes);
 		}
 	}
-	return true;
+
+	if (events & POLLOUT) {
+		BufferPtr buffer;
+		{
+			lock_guard<mutex> lk(this->m_sendMutex);
+			if (!this->m_sendBuffers.empty()) {
+				buffer = this->m_sendBuffers.front();
+				this->m_sendBuffers.pop_front();
+			} else {
+				PollMgr::instance().getEPoll().delEvents(
+						this->m_socket.getHandle(),
+						POLLOUT);
+			}
+		}
+
+		if (buffer) {
+			this->m_socket.send(buffer->getData(), buffer->getSize());
+			this->onSend(buffer->getData(), buffer->getSize());
+		}
+	}
+
+	if (events & POLLHUP) {
+		PollMgr::instance().getEPoll().delFd(this->m_socket.getHandle());
+		this->m_socket.close();
+		this->m_closed = true;
+		this->onDisconnected();
+	}
 }
 
 void TcpClient::send(const void *buf, u32 bufSize) {
-	unique_lock<mutex> lk(this->m_mutexSend);
-	this->m_sendBufferList.push_back(
-			make_shared<Buffer>((const char*) buf, bufSize));
-	this->m_condSend.notify_one();
-}
-
-void TcpClient::addEvent(const ClientEventContext &evt) {
-	unique_lock<mutex> lk(this->m_mutexEvent);
-	this->m_events.push_back(evt);
-	this->m_condEvent.notify_one();
-}
-
-void TcpClient::eventThreadFunc() {
-	while (true) {
-		ClientEventContext event;
-		{
-			unique_lock<mutex> lk(this->m_mutexEvent);
-			if (this->m_events.empty()) {
-				this->m_condEvent.wait(lk);
-			}
-
-			if (this->m_events.empty())
-				continue;
-
-			event = this->m_events.front();
-			this->m_events.pop_front();
-		}
-
-		if (NetEvent::EXIT == event.getEvent()) {
-			if (this->m_stoped)
-				break;
-
-			this->addEvent(ClientEventContext(NetEvent::EXIT));
-			this->m_socket.close();
-			{
-				unique_lock<mutex> lk(this->m_mutexSend);
-				this->m_sendBufferList.clear();
-				this->m_sendThreadStop = true;
-				this->m_condSend.notify_one();
-			}
-		}
-
-		if (this->m_stoped)
-			continue;
-
-		switch (event.getEvent()) {
-		case NetEvent::RECV: {
-			this->onRecv(event.getBuffer());
-			break;
-		}
-		case NetEvent::SEND: {
-			this->onSend(event.getBuffer());
-			break;
-		}
-		case NetEvent::START: {
-			this->doStart();
-			break;
-		}
-		case NetEvent::CONNECTED: {
-			this->onConnected();
-			break;
-		}
-		case NetEvent::DISCONNECTED: {
-			{
-				unique_lock<mutex> lk(this->m_mutexSend);
-				this->m_sendBufferList.clear();
-				this->m_sendThreadStop = true;
-				this->m_condSend.notify_one();
-			}
-
-			if (this->m_sendThread.joinable())
-				this->m_sendThread.join();
-			if (this->m_recvThread.joinable())
-				this->m_recvThread.join();
-
-			this->m_socket.close();
-
-			this->m_stoped = true;
-			this->onDisconnected();
-
-			break;
-		}
-		default: {
-			break;
-		}
-		}
-	}
-}
-
-void TcpClient::doStart() {
-	try {
-		this->doConnect();
-	} catch (std::exception &e) {
-		this->m_socket.close();
-		this->m_stoped = true;
-		this->onStartFailed(e.what());
+	if (this->m_closed)
 		return;
-	}
 
-	this->m_sendThreadStop = false;
-	this->m_recvThread = thread(&TcpClient::recvThreadFunc, this);
-	this->m_sendThread = thread(&TcpClient::sendThreadFunc, this);
+	lock_guard<mutex> lk(this->m_sendMutex);
+	this->m_sendBuffers.push_back(BufferPtr(new Buffer(buf, bufSize)));
+
+	if (1 == this->m_sendBuffers.size())
+		PollMgr::instance().getEPoll().addEvents(this->m_socket.getHandle(),
+		POLLOUT);
 }
 
 const std::string& TcpClient::getLocalIp() const {
@@ -228,65 +152,6 @@ unsigned int TcpClient::getRemotePort() const {
 
 void TcpClient::setRemotePort(unsigned int remotePort) {
 	m_remotePort = remotePort;
-}
-
-void TcpClient::doConnect() {
-	if (this->m_socket.createTcp() <= 0)
-		THROW_EXCEPTION(Exception, "Create socket failed.", errno);
-
-	if (this->m_localPort > 0) {
-		if (!this->m_socket.bind(this->m_localPort, this->m_localIp))
-			THROW_EXCEPTION(Exception,
-					SW("Bind to ")(this->m_remoteAddr)(":") (this->m_remotePort)(" failed. ")(strerror(errno)),
-					errno);
-	}
-
-	if (!this->m_socket.connect(this->m_remoteAddr, this->m_remotePort, 5000)) {
-		THROW_EXCEPTION(Exception,
-				SW("Connect to ")(this->m_remoteAddr)(":")(this->m_remotePort)(
-						" failed."), errno);
-	}
-
-	this->addEvent(ClientEventContext(NetEvent::CONNECTED));
-}
-
-void TcpClient::recvThreadFunc() {
-	Buffer buf(1024 * 4);
-	while (!this->m_stoped) {
-		int readBytes = this->m_socket.read(buf.getData(), buf.getSize());
-		if (readBytes <= 0)
-			break;
-
-		this->addEvent(
-				ClientEventContext(NetEvent::RECV,
-						make_shared<Buffer>(buf.getData(), readBytes)));
-	}
-	this->addEvent(ClientEventContext(NetEvent::DISCONNECTED));
-}
-
-void TcpClient::sendThreadFunc() {
-	while (!this->m_sendThreadStop) {
-		BufferPtr buffer;
-		{
-			unique_lock<mutex> lk(this->m_mutexSend);
-			if (this->m_sendBufferList.empty()) {
-				this->m_condSend.wait(lk);
-			}
-
-			if (this->m_sendBufferList.empty())
-				break;
-
-			buffer = this->m_sendBufferList.front();
-			this->m_sendBufferList.pop_front();
-		}
-
-		if (!buffer)
-			continue;
-
-		if (this->m_socket.send(buffer->getData(), buffer->getSize()) > 0) {
-			this->addEvent(ClientEventContext(NetEvent::SEND, buffer));
-		}
-	}
 }
 
 } /* namespace NS_FF */

@@ -104,7 +104,7 @@ public:
 
 	static bool SetBlocking(int sockFd, bool isNonBlocking = true);
 	static bool IsNonBlocking(int sockFd);
-
+	static unsigned int Host2Ip(const std::string& host);
 private:
 	SocketFd m_socketFd;
 	bool m_useSelect;

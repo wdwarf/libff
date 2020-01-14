@@ -8,6 +8,8 @@
 #ifndef FF_FF_CONFIG_H_
 #define FF_FF_CONFIG_H_
 
+#include <cstdint>
+
 #define NS_FF ff
 
 #ifndef FFDLL

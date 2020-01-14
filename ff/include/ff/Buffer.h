@@ -38,6 +38,8 @@ public:
 	unsigned char& operator[](unsigned int index);
 	const unsigned char& operator[](unsigned int index) const;
 
+	void attach(void* data, unsigned int size);
+
 	void append(const void* data, unsigned int size);
 	void append(const Buffer& buffer);
 
@@ -89,7 +91,7 @@ public:
 
 	friend std::ostream& operator<<(std::ostream& o, const Buffer& buffer);
 	static void ReverseBytes(void* buf, int size);
-	static String ToHexString(void* buf, int size);
+	static String ToHexString(const void* buf, int size);
 
 private:
 	class BufferImpl;

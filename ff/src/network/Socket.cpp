@@ -27,9 +27,7 @@ using namespace std;
 
 namespace NS_FF {
 
-namespace {
-
-unsigned int Host2Ip(const std::string& host) {
+unsigned int Socket::Host2Ip(const std::string& host) {
 	hostent* he = gethostbyname(host.c_str());
 	if (he && (he->h_length > 0)) {
 		unsigned char* pAddr = (unsigned char*) he->h_addr_list[0];
@@ -41,7 +39,6 @@ unsigned int Host2Ip(const std::string& host) {
 	return inet_addr(host.c_str());
 }
 
-}
 
 Socket::Socket() :
 		m_socketFd(0), m_useSelect(true) {

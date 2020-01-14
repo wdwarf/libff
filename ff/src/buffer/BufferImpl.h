@@ -26,6 +26,8 @@ public:
 	unsigned char& at(unsigned int index);
 	const unsigned char& at(unsigned int index) const;
 
+	void attach(void* data, unsigned int size);
+
 	void append(const void* data, unsigned int size);
 	void append(const BufferImpl& buffer);
 
@@ -46,7 +48,7 @@ public:
 	void resetReadPos();
 
 	static void ReverseBytes(void* buf, int size);
-	static String ToHexString(void* buf, int size);
+	static String ToHexString(const void* buf, int size);
 private:
 	unsigned char* data;
 	unsigned int size;

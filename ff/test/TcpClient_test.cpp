@@ -25,20 +25,17 @@ bool dataArrived = false;
 }
 
 class MyTcpClient: public TcpClient {
-	void onStartFailed(const std::string &errInfo) override {
-		LOGD << "error: " << errInfo;
-		this->stop();
-	}
-
 	virtual void onConnected() override {
 		LOGD << __func__;
 		this->send("Hello !", 7);
 	}
+
 	virtual void onDisconnected() override {
 		LOGD << __func__;
 	}
-	void onRecv(const BufferPtr &buffer) override {
-		LOGD << buffer->toHexString();
+
+	void onRecv(const uint8_t* buf, int bufLen) override {
+		LOGD << Buffer::ToHexString(buf, bufLen);
 		unique_lock<mutex> lk(m);
 
 		dataArrived = true;

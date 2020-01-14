@@ -68,6 +68,10 @@ bool Buffer::operator==(const Buffer& buffer) {
 	return (0 == memcmp(this->getData(), buffer.getData(), this->getSize()));
 }
 
+void Buffer::attach(void* data, unsigned int size) {
+	this->impl->attach(data, size);
+}
+
 void Buffer::append(const void* data, unsigned int size) {
 	this->impl->append(data, size);
 }
@@ -165,7 +169,7 @@ void Buffer::ReverseBytes(void* buf, int size) {
 	BufferImpl::ReverseBytes(buf, size);
 }
 
-String Buffer::ToHexString(void* buf, int size)
+String Buffer::ToHexString(const void* buf, int size)
 {
 	return BufferImpl::ToHexString(buf, size);
 }
