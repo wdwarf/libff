@@ -2,7 +2,7 @@
  * TcpClient.h
  *
  *  Created on: Aug 12, 2019
- *      Author: root
+ *      Author: liyawu
  */
 
 #ifndef FF_TCPCLIENT_H_
@@ -24,7 +24,7 @@
 
 namespace NS_FF {
 
-class FFDLL TcpClient: public ff::Object, public ff::Noncopyable {
+class FFDLL TcpClient: public ff::Noncopyable {
 public:
 	TcpClient();
 	TcpClient(uint32_t recvBufSize);

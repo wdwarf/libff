@@ -2,7 +2,7 @@
  * TcpClient.cpp
  *
  *  Created on: Aug 12, 2019
- *      Author: root
+ *      Author: liyawu
  */
 
 #include <ff/TcpClient.h>
@@ -21,7 +21,8 @@ TcpClient::TcpClient() :
 }
 
 TcpClient::TcpClient(uint32_t recvBufSize) :
-		m_remotePort(0), m_localPort(0), m_readBuffer(recvBufSize), m_closed(true) {
+		m_remotePort(0), m_localPort(0), m_readBuffer(recvBufSize), m_closed(
+				true) {
 }
 
 TcpClient::~TcpClient() {
@@ -64,7 +65,7 @@ void TcpClient::start() {
 	this->onConnected();
 
 	PollMgr::instance().getEPoll().addEvents(this->m_socket.getHandle(),
-			POLLIN | POLLHUP);
+	POLLIN | POLLHUP);
 }
 
 void TcpClient::stop() {

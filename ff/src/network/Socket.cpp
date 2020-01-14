@@ -40,7 +40,6 @@ unsigned int Socket::Host2Ip(const std::string& host) {
 	return inet_addr(host.c_str());
 }
 
-
 Socket::Socket() :
 		m_socketFd(0), m_useSelect(true) {
 #ifdef WIN32
@@ -54,7 +53,7 @@ Socket::Socket(int m_socketFd) :
 	this->m_socketFd = m_socketFd;
 }
 
-Socket::Socket(Socket&& sock){
+Socket::Socket(Socket&& sock) {
 	this->close();
 	this->m_socketFd = sock.m_socketFd;
 	this->m_useSelect = sock.m_useSelect;
@@ -458,7 +457,7 @@ bool Socket::setKeepAlive(bool keepAlive, uint32_t idle, uint32_t interval,
 		uint32_t count) {
 	if (keepAlive) {
 		int32_t val = 1;
-		if (setsockopt(this->m_socketFd, SOL_SOCKET, SO_KEEPALIVE,
+		if (this->setsockOpt(SOL_SOCKET, SO_KEEPALIVE,
 				reinterpret_cast<const char*>(&val), sizeof(val)) != 0)
 			return false;
 
@@ -473,8 +472,7 @@ bool Socket::setKeepAlive(bool keepAlive, uint32_t idle, uint32_t interval,
 
 #if defined(SOL_TCP) && defined(TCP_KEEPINTVL)
 		val = interval;
-		if (setsockopt(this->m_socketFd, SOL_TCP, TCP_KEEPINTVL, &val,
-				sizeof(val)) != 0)
+		if (this->setsockOpt(SOL_TCP, TCP_KEEPINTVL, &val, sizeof(val)) != 0)
 			return false;
 #else
 		(void)interval;
@@ -482,15 +480,14 @@ bool Socket::setKeepAlive(bool keepAlive, uint32_t idle, uint32_t interval,
 
 #if defined(SOL_TCP) && defined(TCP_KEEPCNT)
 		val = count;
-		if (setsockopt(this->m_socketFd, SOL_TCP, TCP_KEEPCNT, &val,
-				sizeof(val)) != 0)
+		if (this->setsockOpt(SOL_TCP, TCP_KEEPCNT, &val, sizeof(val)) != 0)
 			return false;
 #else
 		(void)count;
 #endif
 	} else {
 		int32_t val = 0;
-		if (setsockopt(this->m_socketFd, SOL_SOCKET, SO_KEEPALIVE,
+		if (this->setsockOpt(SOL_SOCKET, SO_KEEPALIVE,
 				reinterpret_cast<const char*>(&val), sizeof(val)) != 0)
 			return false;
 	}

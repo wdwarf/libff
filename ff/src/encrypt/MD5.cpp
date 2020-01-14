@@ -55,11 +55,11 @@ unsigned char MD5::PADDING[] = { 0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 
 //---------------------------------------------------------------------------
 
-MD5::MD5Result::MD5Result() {
+MD5Result::MD5Result() {
 	memset(this->result, 0, sizeof(this->result));
 }
 
-string MD5::MD5Result::toStr() {
+string MD5Result::toString() const {
 	stringstream str;
 	for (int i = 0; i < 16; ++i) {
 		str.fill('0');
@@ -69,50 +69,43 @@ string MD5::MD5Result::toStr() {
 	return str.str();
 }
 
-MD5::MD5Result MD5::Generate(unsigned char* encrypt, unsigned int length) {
+MD5Result::operator std::string() const {
+	return this->toString();
+}
+
+bool MD5Result::operator==(const MD5Result& md5Result) const {
+	return (0 == memcmp(this->result, md5Result.result, sizeof(this->result)));
+}
+
+bool MD5Result::operator==(const std::string& md5Str) const{
+	return (this->toString() == md5Str);
+}
+
+bool operator==(const std::string& md5Str, const MD5Result& md5Result){
+	return (md5Result.toString() == md5Str);
+}
+
+MD5Result MD5::Generate(const void* encrypt, unsigned int length) {
 	MD5_CTX md5;
-	MD5::MD5Result result;
+	MD5Result result;
 	memset(result.result, 0, 16);
 	MD5Init(&md5);
-	MD5Update(&md5, encrypt, length);
+	MD5Update(&md5, (const unsigned char*) encrypt, length);
 	MD5Final(&md5, result.result);
 	return result;
 }
 
 //---------------------------------------------------------------------------
 
-MD5::MD5Result MD5::Generate(string input) {
+MD5Result MD5::Generate(string input) {
 	return MD5::Generate((unsigned char*) input.c_str(), input.length());
 }
 
 //---------------------------------------------------------------------------
 
-//MD5::MD5Result MD5::FileMD5CheckSum(char* filePath)
-//{
-//	size_t len;
-//	MD5_CTX md5;
-//	MD5::MD5Result result;
-//	memset(result.result, 0, 16);
-//	FILE* f = fopen(filePath, "rb");
-//	if(f)
-//	{
-//		MD5Init(&md5);
-//		unsigned char buf[1024];
-//		len = fread(buf, 1024, 1, f);
-//		while(len > 0)
-//		{
-//			MD5Update(&md5, buf, len);
-//			len = fread(buf, 1024, 1, f);
-//		}
-//		MD5Final(&md5, result.result);
-//		fclose(f);
-//	}
-//	return result;
-//}
-
-MD5::MD5Result MD5::FileMD5CheckSum(const char* filePath) {
+MD5Result MD5::FileMD5CheckSum(const string& filePath) {
 	MD5_CTX md5;
-	MD5::MD5Result result;
+	MD5Result result;
 	memset(result.result, 0, 16);
 	fstream f;
 	f.open(filePath, ios::in | ios::binary);
@@ -143,7 +136,7 @@ void MD5::MD5Init(MD5_CTX *context) {
 
 //---------------------------------------------------------------------------
 
-void MD5::MD5Update(MD5_CTX *context, unsigned char *input,
+void MD5::MD5Update(MD5_CTX *context, const unsigned char *input,
 		unsigned int inputlen) {
 	unsigned int i = 0, index = 0, partlen = 0;
 	index = (context->count[0] >> 3) & 0x3F;
@@ -180,7 +173,7 @@ void MD5::MD5Final(MD5_CTX *context, unsigned char digest[16]) {
 
 //---------------------------------------------------------------------------
 
-void MD5::MD5Encode(unsigned char *output, unsigned int *input,
+void MD5::MD5Encode(unsigned char *output, const unsigned int *input,
 		unsigned int len) {
 	unsigned int i = 0, j = 0;
 	while (j < len) {
@@ -195,7 +188,7 @@ void MD5::MD5Encode(unsigned char *output, unsigned int *input,
 
 //---------------------------------------------------------------------------
 
-void MD5::MD5Decode(unsigned int *output, unsigned char *input,
+void MD5::MD5Decode(unsigned int *output, const unsigned char *input,
 		unsigned int len) {
 	unsigned int i = 0, j = 0;
 	while (j < len) {
@@ -208,7 +201,7 @@ void MD5::MD5Decode(unsigned int *output, unsigned char *input,
 
 //---------------------------------------------------------------------------
 
-void MD5::MD5Transform(unsigned int state[4], unsigned char block[64]) {
+void MD5::MD5Transform(unsigned int state[4], const unsigned char block[64]) {
 	unsigned int a = state[0];
 	unsigned int b = state[1];
 	unsigned int c = state[2];
