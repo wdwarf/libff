@@ -84,6 +84,9 @@ public:
 
 	int getSockOpt(int level, int optName, void* optVal, socklen_t* optLen);
 	int setsockOpt(int level, int optName, const void* optVal, socklen_t optLen);
+	bool setNoDelay(bool nodelay);
+	bool setKeepAlive(bool keepAlive, uint32_t idle = 10,
+			uint32_t interval = 10, uint32_t count = 9);
 
 	bool connect(const std::string& host, u16 port, int msTimeout = 3000);
 	bool isConnected();

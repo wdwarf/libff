@@ -15,6 +15,7 @@
 #include <unistd.h>
 #include <netdb.h>
 #include <arpa/inet.h>
+#include <netinet/tcp.h>
 #include <sys/errno.h>
 #include <fcntl.h>
 #endif
@@ -444,6 +445,57 @@ bool Socket::isUseSelect() const {
 Socket& Socket::setUseSelect(bool m_useSelect) {
 	this->m_useSelect = m_useSelect;
 	return *this;
+}
+
+bool Socket::setNoDelay(bool nodelay) {
+	int32_t flag = nodelay ? 1 : 0;
+	int32_t result = setsockopt(this->m_socketFd, IPPROTO_TCP, TCP_NODELAY,
+			(char *) &flag, sizeof(int));
+	return (result >= 0);
+}
+
+bool Socket::setKeepAlive(bool keepAlive, uint32_t idle, uint32_t interval,
+		uint32_t count) {
+	if (keepAlive) {
+		int32_t val = 1;
+		if (setsockopt(this->m_socketFd, SOL_SOCKET, SO_KEEPALIVE,
+				reinterpret_cast<const char*>(&val), sizeof(val)) != 0)
+			return false;
+
+#if defined(SOL_TCP) && defined(TCP_KEEPIDLE)
+		val = idle;
+		if (setsockopt(this->m_socketFd, SOL_TCP, TCP_KEEPIDLE, &val,
+				sizeof(val)) != 0)
+			return false;
+#else
+		(void)idle;
+#endif
+
+#if defined(SOL_TCP) && defined(TCP_KEEPINTVL)
+		val = interval;
+		if (setsockopt(this->m_socketFd, SOL_TCP, TCP_KEEPINTVL, &val,
+				sizeof(val)) != 0)
+			return false;
+#else
+		(void)interval;
+#endif
+
+#if defined(SOL_TCP) && defined(TCP_KEEPCNT)
+		val = count;
+		if (setsockopt(this->m_socketFd, SOL_TCP, TCP_KEEPCNT, &val,
+				sizeof(val)) != 0)
+			return false;
+#else
+		(void)count;
+#endif
+	} else {
+		int32_t val = 0;
+		if (setsockopt(this->m_socketFd, SOL_SOCKET, SO_KEEPALIVE,
+				reinterpret_cast<const char*>(&val), sizeof(val)) != 0)
+			return false;
+	}
+
+	return true;
 }
 
 } /* namespace NS_FF */
