@@ -26,8 +26,8 @@ namespace NS_FF {
 
 class FFDLL TcpClient: public ff::Noncopyable {
 public:
-	TcpClient();
-	TcpClient(uint32_t recvBufSize);
+	TcpClient(IpVersion ver = IpVersion::V4);
+	TcpClient(uint32_t recvBufSize, IpVersion ver = IpVersion::V4);
 	virtual ~TcpClient();
 
 	void start();
@@ -56,6 +56,7 @@ private:
 	Socket m_socket;
 	Buffer m_readBuffer;
 	bool m_closed;
+	IpVersion m_ipVersion;
 	std::list<BufferPtr> m_sendBuffers;
 	std::mutex m_sendMutex;
 

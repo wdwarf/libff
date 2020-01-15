@@ -56,6 +56,35 @@ enum class SocketType {
 
 typedef __socket_type SockType;
 
+enum class IpVersion : char{
+	Unknown,
+	V4,
+	V6
+};
+
+union SockAddr_t{
+	sockaddr_in sockaddrV4;
+	sockaddr_in6 sockaddrV6;
+};
+
+class SockAddr{
+public:
+	SockAddr();
+	SockAddr(const std::string& host, uint16_t port);
+	SockAddr(const SockAddr_t& addr, IpVersion version);
+
+	const SockAddr_t& getAddr() const;
+	IpVersion getVersion() const;
+	uint16_t getPort() const;
+	void setPort(uint16_t port);
+
+	bool isValid() const;
+
+private:
+	SockAddr_t m_addr;
+	IpVersion m_version;
+};
+
 class FFDLL Socket {
 public:
 	Socket();
@@ -64,8 +93,8 @@ public:
 	~Socket();
 
 	bool create(int af, int style, int protocol = 0);
-	bool createTcp();
-	bool createUdp();
+	bool createTcp(IpVersion ver = IpVersion::V4);
+	bool createUdp(IpVersion ver = IpVersion::V4);
 	int getHandle();
 	bool close();
 	Socket& shutdown(int type = SHUT_RDWR);
@@ -81,6 +110,7 @@ public:
 	std::string getRemoteAddress();
 	int getRemotePort();
 	SockType getSocketType();
+	IpVersion getIpVersion() const;
 
 	int getSockOpt(int level, int optName, void* optVal, socklen_t* optLen);
 	int setsockOpt(int level, int optName, const void* optVal, socklen_t optLen);
@@ -93,11 +123,13 @@ public:
 	bool bind(u16 port, const std::string& ip = "");
 	bool listen(int n = 10);
 	Socket accept(sockaddr_in& addr);
+	Socket accept(sockaddr_in6& addr);
+	Socket accept(sockaddr* addr, socklen_t* addrSize);
 
 	int send(const void* buf, socklen_t bufLen);
 	int read(void* buf, socklen_t readBytes, int timeoutMs = -1);
 
-	int sendTo(const char* buf, socklen_t bufLen, const sockaddr_in& addr);
+	int sendTo(const char* buf, socklen_t bufLen, const sockaddr* addr, size_t addrSize);
 	int sendTo(const char* buf, socklen_t bufLen, const std::string& host,
 			int port);
 	int recvFrom(char* buf, socklen_t readBytes, sockaddr_in& addr,
@@ -107,7 +139,11 @@ public:
 
 	static bool SetBlocking(int sockFd, bool isNonBlocking = true);
 	static bool IsNonBlocking(int sockFd);
-	static unsigned int Host2Ip(const std::string& host);
+
+	static std::string Host2IpStr(const std::string& host);
+	static in_addr_t Host2Ip(const std::string& host);
+	static in6_addr Host2IpV6(const std::string& host);
+	static SockAddr Host2SockAddr(const std::string& host);
 private:
 	SocketFd m_socketFd;
 	bool m_useSelect;

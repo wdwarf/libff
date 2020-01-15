@@ -16,13 +16,13 @@ using namespace std;
 
 namespace NS_FF {
 
-TcpClient::TcpClient() :
-		m_remotePort(0), m_localPort(0), m_readBuffer(1024), m_closed(true) {
+TcpClient::TcpClient(IpVersion ver) :
+		m_remotePort(0), m_localPort(0), m_readBuffer(1024), m_closed(true), m_ipVersion(ver) {
 }
 
-TcpClient::TcpClient(uint32_t recvBufSize) :
+TcpClient::TcpClient(uint32_t recvBufSize, IpVersion ver) :
 		m_remotePort(0), m_localPort(0), m_readBuffer(recvBufSize), m_closed(
-				true) {
+				true), m_ipVersion(ver) {
 }
 
 TcpClient::~TcpClient() {
@@ -42,20 +42,20 @@ void TcpClient::onSend(const uint8_t* buf, int bufLen) {
 }
 
 void TcpClient::start() {
-	if (this->m_socket.createTcp() <= 0)
+	if (this->m_socket.createTcp(this->m_ipVersion) <= 0)
 		THROW_EXCEPTION(Exception, "Create socket failed.", errno);
 
 	if (this->m_localPort > 0) {
 		if (!this->m_socket.bind(this->m_localPort, this->m_localIp))
 			THROW_EXCEPTION(Exception,
-					SW("Bind to ")(this->m_remoteAddr)(":") (this->m_remotePort)(" failed. ")(strerror(errno)),
+					SW("Bind to ")(this->m_localIp)(":") (this->m_localPort)(" failed. ")(strerror(errno)),
 					errno);
 	}
 
 	if (!this->m_socket.connect(this->m_remoteAddr, this->m_remotePort, 5000)) {
 		THROW_EXCEPTION(Exception,
 				SW("Connect to ")(this->m_remoteAddr)(":")(this->m_remotePort)(
-						" failed."), errno);
+						" failed.")(strerror(errno)), errno);
 	}
 
 	this->m_closed = false;

@@ -23,21 +23,158 @@
 #include <sstream>
 #include <cstring>
 #include <iostream>
+#include <ff/IP.h>
 
 using namespace std;
 
 namespace NS_FF {
 
-unsigned int Socket::Host2Ip(const std::string& host) {
-	hostent* he = gethostbyname(host.c_str());
-	if (he && (he->h_length > 0)) {
-		unsigned char* pAddr = (unsigned char*) he->h_addr_list[0];
-		if (pAddr) {
-			return *((unsigned int*) pAddr);
-		}
+const SockAddr_t& SockAddr::getAddr() const {
+	return m_addr;
+}
+
+IpVersion SockAddr::getVersion() const {
+	return m_version;
+}
+
+uint16_t SockAddr::getPort() const {
+	if (this->m_version == IpVersion::V4) {
+		return ntohs(this->m_addr.sockaddrV4.sin_port);
 	}
 
-	return inet_addr(host.c_str());
+	if (this->m_version == IpVersion::V6) {
+		return ntohs(this->m_addr.sockaddrV6.sin6_port);
+	}
+
+	return 0;
+}
+
+void SockAddr::setPort(uint16_t port) {
+	if (this->m_version == IpVersion::V4) {
+		this->m_addr.sockaddrV4.sin_port = htons(port);
+	}
+
+	if (this->m_version == IpVersion::V6) {
+		this->m_addr.sockaddrV6.sin6_port = htons(port);
+	}
+}
+
+bool SockAddr::isValid() const {
+	return (IpVersion::Unknown != this->m_version);
+}
+
+SockAddr::SockAddr() :
+		m_version(IpVersion::Unknown) {
+	memset(&this->m_addr, 0, sizeof(this->m_addr));
+}
+
+SockAddr::SockAddr(const std::string& host, uint16_t port) {
+	memset(&this->m_addr, 0, sizeof(this->m_addr));
+
+	auto sockAddr = Socket::Host2SockAddr(host);
+	if (!sockAddr.isValid())
+		return;
+
+	*this = sockAddr;
+	if (IpVersion::V4 == sockAddr.getVersion()) {
+		this->m_addr.sockaddrV4.sin_port = htons(port);
+		return;
+	}
+
+	if (IpVersion::V6 == sockAddr.getVersion()) {
+		this->m_addr.sockaddrV6.sin6_port = htons(port);
+		return;
+	}
+}
+
+SockAddr::SockAddr(const SockAddr_t& addr, IpVersion version) :
+		m_addr(addr), m_version(version) {
+}
+
+SockAddr Socket::Host2SockAddr(const std::string& host) {
+	SockAddr sockAddr;
+	if (host.empty())
+		return sockAddr;
+
+	struct addrinfo *answer, hints, *addr_info_p;
+
+	memset(&hints, 0, sizeof(hints));
+	hints.ai_family = AF_UNSPEC;
+	hints.ai_socktype = SOCK_STREAM;
+	hints.ai_flags = AI_PASSIVE;
+
+	if (0 != getaddrinfo(host.c_str(), NULL, &hints, &answer))
+		return sockAddr;
+
+	for (addr_info_p = answer; addr_info_p != NULL;
+			addr_info_p = addr_info_p->ai_next) {
+		if (addr_info_p->ai_family == AF_INET) {
+			auto sinp4 = (struct sockaddr_in *) addr_info_p->ai_addr;
+			SockAddr_t addr_t;
+			addr_t.sockaddrV4 = *sinp4;
+			sockAddr = SockAddr(addr_t, IpVersion::V4);
+		} else if (addr_info_p->ai_family == AF_INET6) {
+			auto sinp6 = (struct sockaddr_in6 *) addr_info_p->ai_addr;
+			SockAddr_t addr_t;
+			addr_t.sockaddrV6 = *sinp6;
+			sockAddr = SockAddr(addr_t, IpVersion::V6);
+		}
+	}
+	freeaddrinfo(answer);
+	return sockAddr;
+}
+
+std::string Socket::Host2IpStr(const std::string& host) {
+	if (host.empty())
+		return "";
+
+	struct addrinfo *answer, hints, *addr_info_p;
+
+	memset(&hints, 0, sizeof(hints));
+	hints.ai_family = AF_UNSPEC;
+	hints.ai_socktype = SOCK_STREAM;
+	hints.ai_flags = AI_PASSIVE;
+
+	if (0 != getaddrinfo(host.c_str(), NULL, &hints, &answer))
+		return host;
+
+	string ip;
+	for (addr_info_p = answer; addr_info_p != NULL;
+			addr_info_p = addr_info_p->ai_next) {
+		if (addr_info_p->ai_family == AF_INET) {
+			auto sinp4 = (struct sockaddr_in *) addr_info_p->ai_addr;
+			ip = inet_ntoa(sinp4->sin_addr);
+		} else if (addr_info_p->ai_family == AF_INET6) {
+			auto sinp6 = (struct sockaddr_in6 *) addr_info_p->ai_addr;
+			char ipv6_addr[64] = { 0 };
+
+			sprintf(ipv6_addr,
+					"%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x",
+					sinp6->sin6_addr.s6_addr[0], sinp6->sin6_addr.s6_addr[1],
+					sinp6->sin6_addr.s6_addr[2], sinp6->sin6_addr.s6_addr[3],
+					sinp6->sin6_addr.s6_addr[4], sinp6->sin6_addr.s6_addr[5],
+					sinp6->sin6_addr.s6_addr[6], sinp6->sin6_addr.s6_addr[7],
+					sinp6->sin6_addr.s6_addr[8], sinp6->sin6_addr.s6_addr[9],
+					sinp6->sin6_addr.s6_addr[10], sinp6->sin6_addr.s6_addr[11],
+					sinp6->sin6_addr.s6_addr[12], sinp6->sin6_addr.s6_addr[13],
+					sinp6->sin6_addr.s6_addr[14], sinp6->sin6_addr.s6_addr[15]);
+			ip = ipv6_addr;
+
+			if (sinp6->sin6_scope_id > 0) {
+				ip += "%" + std::to_string(sinp6->sin6_scope_id);
+			}
+		}
+	}
+	freeaddrinfo(answer);
+	return ip;
+}
+
+in_addr_t Socket::Host2Ip(const std::string& host) {
+	return Host2SockAddr(host).getAddr().sockaddrV4.sin_addr.s_addr;
+}
+
+in6_addr Socket::Host2IpV6(const std::string& host) {
+	return Host2SockAddr(host).getAddr().sockaddrV6.sin6_addr;
 }
 
 Socket::Socket() :
@@ -136,12 +273,16 @@ bool Socket::close() {
 	return (0 == re);
 }
 
-bool Socket::createTcp() {
-	return this->create(AF_INET, SOCK_STREAM);
+bool Socket::createTcp(IpVersion ver) {
+	if (IpVersion::Unknown == ver)
+		return false;
+	return this->create(IpVersion::V4 == ver ? PF_INET : PF_INET6, SOCK_STREAM);
 }
 
-bool Socket::createUdp() {
-	return this->create(AF_INET, SOCK_DGRAM);
+bool Socket::createUdp(IpVersion ver) {
+	if (IpVersion::Unknown == ver)
+		return false;
+	return this->create(IpVersion::V4 == ver ? PF_INET : PF_INET6, SOCK_DGRAM);
 }
 
 bool Socket::connect(const std::string& host, u16 port, int msTimeout) {
@@ -150,15 +291,22 @@ bool Socket::connect(const std::string& host, u16 port, int msTimeout) {
 	}
 
 	bool re = false;
-	sockaddr_in addr;
-	addr.sin_family = AF_INET;
-	addr.sin_port = htons(port);
-	addr.sin_addr.s_addr = Host2Ip(host);
+	const sockaddr* pAddr = nullptr;
+	SockAddr sockAddr = Socket::Host2SockAddr(host);
+	if (!sockAddr.isValid())
+		return false;
 
+	sockAddr.setPort(port);
+	pAddr = (IpVersion::V4 == sockAddr.getVersion()) ?
+			(const sockaddr*) &sockAddr.getAddr().sockaddrV4 :
+			(const sockaddr*) &sockAddr.getAddr().sockaddrV6;
+	socklen_t addrSize =
+			(IpVersion::V4 == sockAddr.getVersion()) ?
+					sizeof(sockaddr_in) : sizeof(sockaddr_in6);
 	bool nonBlock = this->isNonBlocking();
 	this->setBlocking(true);
 
-	int ret = ::connect(this->m_socketFd, (sockaddr*) &addr, sizeof(sockaddr));
+	int ret = ::connect(this->m_socketFd, pAddr, addrSize);
 	if (-1 == ret) {
 		timeval tm;
 		timeval* ptm = NULL;
@@ -190,40 +338,75 @@ bool Socket::bind(u16 port, const std::string& ip) {
 	if (this->m_socketFd <= 0)
 		return false;
 
-	sockaddr_in addr;
-	addr.sin_family = AF_INET;
-	addr.sin_port = htons(port);
-	if (!ip.empty()) {
+	const sockaddr* pAddr = nullptr;
+	socklen_t addrSize = 0;
+
+	sockaddr_in sockaddrV4;
+	sockaddr_in6 sockaddrV6;
+	auto ipVer = this->getIpVersion();
+	if (IpVersion::V4 == ipVer) {
+		memset(&sockaddrV4, 0, sizeof(sockaddrV4));
+		addrSize = sizeof(sockaddrV4);
+		sockaddrV4.sin_family = PF_INET;
+		sockaddrV4.sin_port = htons(port);
+		if (!ip.empty()) {
 #if defined(WIN32) || defined(__MINGW32__)
-		addr.sin_addr.s_addr = inet_addr(ip.c_str());
+			addr.sin_addr.s_addr = inet_addr(ip.c_str());
 #else
-		inet_aton(ip.c_str(), &addr.sin_addr);
+			inet_aton(ip.c_str(), &sockaddrV4.sin_addr);
 #endif
-	} else {
-		addr.sin_addr.s_addr = INADDR_ANY;
+		} else {
+			sockaddrV4.sin_addr.s_addr = INADDR_ANY;
+		}
+
+		pAddr = (const sockaddr*) &sockaddrV4;
 	}
+
+	if (IpVersion::V6 == ipVer) {
+		int32_t flag = 1;
+		if (this->setsockOpt(IPPROTO_IPV6, IPV6_V6ONLY, &flag, sizeof(flag))
+				< 0)
+			return false;
+
+		memset(&sockaddrV6, 0, sizeof(sockaddrV6));
+		addrSize = sizeof(sockaddrV6);
+		if (!ip.empty()) {
+			sockaddrV6 = Socket::Host2SockAddr(ip).getAddr().sockaddrV6;
+		} else {
+			sockaddrV6.sin6_addr = in6addr_any;
+		}
+		sockaddrV6.sin6_port = htons(port);
+
+		pAddr = (const sockaddr*) &sockaddrV6;
+	}
+
+	if (nullptr == pAddr)
+		return false;
 
 	int flag = 1;
 	setsockopt(this->m_socketFd, SOL_SOCKET, SO_REUSEADDR, &flag, sizeof(flag));
-
-	int re = ::bind(this->m_socketFd, (sockaddr*) &addr, sizeof(sockaddr));
-	if (re < 0) {
-		return false;
-	}
-
-	return true;
+	return (0 == ::bind(this->m_socketFd, pAddr, addrSize));
 }
 
 bool Socket::listen(int n) {
 	return (0 == ::listen(this->m_socketFd, n));
 }
 
-Socket Socket::accept(sockaddr_in& addr) {
+Socket Socket::accept(sockaddr* addr, socklen_t* addrSize) {
 	if (this->m_socketFd <= 0)
 		return 0;
 
-	socklen_t addrLen = sizeof(addr);
-	return ::accept(this->m_socketFd, (sockaddr*) &addr, &addrLen);
+	return ::accept(this->m_socketFd, addr, addrSize);
+}
+
+Socket Socket::accept(sockaddr_in& addr) {
+	socklen_t size = sizeof(addr);
+	return this->accept((sockaddr*) &addr, &size);
+}
+
+Socket Socket::accept(sockaddr_in6& addr) {
+	socklen_t size = sizeof(addr);
+	return this->accept((sockaddr*) &addr, &size);
 }
 
 int Socket::send(const void* buf, socklen_t bufLen) {
@@ -273,7 +456,8 @@ int Socket::read(void* buf, socklen_t readBytes, int timeoutMs) {
 	return re;
 }
 
-int Socket::sendTo(const char* buf, socklen_t bufLen, const sockaddr_in& addr) {
+int Socket::sendTo(const char* buf, socklen_t bufLen, const sockaddr* addr,
+		size_t addrSize) {
 	if (this->m_socketFd <= 0)
 		return -1;
 
@@ -289,8 +473,7 @@ int Socket::sendTo(const char* buf, socklen_t bufLen, const sockaddr_in& addr) {
 			return re;
 		}
 	}
-	return ::sendto(this->m_socketFd, buf, bufLen, 0, (sockaddr*) &addr,
-			sizeof(sockaddr));
+	return ::sendto(this->m_socketFd, buf, bufLen, 0, addr, addrSize);
 }
 
 bool Socket::isConnected() {
@@ -298,6 +481,8 @@ bool Socket::isConnected() {
 }
 
 string Socket::getLocalAddress() {
+	if (this->m_socketFd <= 0)
+		return "";
 	sockaddr_in addr;
 	socklen_t addrLen = sizeof(addr);
 	::getsockname(this->m_socketFd, (sockaddr*) &addr, &addrLen);
@@ -305,6 +490,8 @@ string Socket::getLocalAddress() {
 }
 
 int Socket::getLocalPort() {
+	if (this->m_socketFd <= 0)
+		return 0;
 	sockaddr_in addr;
 	socklen_t addrLen = sizeof(addr);
 	::getsockname(this->m_socketFd, (sockaddr*) &addr, &addrLen);
@@ -312,6 +499,8 @@ int Socket::getLocalPort() {
 }
 
 string Socket::getRemoteAddress() {
+	if (this->m_socketFd <= 0)
+		return "";
 	sockaddr_in addr;
 	socklen_t addrLen = sizeof(addr);
 	::getpeername(this->m_socketFd, (sockaddr*) &addr, &addrLen);
@@ -319,6 +508,8 @@ string Socket::getRemoteAddress() {
 }
 
 int Socket::getRemotePort() {
+	if (this->m_socketFd <= 0)
+		return 0;
 	sockaddr_in addr;
 	socklen_t addrLen = sizeof(addr);
 	::getpeername(this->m_socketFd, (sockaddr*) &addr, &addrLen);
@@ -339,6 +530,17 @@ SockType Socket::getSocketType() {
 	return SockType(type);
 }
 
+IpVersion Socket::getIpVersion() const {
+	if (this->m_socketFd <= 0)
+		return IpVersion::Unknown;
+
+	sockaddr_in addr;
+	socklen_t addrLen = sizeof(addr);
+	if (-1 == ::getsockname(this->m_socketFd, (sockaddr*) &addr, &addrLen))
+		return IpVersion::Unknown;
+	return (PF_INET6 == addr.sin_family ? IpVersion::V6 : IpVersion::V4);
+}
+
 int Socket::getSockOpt(int level, int optName, void* optVal,
 socklen_t* optLen) {
 	return ::getsockopt(this->m_socketFd, level, optName, optVal, optLen);
@@ -355,13 +557,18 @@ int Socket::sendTo(const char* buf, socklen_t bufLen, const string& host,
 		return -1;
 	}
 
-	string realIp;
-	sockaddr_in addr;
-	addr.sin_family = AF_INET;
-	addr.sin_port = htons(port);
-	addr.sin_addr.s_addr = Host2Ip(host);
+	SockAddr sockAddr(host, port);
+	if (!sockAddr.isValid())
+		return -1;
 
-	return this->sendTo(buf, bufLen, addr);
+	const sockaddr* pAddr =
+			IpVersion::V6 == sockAddr.getVersion() ?
+					(const sockaddr*) &sockAddr.getAddr().sockaddrV6 :
+					(const sockaddr*) &sockAddr.getAddr().sockaddrV4;
+	size_t addrSize =
+			IpVersion::V6 == sockAddr.getVersion() ?
+					sizeof(sockaddr_in6) : sizeof(sockaddr_in);
+	return this->sendTo(buf, bufLen, pAddr, addrSize);
 }
 
 int Socket::recvFrom(char* buf, socklen_t readBytes, sockaddr_in& addr,
