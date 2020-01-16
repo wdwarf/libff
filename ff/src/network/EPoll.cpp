@@ -12,7 +12,9 @@
 #include <algorithm>
 #include <unistd.h>
 #include <fcntl.h>
+#include <pthread.h>
 #include <sys/epoll.h>
+#include <sys/socket.h>
 #include <errno.h>
 #include <ff/Bind.h>
 
@@ -20,29 +22,52 @@ using namespace std;
 
 namespace NS_FF {
 
+SignalInfo::SignalInfo() : serialNum(0), sigId(0), sigEvent(0){
+}
+
+SignalInfo::SignalInfo(uint64_t sigId, uint64_t sigEvent) : serialNum(0){
+	this->sigId = sigId;
+	this->sigEvent = sigEvent;
+}
+
 EPoll::EPoll() :
 		m_epFd(epoll_create1(0)), m_fdChanged(false) {
 	this->initSignalPipe();
 
-	this->addFd(this->m_signalPipe[0], Bind(&EPoll::onPipeEvents, this));
+	this->addFd(this->m_signalPipe[0], Bind(&EPoll::onSignalEvents, this));
 	this->addEvents(this->m_signalPipe[0], POLLIN);
+
+	this->addFd(this->m_signalPipe[1], Bind(&EPoll::onSignalRspEvents, this));
+	this->addEvents(this->m_signalPipe[1], POLLIN);
 }
 
 EPoll::~EPoll() {
 	if (this->m_epFd >= 0)
 		::close(this->m_epFd);
+	this->uninitSignalPipe();
 }
 
 bool EPoll::initSignalPipe() {
 	this->m_signalPipe[0] = -1;
 	this->m_signalPipe[1] = -1;
 
-	if (0 != pipe(this->m_signalPipe)
+	//pipe(this->m_signalPipe)
+	if (0 != socketpair(PF_LOCAL, SOCK_STREAM, 0, this->m_signalPipe)
 			|| -1 == fcntl(this->m_signalPipe[0], F_SETFL, O_NONBLOCK)
 			|| -1 == fcntl(this->m_signalPipe[1], F_SETFL, O_NONBLOCK)) {
 		return false;
 	}
 	return true;
+}
+
+void EPoll::uninitSignalPipe() {
+	for (size_t i = 0; i < sizeof(this->m_signalPipe); ++i) {
+		if (this->m_signalPipe[i] <= 0)
+			continue;
+		this->delFd(this->m_signalPipe[i]);
+		::close(this->m_signalPipe[i]);
+		this->m_signalPipe[i] = -1;
+	}
 }
 
 bool EPoll::addFd(int fd, const FdUpdateFunc& updateFunc) {
@@ -55,7 +80,7 @@ bool EPoll::addFd(int fd, const FdUpdateFunc& updateFunc) {
 	fdInfo.events = 0;
 
 	{
-		lock_guard < mutex > lk(this->m_fdInfosMutex);
+		lock_guard<mutex> lk(this->m_fdInfosMutex);
 		if (!this->m_fdInfos.insert(make_pair(fd, fdInfo)).second) {
 			return false;
 		}
@@ -72,7 +97,7 @@ bool EPoll::delFd(int fd) {
 	if (fd < 0)
 		return false;
 
-	lock_guard < mutex > lk(this->m_fdInfosMutex);
+	lock_guard<mutex> lk(this->m_fdInfosMutex);
 	auto it = this->m_fdInfos.find(fd);
 	if (it == this->m_fdInfos.end())
 		return false;
@@ -80,7 +105,7 @@ bool EPoll::delFd(int fd) {
 	this->m_fdInfos.erase(it);
 
 	{
-		lock_guard < mutex > lk(this->m_justDeletedMutex);
+		lock_guard<mutex> lk(this->m_justDeletedMutex);
 		this->m_justDeletedFds.push_back(fd);
 	}
 
@@ -93,7 +118,7 @@ bool EPoll::delFd(int fd) {
 }
 
 bool EPoll::addEvents(int fd, int events) {
-	lock_guard < mutex > lk(this->m_fdInfosMutex);
+	lock_guard<mutex> lk(this->m_fdInfosMutex);
 
 	auto it = this->m_fdInfos.find(fd);
 
@@ -111,7 +136,7 @@ bool EPoll::addEvents(int fd, int events) {
 }
 
 bool EPoll::delEvents(int fd, int events) {
-	lock_guard < mutex > lk(this->m_fdInfosMutex);
+	lock_guard<mutex> lk(this->m_fdInfosMutex);
 
 	auto it = this->m_fdInfos.find(fd);
 	if (it == this->m_fdInfos.end())
@@ -140,12 +165,20 @@ bool EPoll::delFdFromPoll(int fd) {
 	return (0 == ::epoll_ctl(this->m_epFd, EPOLL_CTL_DEL, fd, nullptr));
 }
 
-void EPoll::signal() {
-	unique_lock < mutex > lk(this->m_signalMutex, defer_lock);
-	if (!lk.try_lock())
-		return;
-	char b = true;
-	::write(this->m_signalPipe[1], &b, 1);
+uint32_t EPoll::signal(uint64_t sigId, uint64_t sigEvent) {
+	static uint32_t serialNum = 0;
+	unique_lock<mutex> lk(this->m_signalMutex, defer_lock);
+	SignalInfo sigInfo(sigId, sigEvent);
+	sigInfo.serialNum = serialNum++;
+	::write(this->m_signalPipe[1], &sigInfo, sizeof(sigInfo));
+	return sigInfo.serialNum;
+}
+
+void EPoll::signalRsp(uint32_t serialNum, uint64_t sigId, uint64_t sigEvent){
+	unique_lock<mutex> lk(this->m_signalMutex, defer_lock);
+	SignalInfo sigInfo(sigId, sigEvent);
+	sigInfo.serialNum = serialNum;
+	::write(this->m_signalPipe[0], &sigInfo, sizeof(sigInfo));
 }
 
 bool EPoll::setEvent2Fd(int fd, int events) {
@@ -159,7 +192,7 @@ bool EPoll::setEvent2Fd(int fd, int events) {
 }
 
 void EPoll::createNativePolls() {
-	lock_guard < mutex > lk(this->m_fdInfosMutex);
+	lock_guard<mutex> lk(this->m_fdInfosMutex);
 
 	if (!this->m_fdChanged)
 		return;
@@ -213,7 +246,7 @@ void EPoll::update(int pollTimeout) {
 			continue;
 
 		{
-			lock_guard < mutex > lk(this->m_fdInfosMutex);
+			lock_guard<mutex> lk(this->m_fdInfosMutex);
 			auto it = this->m_fdInfos.find(fd);
 
 			if (it == this->m_fdInfos.end())
@@ -230,7 +263,7 @@ void EPoll::update(int pollTimeout) {
 						|| (revents & POLLHUP) || (revents & POLLNVAL))) {
 			bool skip = false;
 			if (revents & (POLLNVAL | POLLERR | POLLHUP)) {
-				lock_guard < mutex > lk(this->m_justDeletedMutex);
+				lock_guard<mutex> lk(this->m_justDeletedMutex);
 				if (std::find(this->m_justDeletedFds.begin(),
 						this->m_justDeletedFds.end(), fd)
 						!= this->m_justDeletedFds.end()) {
@@ -239,20 +272,31 @@ void EPoll::update(int pollTimeout) {
 			}
 
 			if (!skip) {
-				updateFunc(fd, revents & (events | POLLERR | POLLHUP | POLLNVAL));
+				updateFunc(fd,
+						revents & (events | POLLERR | POLLHUP | POLLNVAL));
 			}
 		}
 	}
 
-	lock_guard < mutex > lk(this->m_justDeletedMutex);
+	lock_guard<mutex> lk(this->m_justDeletedMutex);
 	this->m_justDeletedFds.clear();
 
 }
 
-void EPoll::onPipeEvents(int fd, int events) {
+void EPoll::onSignalEvents(int fd, int events) {
 	if (events & POLLIN) {
-		char b;
-		while (read(fd, &b, 1) > 0) {
+		SignalInfo sig;
+		if (read(fd, &sig, sizeof(SignalInfo)) == sizeof(SignalInfo)) {
+			this->onSignal(sig);
+		};
+	}
+}
+
+void EPoll::onSignalRspEvents(int fd, int events) {
+	if (events & POLLIN) {
+		SignalInfo sig;
+		if (read(fd, &sig, sizeof(SignalInfo)) == sizeof(SignalInfo)) {
+			this->onSignalRsp(sig);
 		};
 	}
 }
@@ -266,7 +310,7 @@ PollMgr::~PollMgr() {
 	this->stop();
 }
 
-EPoll& PollMgr::getEPoll(){
+EPoll& PollMgr::getEPoll() {
 	return this->m_ep;
 }
 
@@ -276,17 +320,17 @@ void PollMgr::start() {
 }
 
 void PollMgr::stop() {
-	if(this->m_stoped)
+	if (this->m_stoped)
 		return;
 
 	this->m_stoped = true;
-	if(this_thread::get_id() != this->m_pollThread.get_id()){
+	if (this_thread::get_id() != this->m_pollThread.get_id()) {
 		this->m_pollThread.join();
 	}
 }
 
 void PollMgr::pollThreadFunc() {
-	while(!this->m_stoped){
+	while (!this->m_stoped) {
 		this->m_ep.update(100);
 	}
 }

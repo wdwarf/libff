@@ -11,11 +11,18 @@
 #include <ff/Object.h>
 #include <ff/Exception.h>
 #include <ff/Variant.h>
+#include <cstdint>
 #include <vector>
 #include <string>
 #include <set>
+#include <functional>
 
 namespace NS_FF {
+
+typedef std::function<void (uint32_t serialNum, uint64_t msgId, uint64_t msgData)> MsgHandler;
+
+#define APP_MSG_USER			0xFFFFFFFF
+#define APP_MSG_EXIT			0x00000001
 
 EXCEPTION_DEF(ApplicationException);
 
@@ -43,6 +50,10 @@ public:
 	std::set<std::string> getKeys() const;
 	void saveSettings(const std::string& file);
 	void loadSettings(const std::string& file);
+
+	void subscribeMsgHandler(uint32_t msgId, MsgHandler handler);
+	void sendMessage(uint32_t msgId, uint32_t msgData, MsgHandler callBack = nullptr, int32_t timeoutMs = 3000);
+	void responseMessage(uint32_t serialNum, uint64_t msgId, uint64_t msgData = 0);
 
 	static std::string GetApplicationName();
 	static std::string GetApplicationPath();

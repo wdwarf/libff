@@ -21,6 +21,15 @@ namespace NS_FF {
 
 typedef std::function<void(int, int)> FdUpdateFunc;
 
+struct SignalInfo{
+	uint32_t serialNum;
+	uint64_t sigId;
+	uint64_t sigEvent;
+
+	SignalInfo();
+	SignalInfo(uint64_t sigId, uint64_t sigEvent);
+};
+
 class EPoll {
 public:
 	EPoll();
@@ -32,7 +41,9 @@ public:
 	bool delEvents(int fd, int events);
 	void update(int pollTimeout);
 
-private:
+	uint32_t signal(uint64_t sigId = 0, uint64_t sigEvent = 0);
+	void signalRsp(uint32_t serialNum, uint64_t sigRspId = 0, uint64_t sigEvent = 0);
+protected:
 	int m_epFd;
 	int m_signalPipe[2];
 	bool m_fdChanged;
@@ -51,27 +62,30 @@ private:
 	std::mutex m_justDeletedMutex;
 
 	bool initSignalPipe();
-	void signal();
+	void uninitSignalPipe();
+
 	bool addFd2Poll(int fd);
 	bool delFdFromPoll(int fd);
 	bool setEvent2Fd(int fd, int events);
 
 	void createNativePolls();
-	void onPipeEvents(int fd, int events);
-	bool doPoll(std::vector<pollfd>& ofds, int epFd,
-			pollfd *fds, nfds_t nfds, int timeout);
+	virtual void onSignal(const SignalInfo& sig){}
+	virtual void onSignalRsp(const SignalInfo& sigRsp){}
+	void onSignalEvents(int fd, int events);
+	void onSignalRspEvents(int fd, int events);
+	bool doPoll(std::vector<pollfd>& ofds, int epFd, pollfd *fds, nfds_t nfds,
+			int timeout);
 };
 
-class PollMgr
-{
+class PollMgr {
 public:
 	PollMgr();
 	~PollMgr();
 
-	static PollMgr& instance(){
+	static PollMgr& instance() {
 		static PollMgr g_pollMgr;
 		static std::once_flag onceFlag;
-		std::call_once(onceFlag, [&]{ g_pollMgr.start(); });
+		std::call_once(onceFlag, [&] {g_pollMgr.start();});
 		return g_pollMgr;
 	}
 

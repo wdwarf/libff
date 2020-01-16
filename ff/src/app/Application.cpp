@@ -55,13 +55,11 @@ int Application::getCommandLineCount() const {
 	return this->impl->getCommandLineCount();
 }
 
-const Variant& Application::getValue(
-		const std::string& key) const {
+const Variant& Application::getValue(const std::string& key) const {
 	return this->impl->getValue(key);
 }
 
-void Application::setValue(const std::string& key,
-		const Variant& value) {
+void Application::setValue(const std::string& key, const Variant& value) {
 	this->impl->setValue(key, value);
 }
 
@@ -91,6 +89,19 @@ void Application::exit(int code) {
 
 int Application::getExitCode() const {
 	return this->impl->getExitCode();
+}
+
+void Application::subscribeMsgHandler(uint32_t msgId, MsgHandler handler) {
+	this->impl->subscribeMsgHandler(msgId, handler);
+}
+
+void Application::sendMessage(uint32_t msgId, uint32_t msgData,
+		MsgHandler callBack , int32_t timeoutMs) {
+	this->impl->sendMessage(msgId, msgData, callBack, timeoutMs);
+}
+
+void Application::responseMessage(uint32_t serialNum, uint64_t msgId, uint64_t msgData){
+	this->impl->responseMessage(serialNum, msgId, msgData);
 }
 
 std::string Application::GetApplicationName() {

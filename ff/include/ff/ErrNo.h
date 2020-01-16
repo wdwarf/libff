@@ -11,11 +11,21 @@
 #include <string>
 #include <ff/ff_config.h>
 
+#ifdef _WIN32
+#include <Windows.h>
+typedef DWORD ErrorNo;
+#else
+#include <errno.h>
+typedef error_t ErrorNo;
+#endif
+
 namespace NS_FF {
 
-FFDLL void SetLastError(int errNo, const std::string& errInfo = "");
-FFDLL int GetLastErrNo();
+FFDLL void SetLastErr(ErrorNo errNo, const std::string& errInfo = "");
+FFDLL ErrorNo GetLastErr();
 FFDLL std::string& GetLastErrInfo();
+
+FFDLL ErrorNo GetSysLastErr();
 
 } /* namespace NS_FF */
 
