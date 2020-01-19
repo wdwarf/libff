@@ -19,15 +19,15 @@ void f() {
 
 TEST(TestErrNo, TestErrNo) {
 	thread t1([]() {
-		SetLastError(123, "err info");
+		SetLastErr(123, "err info");
 		this_thread::sleep_for(std::chrono::seconds(1));
-		LOGD << "last errno: " << GetLastErrNo();
+		LOGD << "last errno: " << GetLastErr();
 		LOGD << "last err info: " << GetLastErrInfo();
 	});
 
 	thread t2([]() {
-		SetLastError(1234, "err info 2");
-		LOGD << "last errno: " << GetLastErrNo();
+		SetLastErr(1234, "err info 2");
+		LOGD << "last errno: " << GetLastErr();
 		LOGD << "last err info: " << GetLastErrInfo();
 	});
 

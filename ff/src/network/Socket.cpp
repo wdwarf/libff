@@ -29,12 +29,20 @@ using namespace std;
 
 namespace NS_FF {
 
+SockAddr_t& SockAddr::getAddr() {
+	return m_addr;
+}
+
 const SockAddr_t& SockAddr::getAddr() const {
 	return m_addr;
 }
 
 IpVersion SockAddr::getVersion() const {
 	return m_version;
+}
+
+void SockAddr::setVersion(IpVersion version){
+	this->m_version = version;
 }
 
 uint16_t SockAddr::getPort() const {
@@ -399,6 +407,20 @@ Socket Socket::accept(sockaddr* addr, socklen_t* addrSize) {
 	return ::accept(this->m_socketFd, addr, addrSize);
 }
 
+Socket Socket::accept(SockAddr& addr){
+	auto ver = this->getIpVersion();
+	addr.setVersion(ver);
+	switch(ver){
+	case IpVersion::V4:
+		return this->accept(addr.getAddr().sockaddrV4);
+	case IpVersion::V6:
+		return this->accept(addr.getAddr().sockaddrV6);
+	default:
+		break;
+	}
+	return Socket();
+}
+
 Socket Socket::accept(sockaddr_in& addr) {
 	socklen_t size = sizeof(addr);
 	return this->accept((sockaddr*) &addr, &size);
@@ -480,7 +502,7 @@ bool Socket::isConnected() {
 	return (this->getRemotePort() > 0);
 }
 
-string Socket::getLocalAddress() {
+string Socket::getLocalAddress() const{
 	if (this->m_socketFd <= 0)
 		return "";
 	sockaddr_in addr;
@@ -489,7 +511,7 @@ string Socket::getLocalAddress() {
 	return inet_ntoa(addr.sin_addr);
 }
 
-int Socket::getLocalPort() {
+int Socket::getLocalPort() const{
 	if (this->m_socketFd <= 0)
 		return 0;
 	sockaddr_in addr;
@@ -498,7 +520,7 @@ int Socket::getLocalPort() {
 	return ntohs(addr.sin_port);
 }
 
-string Socket::getRemoteAddress() {
+string Socket::getRemoteAddress() const{
 	if (this->m_socketFd <= 0)
 		return "";
 	sockaddr_in addr;
@@ -507,7 +529,7 @@ string Socket::getRemoteAddress() {
 	return inet_ntoa(addr.sin_addr);
 }
 
-int Socket::getRemotePort() {
+int Socket::getRemotePort() const{
 	if (this->m_socketFd <= 0)
 		return 0;
 	sockaddr_in addr;
@@ -516,7 +538,7 @@ int Socket::getRemotePort() {
 	return ntohs(addr.sin_port);
 }
 
-SockType Socket::getSocketType() {
+SockType Socket::getSocketType() const{
 	if (this->m_socketFd <= 0) {
 		return SockType(-1);
 	}

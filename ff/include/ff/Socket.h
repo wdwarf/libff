@@ -73,8 +73,10 @@ public:
 	SockAddr(const std::string& host, uint16_t port);
 	SockAddr(const SockAddr_t& addr, IpVersion version);
 
+	SockAddr_t& getAddr();
 	const SockAddr_t& getAddr() const;
 	IpVersion getVersion() const;
+	void setVersion(IpVersion version);
 	uint16_t getPort() const;
 	void setPort(uint16_t port);
 
@@ -105,11 +107,11 @@ public:
 	bool isUseSelect() const;
 	Socket& setUseSelect(bool useSelect);
 
-	std::string getLocalAddress();
-	int getLocalPort();
-	std::string getRemoteAddress();
-	int getRemotePort();
-	SockType getSocketType();
+	std::string getLocalAddress() const;
+	int getLocalPort() const;
+	std::string getRemoteAddress() const;
+	int getRemotePort() const;
+	SockType getSocketType() const;
 	IpVersion getIpVersion() const;
 
 	int getSockOpt(int level, int optName, void* optVal, socklen_t* optLen);
@@ -122,6 +124,7 @@ public:
 	bool isConnected();
 	bool bind(u16 port, const std::string& ip = "");
 	bool listen(int n = 10);
+	Socket accept(SockAddr& addr);
 	Socket accept(sockaddr_in& addr);
 	Socket accept(sockaddr_in6& addr);
 	Socket accept(sockaddr* addr, socklen_t* addrSize);
