@@ -8,10 +8,11 @@
 #ifndef FF_BLOCKINGLIST_H_
 #define FF_BLOCKINGLIST_H_
 
-#include <ff/ff_config.h>
 #include <list>
 #include <mutex>
 #include <condition_variable>
+#include <ff/ff_config.h>
+#include <ff/Noncopyable.h>
 
 namespace NS_FF {
 
@@ -20,60 +21,209 @@ class BlockingList {
 public:
 	typedef std::list<T> ListT;
 
-	BlockingList(){}
+	BlockingList() {
+	}
 	~BlockingList() {
 		std::lock_guard<std::mutex> lk(this->m_mutex);
 		m_list.clear();
 	}
 
-	typename ListT::size_type size() {
+	BlockingList(const BlockingList& l) {
+		std::lock_guard<std::mutex> lk(l.m_mutex);
+		std::lock_guard<std::mutex> lk2(this->m_mutex);
+		this->m_list = l.m_list;
+	}
+
+	BlockingList& operator=(const BlockingList& l) {
+		std::lock_guard<std::mutex> lk(l.m_mutex);
+		std::lock_guard<std::mutex> lk2(this->m_mutex);
+		this->m_list = l.m_list;
+		return *this;
+	}
+
+	typename ListT::size_type size() const{
 		std::lock_guard<std::mutex> lk(this->m_mutex);
 		return this->m_list.size();
 	}
 
-	bool empty() {
+	bool empty() const{
 		std::lock_guard<std::mutex> lk(this->m_mutex);
 		return this->m_list.empty();
 	}
 
-	bool clear() {
+	void clear() {
 		std::lock_guard<std::mutex> lk(this->m_mutex);
-		return this->m_list.clear();
+		this->m_list.clear();
 	}
 
-	void pushFront(const T& t){
+	void push_front(const T& t) {
 		std::unique_lock<std::mutex> lk(this->m_mutex);
 		this->m_list.push_front(t);
 		this->m_cond.notify_one();
 	}
 
-	void pushBack(const T& t){
+	void push_back(const T& t) {
 		std::unique_lock<std::mutex> lk(this->m_mutex);
 		this->m_list.push_back(t);
 		this->m_cond.notify_one();
 	}
 
-	T popFront(){
+	T pop_front() {
 		std::unique_lock<std::mutex> lk(this->m_mutex);
-		this->m_cond.wait(lk, [&]{ return !this->m_list.empty(); });
+		this->m_cond.wait(lk, [&] {return !this->m_list.empty();});
 		T t = std::move(this->m_list.front());
 		this->m_list.pop_front();
 		return std::move(t);
 	}
 
-	T popBack(){
+	T pop_back() {
 		std::unique_lock<std::mutex> lk(this->m_mutex);
-		this->m_cond.wait(lk, [&]{ return !this->m_list.empty(); });
+		this->m_cond.wait(lk, [&] {return !this->m_list.empty();});
 		T t = std::move(this->m_list.back());
 		this->m_list.pop_back();
 		return std::move(t);
 	}
 
+	bool pop_front(T& t, uint32_t timeoutMs) {
+		std::unique_lock<std::mutex> lk(this->m_mutex);
+		if (!this->m_cond.wait_for(lk,
+						std::chrono::milliseconds(timeoutMs),
+						[&] {return !this->m_list.empty();}))
+			return false;
+		t = std::move(this->m_list.front());
+		this->m_list.pop_front();
+		return true;
+	}
+
+	bool pop_back(T& t, uint32_t timeoutMs) {
+		std::unique_lock<std::mutex> lk(this->m_mutex);
+		if (!this->m_cond.wait_for(lk,
+						std::chrono::milliseconds(timeoutMs),
+						[&] {return !this->m_list.empty();}))
+			return false;
+		t = std::move(this->m_list.back());
+		this->m_list.pop_back();
+		return true;
+	}
+
+	void sort() {
+		std::unique_lock<std::mutex> lk(this->m_mutex);
+		this->m_list.sort();
+	}
+
+	void unique() {
+		std::unique_lock<std::mutex> lk(this->m_mutex);
+		this->m_list.unique();
+	}
+
+	void merge(ListT&& l) {
+		std::lock_guard<std::mutex> lk(this->m_mutex);
+		this->m_list.merge(std::move(l));
+		this->m_cond.notify_one();
+	}
+
+	void merge(ListT& l) {
+		this->merge(std::move(l));
+	}
+
+	void merge(BlockingList&& l) {
+		std::lock_guard<std::mutex> lk(l.m_mutex);
+		this->merge(l.m_list);
+	}
+
+	void merge(BlockingList& l) {
+		this->merge(std::move(l));
+	}
+
+	template<typename F>
+	void for_each(F f) const{
+		std::lock_guard<std::mutex> lk(this->m_mutex);
+		for(auto& i : this->m_list){
+			f(i);
+		}
+	}
+
+	ListT list() const {
+		std::lock_guard<std::mutex> lk(this->m_mutex);
+		return this->m_list;
+	}
+
+	void notify() {
+		std::unique_lock<std::mutex> lk(this->m_mutex);
+		this->m_cond.notify_one();
+	}
+
 private:
 	ListT m_list;
-	std::mutex m_mutex;
+	mutable std::mutex m_mutex;
 	std::condition_variable m_cond;
+
+	template<typename _Tp>
+	friend inline bool operator==(const BlockingList<_Tp>& __x,
+			const BlockingList<_Tp>& __y);
+
+	template<typename _Tp>
+	friend inline bool operator<(const BlockingList<_Tp>& __x,
+			const BlockingList<_Tp>& __y);
+
+	template<typename _Tp>
+	friend inline bool operator!=(const BlockingList<_Tp>& __x,
+			const BlockingList<_Tp>& __y);
+
+	template<typename _Tp>
+	friend inline bool operator>(const BlockingList<_Tp>& __x,
+			const BlockingList<_Tp>& __y);
+
+	template<typename _Tp>
+	friend inline bool operator<=(const BlockingList<_Tp>& __x,
+			const BlockingList<_Tp>& __y);
+
+	template<typename _Tp, typename _Alloc>
+	friend inline bool operator>=(const BlockingList<_Tp>& __x,
+			const BlockingList<_Tp>& __y);
 };
+
+template<typename _Tp>
+inline bool operator==(const BlockingList<_Tp>& __x,
+		const BlockingList<_Tp>& __y) {
+	std::lock_guard<std::mutex> lk(__x.m_mutex);
+	std::lock_guard<std::mutex> lk2(__y.m_mutex);
+	return __x.m_list == __y.m_list;
+}
+
+template<typename _Tp>
+inline bool operator<(const BlockingList<_Tp>& __x,
+		const BlockingList<_Tp>& __y) {
+	std::lock_guard<std::mutex> lk(__x.m_mutex);
+	std::lock_guard<std::mutex> lk2(__y.m_mutex);
+	return __x.m_list < __y.m_list;
+}
+
+template<typename _Tp>
+inline bool operator!=(const BlockingList<_Tp>& __x,
+		const BlockingList<_Tp>& __y) {
+	return !(__x == __y);
+}
+
+template<typename _Tp>
+inline bool operator>(const BlockingList<_Tp>& __x,
+		const BlockingList<_Tp>& __y) {
+	std::lock_guard<std::mutex> lk(__x.m_mutex);
+	std::lock_guard<std::mutex> lk2(__y.m_mutex);
+	return __y.m_list < __x.m_list;
+}
+
+template<typename _Tp>
+inline bool operator<=(const BlockingList<_Tp>& __x,
+		const BlockingList<_Tp>& __y) {
+	return !(__y < __x);
+}
+
+template<typename _Tp, typename _Alloc>
+inline bool operator>=(const BlockingList<_Tp>& __x,
+		const BlockingList<_Tp>& __y) {
+	return !(__x < __y);
+}
 
 } /* namespace NS_FF */
 

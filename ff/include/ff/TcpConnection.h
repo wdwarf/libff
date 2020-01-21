@@ -16,6 +16,7 @@
 #include <ff/ff_config.h>
 #include <ff/Socket.h>
 #include <ff/Buffer.h>
+#include <ff/BlockingList.h>
 #include <ff/EPoll.h>
 
 namespace NS_FF {

@@ -18,7 +18,7 @@ TEST(TestBlockingList, TestBlockingList) {
 
 	thread t1([&] {
 		int i = 0;
-		while((i = bl.popFront()) > 0)
+		while((i = bl.pop_front()) > 0)
 		{
 			LOGD << "i : " << i << ", size: " << bl.size();
 			this_thread::sleep_for(chrono::milliseconds(500));
@@ -28,7 +28,7 @@ TEST(TestBlockingList, TestBlockingList) {
 	this_thread::sleep_for(chrono::seconds(1));
 	int i = 5;
 	while(i >= 0){
-		bl.pushBack(i--);
+		bl.push_back(i--);
 		this_thread::sleep_for(chrono::milliseconds(100));
 	}
 	t1.join();
@@ -41,7 +41,7 @@ TEST(TestBlockingList, TestBlockingList2) {
 
 	thread t1([&] {
 		int i = 0;
-		while((i = bl.popBack()) > 0)
+		while((i = bl.pop_back()) > 0)
 		{
 			LOGD << "i : " << i << ", size: " << bl.size();
 			this_thread::sleep_for(chrono::milliseconds(1));
@@ -51,10 +51,10 @@ TEST(TestBlockingList, TestBlockingList2) {
 	this_thread::sleep_for(chrono::seconds(1));
 	int i = 20;
 	while(i > 0){
-		bl.pushFront(i--);
+		bl.push_front(i--);
 		this_thread::sleep_for(chrono::milliseconds(1));
 	}
-	bl.pushFront(0);
+	bl.push_front(0);
 	t1.join();
 	EXPECT_TRUE(bl.empty());
 }
