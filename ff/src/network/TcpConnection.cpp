@@ -53,8 +53,12 @@ bool TcpConnection::listen(uint16_t port, const std::string& ip,
 	this->resetCallbackFunctions();
 
 	try {
-		this->m_socket.createTcp(ipVer);
-		this->m_socket.bind(port, ip);
+		if (!this->m_socket.createTcp(ipVer))
+			THROW_EXCEPTION(Exception, "Create socket failed.", errno);
+		if (!this->m_socket.bind(port, ip))
+			THROW_EXCEPTION(Exception,
+					SW("Bind to ")(port)(":")(ip)(" failed. ")(strerror(errno)),
+					errno);
 		this->m_socket.listen();
 	} catch (std::exception& e) {
 		this->m_socket.close();
@@ -159,38 +163,37 @@ TcpConnection& TcpConnection::onClose(const OnCloseFunc& func) {
 	return *this;
 }
 
-void TcpConnection::onSocketUpdate(int fd, int events) {
-	if (this->m_isServer) {
-		if (events & POLLIN) {
-			SockAddr addr;
-			auto sock = this->m_socket.accept(addr);
-			TcpConnectionPtr tcpSock = TcpConnectionPtr(
-					new TcpConnection(move(sock)));
+void TcpConnection::onSvrSocketUpdate(int fd, int events) {
+	if (events & POLLIN) {
+		SockAddr addr;
+		auto sock = this->m_socket.accept(addr);
+		TcpConnectionPtr tcpSock = TcpConnectionPtr(
+				new TcpConnection(move(sock)));
 
-			OnAcceptFunc func;
-			{
-				lock_guard<mutex> lk(this->m_mutex);
-				func = m_onAcceptFunc;
-			}
-			if (func)
-				func(tcpSock);
+		OnAcceptFunc func;
+		{
+			lock_guard<mutex> lk(this->m_mutex);
+			func = m_onAcceptFunc;
 		}
-
-		if (events & POLLHUP) {
-			this->m_ep->delFd(this->m_socket.getHandle());
-			this->m_socket.close();
-
-			OnCloseFunc func;
-			{
-				lock_guard<mutex> lk(this->m_mutex);
-				func = m_onCloseFunc;
-			}
-			if (func)
-				func(this->shared_from_this());
-		}
-		return;
+		if (func)
+			func(tcpSock);
 	}
 
+	if (events & POLLHUP) {
+		this->m_ep->delFd(this->m_socket.getHandle());
+		this->m_socket.close();
+
+		OnCloseFunc func;
+		{
+			lock_guard<mutex> lk(this->m_mutex);
+			func = m_onCloseFunc;
+		}
+		if (func)
+			func(this->shared_from_this());
+	}
+}
+
+void TcpConnection::onClientSocketUpdate(int fd, int events) {
 	if (events & POLLIN) {
 		int readBytes = this->m_socket.read(m_readBuffer.getData(),
 				m_readBuffer.getSize());
@@ -237,6 +240,12 @@ void TcpConnection::onSocketUpdate(int fd, int events) {
 		if (func)
 			func(this->shared_from_this());
 	}
+}
+
+void TcpConnection::onSocketUpdate(int fd, int events) {
+	(this->m_isServer ?
+			this->onSvrSocketUpdate(fd, events) :
+			this->onClientSocketUpdate(fd, events));
 }
 
 TcpConnectionPtr TcpConnection::CreateInstance() {

@@ -14,6 +14,7 @@
 #include <ff/Buffer.h>
 #include <ff/String.h>
 #include <ff/TcpConnection.h>
+#include <ff/FileLock.h>
 
 #include "TestDef.h"
 

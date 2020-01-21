@@ -64,6 +64,8 @@ private:
 
 	void resetCallbackFunctions();
 	void onSocketUpdate(int fd, int events);
+	void onSvrSocketUpdate(int fd, int events);
+	void onClientSocketUpdate(int fd, int events);
 };
 
 } /* namespace NS_FF */

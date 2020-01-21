@@ -8,31 +8,26 @@
 #ifndef FF_SYNCHRONIZABLE_H_
 #define FF_SYNCHRONIZABLE_H_
 
-#include <ff/Object.h>
 #include <mutex>
+#include <ff/Object.h>
+#include <ff/Locker.h>
 
 namespace NS_FF {
 
 class FFDLL Synchronizable {
 public:
 	Synchronizable();
-	virtual ~Synchronizable();
+	~Synchronizable();
 
 	void lock();
+	bool trylock();
 	void unlock();
 
 private:
 	std::mutex m_mutex;
 };
 
-class FFDLL Synchronize {
-public:
-	Synchronize(Synchronizable& sync);
-	~Synchronize();
-
-private:
-	Synchronizable& m_sync;
-};
+typedef ff::Locker<Synchronizable> Synchronize;
 
 } /* namespace NS_FF */
 

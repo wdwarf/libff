@@ -25,12 +25,8 @@ void Synchronizable::unlock() {
 	this->m_mutex.unlock();
 }
 
-Synchronize::Synchronize(Synchronizable &sync) : m_sync(sync){
-	this->m_sync.lock();
-}
-
-Synchronize::~Synchronize() {
-	this->m_sync.unlock();
+bool Synchronizable::trylock(){
+	return this->m_mutex.try_lock();
 }
 
 } /* namespace NS_FF */
