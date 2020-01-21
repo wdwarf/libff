@@ -16,7 +16,7 @@ using std::string;
 namespace NS_FF {
 
 Tick::Tick() :
-		tick(0) {
+		m_tick(Tick::GetTickCount()) {
 
 }
 
@@ -24,22 +24,22 @@ Tick::~Tick() {
 
 }
 
-unsigned long Tick::GetTickCount() {
+tick_t Tick::GetTickCount() {
 	struct timespec ts;
 	if (-1 == clock_gettime(CLOCK_MONOTONIC, &ts)) {
 		THROW_EXCEPTION(TickException,
 				string("clock_gettime failed: ") + strerror(errno), errno);
 	}
-	return (ts.tv_sec * 1000 + ts.tv_nsec / 1000000);
+	return (tick_t(ts.tv_sec * 1000) + ts.tv_nsec / 1000000);
 }
 
-unsigned long Tick::start() {
-	this->tick = Tick::GetTickCount();
-	return this->tick;
+tick_t Tick::start() {
+	this->m_tick = Tick::GetTickCount();
+	return this->m_tick;
 }
 
-unsigned long Tick::count() const {
-	return (Tick::GetTickCount() - this->tick);
+tick_t Tick::count() const {
+	return (Tick::GetTickCount() - this->m_tick);
 }
 
 } /* namespace NS_FF */

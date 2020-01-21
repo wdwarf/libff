@@ -14,19 +14,20 @@
 namespace NS_FF {
 
 EXCEPTION_DEF(TickException);
+typedef long long tick_t;
 
 class FFDLL Tick {
 public:
 	Tick();
 	virtual ~Tick();
 
-	unsigned long start();
-	unsigned long count() const;
+	tick_t start() _throws(TickException);
+	tick_t count() const _throws(TickException);
 
-	static unsigned long GetTickCount();
+	static tick_t GetTickCount() _throws(TickException);
 
 private:
-	unsigned long tick;
+	tick_t m_tick;
 };
 
 } /* namespace NS_FF */

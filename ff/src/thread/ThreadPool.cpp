@@ -13,7 +13,7 @@ using namespace std::placeholders;
 
 namespace NS_FF {
 
-class TaskThread : public Thread{
+class TaskThread: public Thread {
 public:
 	TaskThread(ThreadPool* threadPool);
 	~TaskThread();
@@ -102,7 +102,15 @@ void ThreadPool::exec(RunnablePtr runnable) {
 	threadPtr->setTask(runnable);
 }
 
-unsigned int ThreadPool::getIdelThreadCount() const{
+bool ThreadPool::exec(RunnablePtr runnable, int32_t timeoutMs) {
+	auto threadPtr = this->getThread(timeoutMs);
+	if (!threadPtr)
+		return false;
+	threadPtr->setTask(runnable);
+	return true;
+}
+
+unsigned int ThreadPool::getIdelThreadCount() const {
 	lock_guard<mutex> lk(this->m_mutex);
 	return this->m_idelThreads.size();
 }
@@ -119,39 +127,38 @@ void ThreadPool::PutTaskThreadPtr(TaskThread* p) {
 	this->m_cond.notify_one();
 }
 
-TaskThread* ThreadPool::getThread() {
-	auto getIdelThread = [&]() -> TaskThread* {
-		lock_guard<mutex> lk(this->m_mutex);
-		if(!this->m_idelThreads.empty())
-		{
-			auto it = this->m_idelThreads.begin();
-			auto pThread = *it;
-			this->m_idelThreads.erase(it);
-			this->m_busyThreads.insert(pThread);
-			return pThread;
-		}
-		return nullptr;
-	};
+TaskThread* ThreadPool::getThread(int32_t timeoutMs) {
+	unique_lock<mutex> lk(this->m_mutex);
 
-	auto threadPtr = getIdelThread();
-	if (threadPtr)
-		return threadPtr;
+	if (!this->m_idelThreads.empty()) {
+		auto it = this->m_idelThreads.begin();
+		auto pThread = *it;
+		this->m_idelThreads.erase(it);
+		this->m_busyThreads.insert(pThread);
+		return pThread;
+	}
 
-	if (this->getActiveThreadCount() < this->m_maxSize) {
-		lock_guard<mutex> lk(this->m_mutex);
+	if (this->m_idelThreads.size() + this->m_busyThreads.size()
+			< this->m_maxSize) {
 		auto pThread = new TaskThread(this);
 		pThread->start();
 		this->m_busyThreads.insert(pThread);
 		return pThread;
 	}
 
-	while (!(threadPtr = getIdelThread())) {
-		//Thread::Sleep(100);
-		unique_lock<mutex> lk(this->m_mutex);
-		this->m_cond.wait(lk);
-	}
+	if (timeoutMs >= 0) {
+		if (!this->m_cond.wait_for(lk, std::chrono::milliseconds(timeoutMs),
+				[&] {return !this->m_idelThreads.empty();}))
+			return nullptr;
+	} else
+		this->m_cond.wait(lk, [&] {return !this->m_idelThreads.empty();});
 
-	return threadPtr;
+	auto it = this->m_idelThreads.begin();
+	auto pThread = *it;
+	this->m_idelThreads.erase(it);
+	this->m_busyThreads.insert(pThread);
+	return pThread;
+
 }
 
 } /* namespace NS_FF */

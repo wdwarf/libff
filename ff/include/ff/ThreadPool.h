@@ -8,13 +8,13 @@
 #ifndef FF_THREADPOOL_H_
 #define FF_THREADPOOL_H_
 
-#include <ff/Object.h>
-#include <ff/Thread.h>
-#include <ff/Noncopyable.h>
 #include <mutex>
 #include <condition_variable>
 #include <set>
 #include <atomic>
+#include <ff/ff_config.h>
+#include <ff/Thread.h>
+#include <ff/Noncopyable.h>
 
 namespace NS_FF {
 
@@ -25,9 +25,14 @@ public:
 	virtual ~ThreadPool();
 
 	void exec(RunnablePtr runnable);
+	bool exec(RunnablePtr runnable, int32_t timeoutMs);
 
 	template<class Func> void exec(Func func){
 		this->exec(MakeRunnable(func));
+	}
+
+	template<class Func> bool exec(Func func, int32_t timeoutMs){
+		return this->exec(MakeRunnable(func), timeoutMs);
 	}
 
 	unsigned int getIdelThreadCount() const;
@@ -36,7 +41,7 @@ public:
 private:
 	friend class TaskThread;
 
-	TaskThread* getThread();
+	TaskThread* getThread(int32_t timeoutMs = -1);
 
 	void PutTaskThreadPtr(TaskThread* p);
 private:
