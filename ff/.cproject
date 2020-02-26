@@ -11,7 +11,7 @@
 					</externalSetting>
 				</externalSettings>
 				<extensions>
-					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
+					<extension id="org.eclipse.cdt.core.GNU_ELF" point="org.eclipse.cdt.core.BinaryParser"/>
 					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
@@ -71,7 +71,7 @@
 					</externalSetting>
 				</externalSettings>
 				<extensions>
-					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
+					<extension id="org.eclipse.cdt.core.GNU_ELF" point="org.eclipse.cdt.core.BinaryParser"/>
 					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
@@ -131,7 +131,7 @@
 					</externalSetting>
 				</externalSettings>
 				<extensions>
-					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
+					<extension id="org.eclipse.cdt.core.GNU_ELF" point="org.eclipse.cdt.core.BinaryParser"/>
 					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
@@ -206,22 +206,16 @@
 	<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
 	<storageModule moduleId="scannerConfiguration">
 		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.lib.release.747273100;cdt.managedbuild.config.gnu.lib.release.747273100.;cdt.managedbuild.tool.gnu.cpp.compiler.lib.release.5349257;cdt.managedbuild.tool.gnu.cpp.compiler.input.1011812211">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.lib.release.747273100;cdt.managedbuild.config.gnu.lib.release.747273100.;cdt.managedbuild.tool.gnu.c.compiler.lib.release.1625206131;cdt.managedbuild.tool.gnu.c.compiler.input.2101152875">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.lib.debug.47020519;cdt.managedbuild.config.gnu.lib.debug.47020519.;cdt.managedbuild.tool.gnu.cpp.compiler.lib.debug.1277489908;cdt.managedbuild.tool.gnu.cpp.compiler.input.1925709814">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.lib.debug.47020519;cdt.managedbuild.config.gnu.lib.debug.47020519.;cdt.managedbuild.tool.gnu.c.compiler.lib.debug.1079648906;cdt.managedbuild.tool.gnu.c.compiler.input.257840541">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.lib.debug.47020519.305712127;cdt.managedbuild.config.gnu.lib.debug.47020519.305712127.;cdt.managedbuild.tool.gnu.c.compiler.lib.debug.158894265;cdt.managedbuild.tool.gnu.c.compiler.input.1425998985">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.lib.release.747273100;cdt.managedbuild.config.gnu.lib.release.747273100.;cdt.managedbuild.tool.gnu.cpp.compiler.lib.release.5349257;cdt.managedbuild.tool.gnu.cpp.compiler.input.1011812211">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.lib.debug.47020519.305712127;cdt.managedbuild.config.gnu.lib.debug.47020519.305712127.;cdt.managedbuild.tool.gnu.cpp.compiler.lib.debug.1147466658;cdt.managedbuild.tool.gnu.cpp.compiler.input.1948934327">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.lib.release.747273100;cdt.managedbuild.config.gnu.lib.release.747273100.;cdt.managedbuild.tool.gnu.c.compiler.lib.release.1625206131;cdt.managedbuild.tool.gnu.c.compiler.input.2101152875">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		</scannerConfigBuildInfo>
 	</storageModule>

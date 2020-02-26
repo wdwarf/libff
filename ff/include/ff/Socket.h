@@ -56,18 +56,23 @@ enum class SocketType {
 
 typedef __socket_type SockType;
 
-enum class IpVersion : char{
-	Unknown,
-	V4,
-	V6
+enum class IpVersion : char {
+	Unknown, V4, V6
 };
 
-union SockAddr_t{
-	sockaddr_in sockaddrV4;
-	sockaddr_in6 sockaddrV6;
+struct SockAddr_t {
+	sockaddr_storage sockaddr;
+
+	sockaddr_in* V4() const {
+		return (sockaddr_in*) &sockaddr;
+	}
+
+	sockaddr_in6* V6() const {
+		return (sockaddr_in6*) &sockaddr;
+	}
 };
 
-class SockAddr{
+class SockAddr {
 public:
 	SockAddr();
 	SockAddr(const std::string& host, uint16_t port);
@@ -115,7 +120,8 @@ public:
 	IpVersion getIpVersion() const;
 
 	int getSockOpt(int level, int optName, void* optVal, socklen_t* optLen);
-	int setsockOpt(int level, int optName, const void* optVal, socklen_t optLen);
+	int setsockOpt(int level, int optName, const void* optVal,
+			socklen_t optLen);
 	bool setNoDelay(bool nodelay);
 	bool setKeepAlive(bool keepAlive, uint32_t idle = 10,
 			uint32_t interval = 10, uint32_t count = 9);
@@ -132,7 +138,8 @@ public:
 	int send(const void* buf, socklen_t bufLen);
 	int read(void* buf, socklen_t readBytes, int timeoutMs = -1);
 
-	int sendTo(const char* buf, socklen_t bufLen, const sockaddr* addr, size_t addrSize);
+	int sendTo(const char* buf, socklen_t bufLen, const sockaddr* addr,
+			size_t addrSize);
 	int sendTo(const char* buf, socklen_t bufLen, const std::string& host,
 			int port);
 	int recvFrom(char* buf, socklen_t readBytes, sockaddr_in& addr,
