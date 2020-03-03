@@ -72,22 +72,6 @@ public:
 	std::string toString() const;
 	Buffer toBuffer() const;
 
-	Variant& operator=(bool v);
-	Variant& operator=(char v);
-	Variant& operator=(short v);
-	Variant& operator=(int v);
-	Variant& operator=(long v);
-	Variant& operator=(long long v);
-	Variant& operator=(unsigned char v);
-	Variant& operator=(unsigned short v);
-	Variant& operator=(unsigned int v);
-	Variant& operator=(unsigned long v);
-	Variant& operator=(unsigned long long v);
-	Variant& operator=(float v);
-	Variant& operator=(double v);
-	Variant& operator=(const char* v);
-	Variant& operator=(const std::string& v);
-	Variant& operator=(const Buffer& v);
 	void setValue(const void* v);
 	void setValue(const void* v, unsigned long size);
 	void setValue(const void* v, VariantType type);
