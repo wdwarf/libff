@@ -19,7 +19,7 @@
 
 namespace NS_FF {
 
-class FFDLL Logger: public Noncopyable {
+class LIBFF_API Logger: public Noncopyable {
 public:
 	Logger(const std::string& module,
 			LogLevel logLevel = LogLevel::INFO);

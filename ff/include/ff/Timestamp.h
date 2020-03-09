@@ -16,7 +16,7 @@ namespace NS_FF {
 
 EXCEPTION_DEF(TimestampException);
 
-class FFDLL Timestamp {
+class LIBFF_API Timestamp {
 public:
 	Timestamp();
 	Timestamp(const Timestamp& t);

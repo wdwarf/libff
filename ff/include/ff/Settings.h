@@ -20,7 +20,7 @@ namespace NS_FF {
 
 EXCEPTION_DEF(SettingsException);
 
-class FFDLL Settings {
+class LIBFF_API Settings {
 public:
 	Settings();
 	virtual ~Settings();

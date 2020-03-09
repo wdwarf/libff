@@ -15,7 +15,7 @@
 
 namespace NS_FF {
 
-class FFDLL StringWrapper: protected std::stringstream {
+class LIBFF_API StringWrapper: protected std::stringstream {
 public:
 	StringWrapper();
 	virtual ~StringWrapper();

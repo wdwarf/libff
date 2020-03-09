@@ -16,7 +16,7 @@ using std::ostream;
 
 namespace NS_FF {
 
-class FFDLL Base64 {
+class LIBFF_API Base64 {
 public:
 	static string Encrypt(string str);
 	static string Encrypt(const void* buf, unsigned int len);

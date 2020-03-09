@@ -84,7 +84,7 @@ enum class CrcAlgorithms {
 	Crc15Mpt1327
 };
 
-class FFDLL CrcParamInfo {
+class LIBFF_API CrcParamInfo {
 public:
 	CrcParamInfo(const std::string& name, int hashSize, uint64_t poly,
 			uint64_t init, bool refIn, bool refOut, uint64_t xorOut,
@@ -112,7 +112,7 @@ private:
 
 typedef std::map<CrcAlgorithms, CrcParamInfo> CrcParamInfos;
 
-class FFDLL CrcParams {
+class LIBFF_API CrcParams {
 public:
 	~CrcParams() = default;
 

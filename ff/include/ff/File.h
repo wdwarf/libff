@@ -22,7 +22,7 @@ namespace NS_FF {
 EXCEPTION_DEF(FileException);
 
 class File;
-class FFDLL FileIterator : public Noncopyable{
+class LIBFF_API FileIterator : public Noncopyable{
 public:
 	FileIterator(const std::string& path);
 	FileIterator(FileIterator&& it);
@@ -36,7 +36,7 @@ private:
 	FileIteratorImpl* m_impl;
 };
 
-class FFDLL File {
+class LIBFF_API File {
 public:
 	File();
 	File(const std::string& path);

@@ -92,7 +92,7 @@ private:
 	IpVersion m_version;
 };
 
-class FFDLL Socket {
+class LIBFF_API Socket {
 public:
 	Socket();
 	Socket(int sockFd);

@@ -14,7 +14,7 @@
 namespace NS_FF {
 
 class LogInfo;
-class FFDLL IAppender {
+class LIBFF_API IAppender {
 public:
 	IAppender() = default;
 	virtual ~IAppender() = default;

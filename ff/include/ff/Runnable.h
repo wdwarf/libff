@@ -17,7 +17,7 @@ namespace NS_FF {
 
 EXCEPTION_DEF(RunnableException);
 
-class FFDLL Runnable {
+class LIBFF_API Runnable {
 public:
 	Runnable() = default;
 	virtual ~Runnable() = default;

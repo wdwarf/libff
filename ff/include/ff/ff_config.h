@@ -12,19 +12,21 @@
 
 #define NS_FF ff
 
-#ifndef FFDLL
+
+#ifndef LIBFF_API
 #ifdef _WIN32
 
-#if defined(FF_LIB) && defined(FF_DLL)
-#define FFDLL __declspec(dllexport)
+#ifdef LIBFF_EXPORTS
+#define LIBFF_API __declspec(dllexport)
 #else
-#define FFDLL __declspec(dllimport)
+#define LIBFF_API __declspec(dllimport)
 #endif
 
 #else
-#define FFDLL
+#define LIBFF_API
 #endif
 #endif
+
 
 namespace NS_FF {
 

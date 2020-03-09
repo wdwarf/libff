@@ -18,7 +18,7 @@ namespace NS_FF {
 
 static Application* __app = nullptr;
 
-Application* GetApplication() {
+Application* GetApp() {
 	return __app;
 }
 

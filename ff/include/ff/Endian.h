@@ -20,7 +20,7 @@ enum class EndianType {
 Buffer::ReverseBytes((char*) &v, sizeof(T));\
 return v;
 
-class FFDLL Endian {
+class LIBFF_API Endian {
 public:
 	Endian(EndianType _endianType = GetHostEndian()) :
 			endianType(_endianType) {

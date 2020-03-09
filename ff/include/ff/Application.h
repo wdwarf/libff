@@ -26,7 +26,7 @@ typedef std::function<void (uint32_t serialNum, uint64_t msgId, uint64_t msgData
 
 EXCEPTION_DEF(ApplicationException);
 
-class FFDLL Application: public Object {
+class LIBFF_API Application: public Object {
 public:
 	Application(int argc, char** argv);
 	virtual ~Application();
@@ -64,7 +64,7 @@ private:
 	ApplicationImpl* impl;
 };
 
-FFDLL Application* GetApplication();
+LIBFF_API Application* GetApp();
 
 } /* namespace NS_FF */
 

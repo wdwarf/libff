@@ -13,7 +13,7 @@
 
 namespace NS_FF {
 
-class FFDLL Object {
+class LIBFF_API Object {
 public:
 	virtual std::string getClassName() const;
 	virtual std::string getFullClassName() const;

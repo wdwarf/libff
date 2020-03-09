@@ -14,7 +14,7 @@
 
 namespace NS_FF {
 
-class FFDLL Synchronizable {
+class LIBFF_API Synchronizable {
 public:
 	Synchronizable();
 	~Synchronizable();

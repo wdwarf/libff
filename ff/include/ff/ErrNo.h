@@ -21,11 +21,11 @@ typedef error_t ErrorNo;
 
 namespace NS_FF {
 
-FFDLL void SetLastErr(ErrorNo errNo, const std::string& errInfo = "");
-FFDLL ErrorNo GetLastErr();
-FFDLL std::string& GetLastErrInfo();
+LIBFF_API void SetLastErr(ErrorNo errNo, const std::string& errInfo = "");
+LIBFF_API ErrorNo GetLastErr();
+LIBFF_API std::string& GetLastErrInfo();
 
-FFDLL ErrorNo GetSysLastErr();
+LIBFF_API ErrorNo GetSysLastErr();
 
 } /* namespace NS_FF */
 

@@ -20,7 +20,7 @@ namespace NS_FF {
 
 EXCEPTION_DEF2(ThreadException, RunnableException);
 
-class FFDLL Thread: public Runnable, public Noncopyable {
+class LIBFF_API Thread: public Runnable, public Noncopyable {
 public:
 	Thread();
 	Thread(RunnablePtr runnable);

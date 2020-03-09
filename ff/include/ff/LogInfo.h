@@ -22,9 +22,9 @@ enum class LogLevel {
 	VERBOSE, DEBUG, INFO, WARNING, ERROR, FATAL
 };
 
-FFDLL std::string LogLevel2Str(LogLevel ll);
+LIBFF_API std::string LogLevel2Str(LogLevel ll);
 
-class FFDLL LogInfo {
+class LIBFF_API LogInfo {
 public:
 	LogInfo();
 	LogInfo(const LogLevel &logLevel, const std::string &logMessage,

@@ -16,6 +16,8 @@
 #include <ff/String.h>
 #include <ff/Base64.h>
 
+#include <json/json.h>
+
 using namespace std;
 
 namespace NS_FF {

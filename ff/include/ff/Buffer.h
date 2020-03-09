@@ -22,7 +22,7 @@ EXCEPTION_DEF(BufferException);
 #define BUF_IN_OPERATOR_DEF(T) Buffer& operator<<(const T& t)
 #define BUF_OUT_OPERATOR_DEF(T) Buffer& operator>>(T& t)
 
-class FFDLL Buffer {
+class LIBFF_API Buffer {
 public:
 	Buffer();
 	Buffer(unsigned int initSize);
@@ -59,6 +59,7 @@ public:
 	int read(void* buf, unsigned int size);
 	void resetReadPos();
 
+	/** append */
 	BUF_IN_OPERATOR_DEF(long long);
 	BUF_IN_OPERATOR_DEF(long);
 	BUF_IN_OPERATOR_DEF(int);
@@ -72,6 +73,7 @@ public:
 	BUF_IN_OPERATOR_DEF(float);
 	BUF_IN_OPERATOR_DEF(double);
 
+	/** read */
 	BUF_OUT_OPERATOR_DEF(long long);
 	BUF_OUT_OPERATOR_DEF(long);
 	BUF_OUT_OPERATOR_DEF(int);

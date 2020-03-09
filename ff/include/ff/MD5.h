@@ -29,7 +29,7 @@ struct MD5Result {
 			const MD5Result& md5Result);
 };
 
-class FFDLL MD5 {
+class LIBFF_API MD5 {
 public:
 	static MD5Result Generate(const void* encrypt, unsigned int length);
 	static MD5Result Generate(string input);

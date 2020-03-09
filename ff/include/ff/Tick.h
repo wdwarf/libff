@@ -16,7 +16,7 @@ namespace NS_FF {
 EXCEPTION_DEF(TickException);
 typedef long long tick_t;
 
-class FFDLL Tick {
+class LIBFF_API Tick {
 public:
 	Tick();
 	virtual ~Tick();

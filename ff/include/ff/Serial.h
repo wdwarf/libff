@@ -34,7 +34,7 @@ enum class StopBit {
 	_2,			//2
 };
 
-class FFDLL Serial: public Synchronizable, protected Noncopyable {
+class LIBFF_API Serial: public Synchronizable, protected Noncopyable {
 public:
 	Serial();
 	virtual ~Serial();

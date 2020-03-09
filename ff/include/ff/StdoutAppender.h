@@ -13,7 +13,7 @@
 
 namespace NS_FF {
 
-class FFDLL StdoutAppender: public ff::IAppender {
+class LIBFF_API StdoutAppender: public ff::IAppender {
 public:
 	StdoutAppender();
 	virtual ~StdoutAppender();

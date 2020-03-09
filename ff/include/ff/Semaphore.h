@@ -16,7 +16,7 @@ namespace NS_FF {
 
 using std::string;
 
-class FFDLL Semaphore {
+class LIBFF_API Semaphore {
 public:
 	Semaphore();
 	Semaphore(const string& name, int flag, ...);

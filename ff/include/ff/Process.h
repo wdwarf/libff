@@ -20,7 +20,7 @@ namespace NS_FF {
 
 EXCEPTION_DEF(ProcessException);
 
-class FFDLL Process: protected Noncopyable, public Object {
+class LIBFF_API Process: protected Noncopyable, public Object {
 public:
 	Process(const std::string &command);
 	virtual ~Process();
