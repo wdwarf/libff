@@ -60,7 +60,7 @@ public:
 	bool operator>=(const DateTime& t) const;
 	long operator-(const DateTime& t) const;
 
-	void setSystemTime();
+	bool setSystemTime();
 
 	static DateTime now();
 

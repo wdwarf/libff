@@ -25,8 +25,8 @@ public:
 	static bool Decrypt(char* des, unsigned int* desLen, const char* src, unsigned int srcLen);
 
 private:
-	Base64(void);
-	virtual ~Base64(void);
+	Base64(void) = default;
+	~Base64(void) = default;
 };
 
 }

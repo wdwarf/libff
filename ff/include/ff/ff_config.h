@@ -12,6 +12,10 @@
 
 #define NS_FF ff
 
+#ifdef _WIN32
+#include <WinSock2.h>
+#include <Windows.h>
+#endif
 
 #ifndef LIBFF_API
 #ifdef _WIN32
@@ -44,6 +48,6 @@ typedef unsigned long long u64;
 
 }
 
-#define __USE_SQLITE3_DB__
+//#define __USE_SQLITE3_DB__
 
 #endif /* FF_FF_CONFIG_H_ */

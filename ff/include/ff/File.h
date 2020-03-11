@@ -55,16 +55,15 @@ public:
 	bool isReadable() const;
 	bool isWritable() const;
 	bool isExecutable() const;
-	void mkdir() const;
-	void mkdirs() const;
-	void remove(bool recursive = false) const;
+	bool mkdir() const;
+	bool mkdirs() const;
+	bool remove(bool recursive = false) const;
 	long long getSize() const;
-	void rename(const std::string& path) const;
-	void copyTo(const std::string& path, bool forceReplace = false) const;
-	void moveTo(const std::string& path, bool forceReplace = false) const;
+	bool rename(const std::string& path) const;
+	bool copyTo(const std::string& path, bool forceReplace = false) const;
+	bool moveTo(const std::string& path, bool forceReplace = false) const;
 
 	FileIterator iterator() const;
-	std::list<File> list() const;
 	File cut(int count = 1) const;
 	DateTime getModifyTime() const;
 	DateTime getCreateTime() const;
