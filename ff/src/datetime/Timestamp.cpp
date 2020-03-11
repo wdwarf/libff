@@ -9,7 +9,12 @@
 #include <cstring>
 #include <ctime>
 #include <vector>
+
+#ifdef _WIN32
+#else
 #include <sys/time.h>
+#endif
+
 #include <iostream>
 #include <iomanip>
 #include <sstream>
@@ -25,7 +30,11 @@ public:
 	}
 
 	void setCurrentTime() {
+#ifdef _WIN32
+		DateTime(this->ts.tv_sec).setSystemTime();
+#else
 		clock_gettime(CLOCK_REALTIME, &ts);
+#endif
 	}
 
 	bool operator==(const TimestampImpl &t) const {

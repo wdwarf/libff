@@ -10,14 +10,19 @@
 
 #include <iostream>
 #include <sstream>
+#include <fstream>
 #include <cstring>
 #include <cstdio>
+#include <errno.h>
 
+#ifdef _WIN32
+#include <sys/stat.h>
+#else
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <dirent.h>
-#include <errno.h>
+#endif
 
 using namespace std;
 
@@ -33,40 +38,82 @@ class FileIterator::FileIteratorImpl {
 public:
 	FileIteratorImpl(const std::string& path) :
 			m_path(path) {
+#ifdef _WIN32
+#else
 		this->m_dir = opendir(path.c_str());
+#endif
 	}
 
 	~FileIteratorImpl() {
+#ifdef _WIN32
+		FindClose(this->m_dir);
+#else
 		if (nullptr != this->m_dir)
 			closedir(this->m_dir);
+#endif
 	}
 
 	bool valid() const {
+#ifdef _WIN32
+		return (INVALID_HANDLE_VALUE != this->m_dir);
+#else
 		return (nullptr != this->m_dirent);
+#endif
 	}
 
 	bool next() {
+
+#ifdef _WIN32
+		if (!this->valid()) {
+			this->m_dir = FindFirstFileA((m_path + PATH_SEPARATER + "*.*").c_str(), &m_findData);
+			if (this->valid()) {
+				do {
+					string name = this->m_findData.cFileName;
+					if ("." == name || ".." == name)
+						continue;
+					return true;
+				} while (FindNextFileA(this->m_dir, &this->m_findData));
+				return false;
+			}
+			return false;
+		}
+		
+		while(FindNextFileA(this->m_dir, &this->m_findData)) {
+			string name = this->m_findData.cFileName;
+			if ("." == name || ".." == name)
+				continue;
+			return true;
+		};
+#else
 		while (nullptr != (this->m_dirent = readdir(this->m_dir))) {
 			string name = this->m_dirent->d_name;
 			if ("." == name || ".." == name)
 				continue;
 			return true;
 		}
+#endif
 
 		return false;
 	}
 
 	File getFile() {
-		if (this->valid()) {
-			return File(this->m_path, this->m_dirent->d_name);
-		}
-
-		return File();
+		if (!this->valid())
+			return File();
+#ifdef _WIN32
+		return File(this->m_path, this->m_findData.cFileName);
+#else
+		return File(this->m_path, this->m_dirent->d_name);
+#endif
 	}
 private:
 	string m_path;
+#ifdef _WIN32
+	HANDLE m_dir = INVALID_HANDLE_VALUE;
+	WIN32_FIND_DATAA m_findData;
+#else
 	DIR* m_dir;
 	struct dirent* m_dirent = NULL;
+#endif
 };
 
 FileIterator::FileIterator(const std::string& path) :
@@ -198,12 +245,17 @@ bool File::isDirectory() const {
 		path += PATH_SEPARATER;
 	}
 
+#ifdef _WIN32
+	DWORD attr = ::GetFileAttributesA(path.c_str());
+	return (INVALID_FILE_ATTRIBUTES != attr && (attr & FILE_ATTRIBUTE_DIRECTORY));
+#else
 	struct stat buf;
 	int re = stat(path.c_str(), &buf);
 	if (0 != re)
 		return false;
 
 	return S_ISDIR(buf.st_mode);
+#endif
 }
 
 bool File::isRegularFile() const {
@@ -215,12 +267,17 @@ bool File::isRegularFile() const {
 		path += PATH_SEPARATER;
 	}
 
+#ifdef _WIN32
+	DWORD attr = ::GetFileAttributesA(path.c_str());
+	return (INVALID_FILE_ATTRIBUTES != attr && (attr & FILE_ATTRIBUTE_NORMAL));
+#else
 	struct stat buf;
 	int re = stat(path.c_str(), &buf);
 	if (0 != re)
 		return false;
 
 	return S_ISREG(buf.st_mode);
+#endif
 }
 
 bool File::isExists() const {
@@ -232,7 +289,11 @@ bool File::isExists() const {
 		path += PATH_SEPARATER;
 	}
 
+#ifdef _WIN32
+	return (INVALID_FILE_ATTRIBUTES != ::GetFileAttributesA(path.c_str()));
+#else
 	return (0 == access(path.c_str(), F_OK));
+#endif
 }
 
 bool File::isReadable() const {
@@ -244,7 +305,13 @@ bool File::isReadable() const {
 		path += PATH_SEPARATER;
 	}
 
+#ifdef _WIN32
+	DWORD attr = ::GetFileAttributesA(path.c_str());
+	return (INVALID_FILE_ATTRIBUTES != attr);
+#else
 	return (0 == access(path.c_str(), R_OK));
+#endif
+	
 }
 
 bool File::isWritable() const {
@@ -256,7 +323,13 @@ bool File::isWritable() const {
 		path += PATH_SEPARATER;
 	}
 
+#ifdef _WIN32
+	DWORD attr = ::GetFileAttributesA(path.c_str());
+	return (INVALID_FILE_ATTRIBUTES != attr 
+		&& (FILE_ATTRIBUTE_READONLY != (attr & FILE_ATTRIBUTE_READONLY)));
+#else
 	return (0 == access(path.c_str(), W_OK));
+#endif
 }
 
 bool File::isExecutable() const {
@@ -268,7 +341,15 @@ bool File::isExecutable() const {
 		path += PATH_SEPARATER;
 	}
 
+#ifdef _WIN32
+	struct stat buf;
+	if (0 != stat(path.c_str(), &buf))
+		return false;
+	
+	return (_S_IEXEC == (_S_IEXEC & buf.st_mode));
+#else
 	return (0 == access(path.c_str(), X_OK));
+#endif
 }
 
 long long File::getSize() const {
@@ -277,50 +358,47 @@ long long File::getSize() const {
 		return false;
 
 	struct stat buf;
-	int re = stat(path.c_str(), &buf);
+	if (0 != stat(path.c_str(), &buf))
+		return 0;
 
-	if (0 != re) {
-		THROW_EXCEPTION(FileException, "get file stat failed", errno);
-	}
-
+#ifdef _WIN32
+	if (_S_IFDIR & buf.st_mode)
+		return 0;
+#else
 	if (S_ISDIR(buf.st_mode)) {
-		THROW_EXCEPTION(FileException, "is a directory", 0);
+		rturn 0;
 	}
+#endif
 
 	return buf.st_size;
 }
 
-void File::mkdir() const {
+bool File::mkdir() const {
 	if (this->isExists() && !this->isDirectory()) {
-		THROW_EXCEPTION(FileException, this->getPath() + " is not a directory",
-				0);
+		return false;
 	}
 
 	if (this->isExists())
-		return;
+		return false;
 
 	string path = this->getPath();
 
 #if defined(__linux__) || defined(__CYGWIN32__)
-	int re = ::mkdir(path.c_str(), S_IRWXU);
+	return (0 == ::mkdir(path.c_str(), S_IRWXU));
 #elif defined(__MINGW32__)
-	int re = ::mkdir(path.c_str());
+	return (0 == ::mkdir(path.c_str()));
+#elif defined(_WIN32)
+	return (TRUE == ::CreateDirectoryA(path.c_str(), NULL));
 #endif
-
-	if (0 != re) {
-		THROW_EXCEPTION(FileException,
-				"mkdir[" + path + "] failed, " + strerror(errno), errno);
-	}
 }
 
-void File::mkdirs() const {
+bool File::mkdirs() const {
 	if (this->isExists() && !this->isDirectory()) {
-		THROW_EXCEPTION(FileException, this->getPath() + " is not a directory",
-				0);
+		return false;
 	}
 
 	if (this->isExists())
-		return;
+		return false;
 
 	string path;
 	for (std::list<std::string>::const_iterator it = this->path.begin();
@@ -340,54 +418,32 @@ void File::mkdirs() const {
 			f.mkdir();
 		}
 	}
+
+	return true;
 }
 
-void File::remove(bool recursive) const {
+bool File::remove(bool recursive) const {
 	if (!this->isExists())
-		return;
+		return false;
 
-	if (recursive && this->isDirectory()) {
-		std::list<File> files = this->list();
-		if (!files.empty()) {
-			for (std::list<File>::iterator it = files.begin();
-					it != files.end(); ++it) {
-				it->remove(true);
-			}
+	if (this->isDirectory()) {
+		auto it = this->iterator();
+		while (it.next()) {
+			auto file = it.getFile();
+			if (!recursive && file.isDirectory())
+				continue;
+			file.remove(true);
 		}
+#ifdef _WIN32
+		return (TRUE == RemoveDirectory(this->getPath().c_str()));
+#endif
 	}
 
-	string path = this->getPath();
-	int re = ::remove(path.c_str());
-	if (0 != re) {
-		THROW_EXCEPTION(FileException,
-				"remove[" + path + "] failed, " + strerror(errno), errno);
-	}
+	return (0 == ::remove(this->getPath().c_str()));
 }
 
 FileIterator File::iterator() const {
 	return FileIterator(this->getPath());
-}
-
-std::list<File> File::list() const {
-	std::list<File> files;
-	if (this->isDirectory()) {
-		string path = this->getPath();
-
-		DIR* dir = opendir(path.c_str());
-		if (NULL == dir)
-			return files;
-
-		struct dirent* _dirent = NULL;
-		while (NULL != (_dirent = readdir(dir))) {
-			string name = _dirent->d_name;
-			if ("." == name || ".." == name)
-				continue;
-			files.push_back(File(path + PATH_SEPARATER + name));
-		}
-
-		closedir(dir);
-	}
-	return files;
 }
 
 File File::cut(int count) const {
@@ -399,118 +455,73 @@ File File::cut(int count) const {
 	return File(p);
 }
 
-void File::rename(const std::string& path) const {
+bool File::rename(const std::string& path) const {
 	string currentPath = this->getPath();
-	int re = ::rename(currentPath.c_str(), path.c_str());
-	if (0 != re) {
-		THROW_EXCEPTION(FileException,
-				"rename[" + currentPath + "] to [" + path + "] failed, " + strerror(errno),
-				errno);
-	}
+	return (0 == ::rename(currentPath.c_str(), path.c_str()));
 }
 
-void File::copyTo(const std::string& path, bool forceReplace) const {
+bool File::copyTo(const std::string& path, bool forceReplace) const {
 	if (!this->isExists()) {
-		THROW_EXCEPTION(FileException,
-				"copy failed, [" + this->getPath() + "] not exists", 0);
+		return false;
 	}
 
 	if (*this == path)
-		return;
+		return false;
 
 	File newPath(path);
 	if (!forceReplace && newPath.isExists()) {
-		THROW_EXCEPTION(FileException, "copy failed, [" + path + "] has exists",
-				0);
+		return false;
 	}
 
 	if (this->isDirectory()) {
 		if (newPath.isExists() && !newPath.isDirectory()) {
-			THROW_EXCEPTION(FileException,
-					"copy failed, [" + path
-							+ "] has exists and it's not a directory.", 0);
+			return false;
 		}
 		newPath.mkdirs();
 
-		std::list<File> files = this->list();
-		for (std::list<File>::iterator it = files.begin(); it != files.end();
-				++it) {
-			it->copyTo(File(path, it->getName()), forceReplace);
+		auto it = this->iterator();
+		while (it.next()) {
+			auto file = it.getFile();
+			file.copyTo(File(path, file.getName()), forceReplace);
 		}
-
-		return;
+		return true;
 	}
 
-	int fdSrc = 0;
-	int fdDest = 0;
+	ifstream in(this->getPath().c_str(), ios::in | ios::binary);
+	ofstream out(path.c_str(), ios::out | ios::binary | ios::trunc);
 
-	try {
-		fdSrc = ::open(this->getPath().c_str(), O_RDONLY);
-		if (fdSrc <= 0) {
-			THROW_EXCEPTION(FileException,
-					"file[" + this->getPath() + "] open failed.", 0);
-		}
-
-		fdDest = ::open(path.c_str(), O_RDWR | O_CREAT | O_TRUNC,
-		S_IRUSR | S_IWUSR);
-		if (fdSrc <= 0) {
-			THROW_EXCEPTION(FileException, "file[" + path + "] create failed.",
-					0);
-		}
-
-		int readBytes = 0;
-		const int bufSize = 1024;
-		char buf[bufSize];
-		do {
-			readBytes = ::read(fdSrc, buf, bufSize);
-			if (0 == readBytes)
-				break;
-			if ((readBytes < 0) && (EINTR != errno)) {
-				THROW_EXCEPTION(FileException,
-						"file[" + this->getPath() + "] read failed.", 0);
-			}
-
-			int writeBytes = ::write(fdDest, buf, readBytes);
-			if ((writeBytes < 0) && (EINTR != errno)) {
-				THROW_EXCEPTION(FileException,
-						"file[" + path + "] write failed.", 0);
-			}
-		} while (readBytes > 0);
-	} catch (Exception& e) {
-		close(fdSrc);
-		close(fdDest);
-		throw;
+	const int bufSize = 4096;
+	char buf[bufSize];
+	while (!in.eof()) {
+		in.read(buf, bufSize);
+		out.write(buf, in.gcount());
 	}
 
-	close(fdSrc);
-	close(fdDest);
+	in.close();
+	out.close();
+	return true;
 }
 
-void File::moveTo(const std::string& path, bool forceReplace) const {
+bool File::moveTo(const std::string& path, bool forceReplace) const {
 	if (!this->isExists()) {
-		THROW_EXCEPTION(FileException,
-				"move failed, [" + this->getPath() + "] not exists", 0);
+		return false;
 	}
 
 	if (*this == path)
-		return;
+		return false;
 
-	this->copyTo(path, forceReplace);
-	this->remove(true);
+	return (this->copyTo(path, forceReplace) && this->remove(true));
 }
 
 DateTime File::getModifyTime() const {
 	if (!this->isExists()) {
-		THROW_EXCEPTION(FileException,
-				"file[" + this->getPath() + "] not exists", 0);
+		return DateTime(0);
 	}
 	string path = this->getPath();
 	struct stat buf;
 	int re = stat(path.c_str(), &buf);
 	if (0 != re) {
-		THROW_EXCEPTION(FileException,
-				"file[" + this->getPath() + "] stat failed, " + strerror(errno),
-				errno);
+		return DateTime(0);
 	}
 
 	return DateTime(buf.st_mtime);
@@ -518,16 +529,13 @@ DateTime File::getModifyTime() const {
 
 DateTime File::getCreateTime() const {
 	if (!this->isExists()) {
-		THROW_EXCEPTION(FileException,
-				"file[" + this->getPath() + "] not exists", 0);
+		return DateTime(0);
 	}
 	string path = this->getPath();
 	struct stat buf;
 	int re = stat(path.c_str(), &buf);
 	if (0 != re) {
-		THROW_EXCEPTION(FileException,
-				"file[" + this->getPath() + "] stat failed, " + strerror(errno),
-				errno);
+		return DateTime(0);
 	}
 
 	return DateTime(buf.st_ctime);

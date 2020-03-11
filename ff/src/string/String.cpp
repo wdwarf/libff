@@ -8,11 +8,16 @@
 #include <string>
 #include <cstring>
 #include <sstream>
+#include <functional>
 #include <algorithm>
 #include <ff/Exception.h>
 #include <ff/String.h>
 
 using namespace std;
+
+#ifdef _WIN32
+#define strcasecmp		_strcmpi
+#endif
 
 namespace NS_FF {
 

@@ -1,0 +1,135 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="源文件">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="头文件">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="资源文件">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="源文件\buffer">
+      <UniqueIdentifier>{b2b6e53b-4852-4db6-bfea-0f51ba580344}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\errno">
+      <UniqueIdentifier>{cd20d729-379d-41bf-b994-b97ecf4ea088}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\string">
+      <UniqueIdentifier>{c700d2d2-1586-475d-9b8d-2d9282f83c3d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\exception">
+      <UniqueIdentifier>{decf882a-9a20-4bbc-bddc-a06a62365669}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\encrypt">
+      <UniqueIdentifier>{022fee53-857f-4a72-8844-6ac605d23030}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\datetime">
+      <UniqueIdentifier>{fe0413d1-2a32-42ad-9d31-2de45025cffe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\settings">
+      <UniqueIdentifier>{f33a98fa-7b7e-4ad9-a113-88d99af1f6e5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\variant">
+      <UniqueIdentifier>{a9d0ce28-e504-4267-a2f7-233ae55fc84e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\db">
+      <UniqueIdentifier>{ea423be1-9e3b-40b3-8c8e-fafb30280c0e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\endian">
+      <UniqueIdentifier>{b95baf16-2af5-487f-96d9-b56ce25728b1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\file">
+      <UniqueIdentifier>{5e607ea1-117c-4973-8adf-53ea62304f3b}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stdafx.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\buffer\BufferImpl.h">
+      <Filter>源文件\buffer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\ff\ff_config.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="libff.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="dllmain.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Object.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\buffer\Buffer.cpp">
+      <Filter>源文件\buffer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\buffer\BufferImpl.cpp">
+      <Filter>源文件\buffer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\errno\ErrNo.cpp">
+      <Filter>源文件\errno</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\string\StringWrapper.cpp">
+      <Filter>源文件\string</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\string\String.cpp">
+      <Filter>源文件\string</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\exception\Exception.cpp">
+      <Filter>源文件\exception</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\encrypt\Base64.cpp">
+      <Filter>源文件\encrypt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\encrypt\CRC.cpp">
+      <Filter>源文件\encrypt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\encrypt\MD5.cpp">
+      <Filter>源文件\encrypt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\encrypt\Rijndael.cpp">
+      <Filter>源文件\encrypt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\datetime\DateTime.cpp">
+      <Filter>源文件\datetime</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\datetime\Tick.cpp">
+      <Filter>源文件\datetime</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\datetime\Timestamp.cpp">
+      <Filter>源文件\datetime</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\settings\Settings.cpp">
+      <Filter>源文件\settings</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\variant\Variant.cpp">
+      <Filter>源文件\variant</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\db\Sqlite3DataBase.cpp">
+      <Filter>源文件\db</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\endian\Endian.cpp">
+      <Filter>源文件\endian</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\file\File.cpp">
+      <Filter>源文件\file</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

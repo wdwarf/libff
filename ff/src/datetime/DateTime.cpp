@@ -6,14 +6,29 @@
  */
 
 #include <ff/DateTime.h>
+
+#ifdef _WIN32
+#else
 #include <sys/time.h>
+#endif
+
 #include <errno.h>
+#include <iostream>
 #include <vector>
 #include <ctime>
 #include <cstring>
 #include <sstream>
 
 using namespace std;
+
+#ifdef _WIN32
+#define __localtime__(t, tm)	localtime_s(tm, t)
+#define __gmtime__(t, tm)	gmtime_s(tm, t)
+
+#else
+#define __localtime__(t, tm)	localtime_r(t, tm)
+#define __gmtime__(t, tm)	gmtime_r(t, tm)
+#endif
 
 namespace NS_FF {
 
@@ -56,10 +71,7 @@ string DateTime::toLocalString(const string& format) const {
 	}
 	vector<char> buf(f.length() * 4 + 10);
 	tm tm_t;
-	if (NULL == localtime_r(&t, &tm_t)) {
-		THROW_EXCEPTION(DateTimeException,
-				string("localtime_r failed: ") + strerror(errno), errno);
-	}
+	__localtime__(&t, &tm_t);
 	strftime(&buf[0], buf.size(), f.c_str(), &tm_t);
 	return &buf[0];
 }
@@ -71,29 +83,20 @@ string DateTime::toString(const string& format) const {
 	}
 	vector<char> buf(f.length() * 4 + 10);
 	tm tm_t;
-	if (NULL == gmtime_r(&t, &tm_t)) {
-		THROW_EXCEPTION(DateTimeException,
-				string("gmtime_r failed: ") + strerror(errno), errno);
-	}
+	__gmtime__(&t, &tm_t);
 	strftime(&buf[0], buf.size(), f.c_str(), &tm_t);
 	return &buf[0];
 }
 
 tm DateTime::toLocalTm() const {
 	tm tm_t;
-	if (NULL == localtime_r(&t, &tm_t)) {
-		THROW_EXCEPTION(DateTimeException,
-				string("localtime_r failed: ") + strerror(errno), errno);
-	}
+	__localtime__(&t, &tm_t);
 	return tm_t;
 }
 
 tm DateTime::toTm() const {
 	tm tm_t;
-	if (NULL == gmtime_r(&t, &tm_t)) {
-		THROW_EXCEPTION(DateTimeException,
-				string("gmtime_r failed: ") + strerror(errno), errno);
-	}
+	__gmtime__(&t, &tm_t);
 	return tm_t;
 }
 
@@ -202,14 +205,25 @@ DateTime DateTime::now() {
 	return DateTime(time(0));
 }
 
-void DateTime::setSystemTime() {
+bool DateTime::setSystemTime() {
+#ifdef _WIN32
+	SYSTEMTIME sysTime;
+	memset(&sysTime, 0, sizeof(sysTime));
+	auto t = this->toTm();
+	sysTime.wYear = t.tm_year + 1900;
+	sysTime.wMonth = t.tm_mon + 1;
+	sysTime.wDay = t.tm_mday;
+	sysTime.wHour = t.tm_hour;
+	sysTime.wMinute = t.tm_min;
+	sysTime.wSecond = t.tm_sec;
+	sysTime.wDayOfWeek = t.tm_wday;
+	return (TRUE == ::SetSystemTime(&sysTime));
+#else
 	timeval val;
 	val.tv_sec = this->t;
 	val.tv_usec = 0;
-	if (0 != settimeofday(&val, nullptr)) {
-		THROW_EXCEPTION(DateTimeException,
-				string("set system time failed: ") + strerror(errno), errno);
-	}
+	return (0 == settimeofday(&val, nullptr));
+#endif
 }
 
 } /* namespace NS_FF */

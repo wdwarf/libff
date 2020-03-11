@@ -11,7 +11,6 @@
 #include <cmath>
 #include <cstring>
 #include <vector>
-#include <pthread.h>
 
 using namespace std;
 
@@ -65,6 +64,14 @@ string Object::getClassName() const {
 
 string Object::getFullClassName() const {
 	string fullName = typeid(*this).name();
+#ifdef _WIN32
+	const string hdr = "class ";
+	if (fullName.find(hdr) != string::npos)
+	{
+		fullName = fullName.substr(hdr.length());
+	}
+	return fullName;
+#else
 	if('N' == fullName[0])
 		return ParseClassNameWithNS(fullName);
 
@@ -74,6 +81,7 @@ string Object::getFullClassName() const {
 	str >> len;
 
 	return len > 0 ? fullName.substr(NumLen(len), len) : fullName;
+#endif
 }
 
 unsigned long Object::CppVeraion() {

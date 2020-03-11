@@ -25,12 +25,16 @@ Tick::~Tick() {
 }
 
 tick_t Tick::GetTickCount() {
+#ifdef _WIN32
+	return ::GetTickCount();
+#else
 	struct timespec ts;
 	if (-1 == clock_gettime(CLOCK_MONOTONIC, &ts)) {
 		THROW_EXCEPTION(TickException,
 				string("clock_gettime failed: ") + strerror(errno), errno);
 	}
 	return (tick_t(ts.tv_sec * 1000) + ts.tv_nsec / 1000000);
+#endif
 }
 
 tick_t Tick::start() {
