@@ -36,6 +36,9 @@ public:
 	void setAsyncRead(bool asyncRead);
 	const std::string& getWorkDir() const;
 	void setWorkDir(const std::string& workDir);
+	void addParameter(const std::string& arg);
+	const std::vector<std::string>& getParameters() const;
+	void clearParameter();
 
 	static int GetPid();
 	static int GetPPid();
@@ -43,7 +46,7 @@ public:
 	static int GetPidByName(const std::string& processName);
 	static bool Kill(int pid, int code = 15);
 	static bool Kill(const std::string& processName, int code = 15);
-	static std::map<int, std::string> Process::ListProcesses();
+	static std::map<int, std::string> ListProcesses();
 
 private:
 	void doReadData();
@@ -52,6 +55,7 @@ private:
 	std::string command;
 	bool asyncRead;
 	std::string workDir;
+	std::vector<std::string> args;
 	HANDLE hRead;
 	HANDLE hWrite;
 	PROCESS_INFORMATION pi;

@@ -5,6 +5,8 @@
  *      Author: liyawu
  */
 
+#ifndef _WIN32
+
 #ifndef FF_SERIAL_H_
 #define FF_SERIAL_H_
 
@@ -68,3 +70,4 @@ std::shared_ptr<Serial> SerialPtr;
 } /* namespace NS_FF */
 
 #endif /* FF_SERIAL_H_ */
+#endif

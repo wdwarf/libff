@@ -21,7 +21,7 @@ StdoutAppender::~StdoutAppender() {
 
 void StdoutAppender::log(const LogInfo &logInfo) {
 	ostream *o = &cout;
-	if (logInfo.getLogLevel() >= LogLevel::WARNING)
+	if (logInfo.getLogLevel() >= LogLevel::Warning)
 		o = &cerr;
 
 	(*o) << logInfo.toLogString() << endl;

@@ -9,8 +9,12 @@
 #define FF_SEMAPHORE_H_
 
 #include <string>
+#include <ff/ff_config.h>
 #include <ff/Object.h>
+#ifdef _WIN32
+#else
 #include <semaphore.h>
+#endif
 
 namespace NS_FF {
 
@@ -23,15 +27,20 @@ public:
 
 	~Semaphore();
 
-	int wait(int mSec = -1);
-	int release();
+	void wait(int mSec = -1);
+	void release();
 	int getValue();
 	void unlink();
 
 private:
-	sem_t* sem;
-	string name;
-	bool named;
+#ifdef _WIN32
+	HANDLE m_sem;
+	LONG m_previousCount;
+#else
+	sem_t* m_sem;
+#endif
+	string m_name;
+	bool m_named;
 };
 
 } /* namespace NS_FF */

@@ -17,11 +17,11 @@ Log::LoggerMap Log::s_loggers;
 std::mutex Log::s_mutex;
 
 Log::Log() :
-		m_logLevel(LogLevel::INFO), m_lineNumber(0) {
+		m_logLevel(LogLevel::Info), m_lineNumber(0) {
 }
 
 Log::Log(const std::string &m_module) :
-		m_logLevel(LogLevel::INFO), m_lineNumber(0) {
+		m_logLevel(LogLevel::Info), m_lineNumber(0) {
 	this->m_module = m_module;
 }
 

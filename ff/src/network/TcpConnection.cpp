@@ -5,6 +5,8 @@
  *      Author: liyawu
  */
 
+#ifndef _WIN32
+
 #include <iostream>
 #include <cstring>
 #include <errno.h>
@@ -253,3 +255,5 @@ TcpConnectionPtr TcpConnection::CreateInstance() {
 }
 
 } /* namespace NS_FF */
+
+#endif

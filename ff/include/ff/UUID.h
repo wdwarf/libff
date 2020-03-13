@@ -16,11 +16,11 @@ namespace NS_FF {
 
 typedef uint8_t uuid_t[16];
 
-class UUID {
+class Uuid {
 public:
-	UUID();
-	UUID(const std::string& uuidStr);
-	~UUID();
+	Uuid();
+	Uuid(const std::string& uuidStr);
+	~Uuid();
 
 	const uuid_t* getBuffer() const;
 	std::string toString() const;
@@ -29,7 +29,7 @@ private:
 	uuid_t m_uuid;
 };
 
-std::ostream& operator<<(std::ostream& o, const UUID& u);
+std::ostream& operator<<(std::ostream& o, const Uuid& u);
 
 } /* namespace NS_FF */
 

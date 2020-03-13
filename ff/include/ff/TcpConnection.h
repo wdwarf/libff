@@ -8,6 +8,8 @@
 #ifndef FF_TCPCONNECTION_H_
 #define FF_TCPCONNECTION_H_
 
+#ifndef _WIN32
+
 #include <string>
 #include <memory>
 #include <mutex>
@@ -71,4 +73,5 @@ private:
 
 } /* namespace NS_FF */
 
+#endif
 #endif /* FF_TCPCONNECTION_H_ */

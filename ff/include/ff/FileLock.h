@@ -25,7 +25,11 @@ public:
 
 	typedef ff::Locker<FileLock> Locker;
 private:
+#ifdef _WIN32
+	HANDLE m_fd;
+#else
 	int m_fd;
+#endif
 };
 
 } /* namespace NS_FF */

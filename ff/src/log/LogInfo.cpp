@@ -15,17 +15,17 @@ namespace NS_FF {
 
 std::string LogLevel2Str(LogLevel ll) {
 	switch (ll) {
-	case LogLevel::DEBUG:
+	case LogLevel::Debug:
 		return "D";
-	case LogLevel::ERROR:
+	case LogLevel::Error:
 		return "E";
-	case LogLevel::FATAL:
+	case LogLevel::Fatal:
 		return "F";
-	case LogLevel::INFO:
+	case LogLevel::Info:
 		return "I";
-	case LogLevel::VERBOSE:
+	case LogLevel::Verbose:
 		return "V";
-	case LogLevel::WARNING:
+	case LogLevel::Warning:
 		return "W";
 	default:
 		return "";
@@ -33,7 +33,7 @@ std::string LogLevel2Str(LogLevel ll) {
 }
 
 LogInfo::LogInfo() :
-		m_logLevel(LogLevel::INFO), m_logTime(Timestamp::now()), m_lineNumber(0) {
+		m_logLevel(LogLevel::Info), m_logTime(Timestamp::now()), m_lineNumber(0) {
 	//
 }
 
@@ -41,7 +41,7 @@ LogInfo::LogInfo(const LogLevel &_logLevel, const std::string &logMessage,
 		const std::string &logModule, const Timestamp &logTime,
 		const std::string &fileName, const std::string &functionName,
 		unsigned int lineNumber) :
-		m_logLevel(LogLevel::INFO) {
+		m_logLevel(LogLevel::Info) {
 	this->m_logLevel = _logLevel;
 	this->m_logMessage = logMessage;
 	this->m_logModule = logModule;

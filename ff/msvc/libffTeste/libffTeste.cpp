@@ -6,8 +6,11 @@
 #include <ff/Object.h>
 #include <ff/DateTime.h>
 #include <ff/File.h>
+#include <ff/Socket.h>
 #include <cstring>
 #include <errno.h>
+#include <ff/Application.h>
+#include <ff/Variant.h>
 
 using namespace std;
 using namespace ff;
@@ -20,23 +23,33 @@ namespace Test {
 
 int main()
 {
-	Test::T t;
-	cout << t.getClassName() << endl;
-	cout << t.getFullClassName() << endl;
-	DateTime dt = DateTime::now();
-	cout << dt.toLocalString() << endl;
+	Variant v = 10;
+	cout << v << endl;
+	cout << Application::GetApplicationPath() << endl;
+	cout << Application::GetApplicationName() << endl;
 
-	File f("D:\\tools");
-	cout << "is exists: " << f.isExists() << endl;
-	cout << "is exe: " << f.isExecutable() << endl;
-	cout << "is dir: " << f.isDirectory() << endl;
-	cout << "size: " << f.getSize() << endl;
-	cout << "copy: " << f.copyTo("d:\\tools2", true) << endl;
+	Socket svr;
+	svr.createTcp(IpVersion::V6);
+	cout << "bind: " << svr.bind(60002, "fe80::3893:8250:80fa:aa0f%3") << endl;
+	svr.listen();
+
+	Socket s;
+	cout << "create: " << s.createTcp(IpVersion::V6) << endl;
+	cout << "conn: " << s.connect("fe80::3893:8250:80fa:aa0f%3", 60002) << endl;
+	cout << "ver: " << (int)s.getIpVersion() << endl;
+	SockAddr addr;
+	Socket c = svr.accept(addr);
+	cout << "c ver: " << (int)c.getIpVersion() << endl;
+	cout << "send: " << s.send("Hello World!", 12) << endl;
+
+	char buf[100] = { 0 };
+	cout << "read: " << c.read(buf, 99) << endl;
+	cout << "err: " << GetLastError() << endl;
+	cout << buf << endl;
+
 	cout << "end" << endl;
 	cin.get();
-	cout << "rm: " << File("d:\\tools2").remove() << endl;
-	
-	cin.get();
+	s.close();
     return 0;
 }
 

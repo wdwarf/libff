@@ -11,6 +11,8 @@
 #ifdef WIN32
 #include <Mstcpip.h>
 #define SIO_UDP_CONNRESET _WSAIOW(IOC_VENDOR, 12)
+#define sockopt_flat_t char
+
 #else
 #include <unistd.h>
 #include <netdb.h>
@@ -18,6 +20,8 @@
 #include <netinet/tcp.h>
 #include <sys/errno.h>
 #include <fcntl.h>
+
+#define sockopt_flat_t int
 #endif
 
 #include <sstream>
@@ -186,7 +190,7 @@ in6_addr Socket::Host2IpV6(const std::string& host) {
 }
 
 Socket::Socket() :
-		m_socketFd(0), m_useSelect(true) {
+		m_socketFd(0), m_useSelect(true), m_ipVer(IpVersion::Unknown){
 #ifdef WIN32
 	WSADATA wsaData;
 	WSAStartup(MAKEWORD(2,0), &wsaData);
@@ -196,12 +200,14 @@ Socket::Socket() :
 Socket::Socket(int m_socketFd) :
 		m_useSelect(true) {
 	this->m_socketFd = m_socketFd;
+	this->m_ipVer = this->getIpVersion();
 }
 
 Socket::Socket(Socket&& sock) {
 	this->close();
 	this->m_socketFd = sock.m_socketFd;
 	this->m_useSelect = sock.m_useSelect;
+	this->m_ipVer = sock.m_ipVer;
 	sock.m_socketFd = 0;
 }
 
@@ -235,7 +241,7 @@ bool Socket::create(int af, int style, int protocol) {
 	if (SOCK_DGRAM == style) {
 		BOOL bNewBehavior = FALSE;
 		DWORD dwBytesReturned = 0;
-		WSAIoctl(iSock, SIO_UDP_CONNRESET, &bNewBehavior, sizeof bNewBehavior,
+		WSAIoctl(this->m_socketFd, SIO_UDP_CONNRESET, &bNewBehavior, sizeof bNewBehavior,
 				NULL, 0, &dwBytesReturned, NULL, NULL);
 	}
 #endif
@@ -284,12 +290,14 @@ bool Socket::close() {
 bool Socket::createTcp(IpVersion ver) {
 	if (IpVersion::Unknown == ver)
 		return false;
+	this->m_ipVer = ver;
 	return this->create(IpVersion::V4 == ver ? PF_INET : PF_INET6, SOCK_STREAM);
 }
 
 bool Socket::createUdp(IpVersion ver) {
 	if (IpVersion::Unknown == ver)
 		return false;
+	this->m_ipVer = ver;
 	return this->create(IpVersion::V4 == ver ? PF_INET : PF_INET6, SOCK_DGRAM);
 }
 
@@ -304,9 +312,6 @@ bool Socket::connect(const std::string& host, u16 port, int msTimeout) {
 		return false;
 
 	sockAddr.setPort(port);
-//	pAddr = (IpVersion::V4 == sockAddr.getVersion()) ?
-//			(const sockaddr*) &sockAddr.getAddr().sockaddrV4 :
-//			(const sockaddr*) &sockAddr.getAddr().sockaddrV6;
 	const sockaddr* pAddr = (const sockaddr*) &sockAddr.getAddr();
 	socklen_t addrSize =
 			(IpVersion::V4 == sockAddr.getVersion()) ?
@@ -351,15 +356,15 @@ bool Socket::bind(u16 port, const std::string& ip) {
 
 	sockaddr_in sockaddrV4;
 	sockaddr_in6 sockaddrV6;
-	auto ipVer = this->getIpVersion();
-	if (IpVersion::V4 == ipVer) {
+	// auto ipVer = this->getIpVersion();
+	if (IpVersion::V4 == this->m_ipVer) {
 		memset(&sockaddrV4, 0, sizeof(sockaddrV4));
 		addrSize = sizeof(sockaddrV4);
 		sockaddrV4.sin_family = PF_INET;
 		sockaddrV4.sin_port = htons(port);
 		if (!ip.empty()) {
 #if defined(WIN32) || defined(__MINGW32__)
-			addr.sin_addr.s_addr = inet_addr(ip.c_str());
+			sockaddrV4.sin_addr.s_addr = inet_addr(ip.c_str());
 #else
 			inet_aton(ip.c_str(), &sockaddrV4.sin_addr);
 #endif
@@ -370,7 +375,7 @@ bool Socket::bind(u16 port, const std::string& ip) {
 		pAddr = (const sockaddr*) &sockaddrV4;
 	}
 
-	if (IpVersion::V6 == ipVer) {
+	if (IpVersion::V6 == this->m_ipVer) {
 		int32_t flag = 1;
 		if (this->setsockOpt(IPPROTO_IPV6, IPV6_V6ONLY, &flag, sizeof(flag))
 				< 0)
@@ -391,7 +396,7 @@ bool Socket::bind(u16 port, const std::string& ip) {
 	if (nullptr == pAddr)
 		return false;
 
-	int flag = 1;
+	sockopt_flat_t flag = 1;
 	setsockopt(this->m_socketFd, SOL_SOCKET, SO_REUSEADDR, &flag, sizeof(flag));
 	return (0 == ::bind(this->m_socketFd, pAddr, addrSize));
 }
@@ -408,9 +413,8 @@ Socket Socket::accept(sockaddr* addr, socklen_t* addrSize) {
 }
 
 Socket Socket::accept(SockAddr& addr) {
-	auto ver = this->getIpVersion();
-	addr.setVersion(ver);
-	switch (ver) {
+	addr.setVersion(this->m_ipVer);
+	switch (this->m_ipVer) {
 	case IpVersion::V4:
 		return this->accept(*addr.getAddr().V4());
 	case IpVersion::V6:
@@ -447,7 +451,7 @@ int Socket::send(const void* buf, socklen_t bufLen) {
 			return re;
 		}
 	}
-	return ::send(this->m_socketFd, buf, bufLen, 0);
+	return ::send(this->m_socketFd, (const char*)buf, bufLen, 0);
 }
 
 int Socket::read(void* buf, socklen_t readBytes, int timeoutMs) {
@@ -470,7 +474,7 @@ int Socket::read(void* buf, socklen_t readBytes, int timeoutMs) {
 	}
 
 #if defined(WIN32) || defined(__MINGW32__)
-	re = ::recv(this->m_socketFd, buf, readBytes, 0);
+	re = ::recv(this->m_socketFd, (char*)buf, readBytes, 0);
 #else
 	re = ::read(this->m_socketFd, buf, readBytes);
 #endif
@@ -565,12 +569,12 @@ IpVersion Socket::getIpVersion() const {
 
 int Socket::getSockOpt(int level, int optName, void* optVal,
 socklen_t* optLen) {
-	return ::getsockopt(this->m_socketFd, level, optName, optVal, optLen);
+	return ::getsockopt(this->m_socketFd, level, optName, (char*)optVal, optLen);
 }
 
 int Socket::setsockOpt(int level, int optName, const void* optVal,
 socklen_t optLen) {
-	return ::setsockopt(this->m_socketFd, level, optName, optVal, optLen);
+	return ::setsockopt(this->m_socketFd, level, optName, (const char*)optVal, optLen);
 }
 
 int Socket::sendTo(const char* buf, socklen_t bufLen, const string& host,

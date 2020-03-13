@@ -40,6 +40,10 @@ LIBFF_API std::string ReplaceAllCopy(const std::string& src, const std::string& 
 LIBFF_API int IndexOf(const std::string& src, const std::string& find, bool ignoreCase =
 		false);
 
+/** 十六进制字符转数字 */
+LIBFF_API unsigned int HexAToI(char x);
+LIBFF_API char IToHexA(unsigned int x);
+
 enum StringCompressType {
 	WithEmptyString, RemoveEmptyString
 };
@@ -75,10 +79,6 @@ public:
 LIBFF_API std::vector<std::string> Split(const std::string& text,
 		const IDelimiter& delimiterChecker, StringCompressType compressType =
 				WithEmptyString);
-
-//十六进制字符转数字
-LIBFF_API unsigned int HexAToI(char x);
-LIBFF_API char IToHexA(unsigned int x);
 
 class LIBFF_API String : public std::string{
 public:

@@ -1,11 +1,11 @@
 /*
- * UUID.cpp
+ * Uuid.cpp
  *
  *  Created on: Jan 22, 2020
  *      Author: liyawu
  */
 
-#include <ff/UUID.h>
+#include <ff/Uuid.h>
 #include <cstring>
 #include <ff/Random.h>
 
@@ -166,33 +166,33 @@ void uuid_unparse(const uuid_t uu, char *out) {
 
 }
 
-UUID::UUID() {
+Uuid::Uuid() {
 	int num = 1;
 	uuidRandom(this->m_uuid, &num);
 }
 
-UUID::UUID(const std::string& uuidStr) {
+Uuid::Uuid(const std::string& uuidStr) {
 	(void) uuid_parse(uuidStr.c_str(), this->m_uuid);
 }
 
-UUID::~UUID() {
+Uuid::~Uuid() {
 }
 
-const uuid_t* UUID::getBuffer() const {
+const uuid_t* Uuid::getBuffer() const {
 	return &this->m_uuid;
 }
 
-string UUID::toString() const {
+string Uuid::toString() const {
 	char buf[64];
 	uuid_unparse(this->m_uuid, buf);
 	return buf;
 }
 
-UUID::operator std::string() const {
+Uuid::operator std::string() const {
 	return this->toString();
 }
 
-std::ostream& operator<<(std::ostream& o, const UUID& u) {
+std::ostream& operator<<(std::ostream& o, const Uuid& u) {
 	o << (std::string) u;
 	return o;
 }

@@ -46,6 +46,27 @@
     <Filter Include="源文件\file">
       <UniqueIdentifier>{5e607ea1-117c-4973-8adf-53ea62304f3b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="源文件\log">
+      <UniqueIdentifier>{ef69dbeb-a26d-4e1a-8019-1c30a3670566}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\process">
+      <UniqueIdentifier>{7428c882-bee9-4514-a040-675299b65523}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\random">
+      <UniqueIdentifier>{02f70b52-be3f-4af7-9ec2-0ab9b8906460}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\thread">
+      <UniqueIdentifier>{f69483da-c330-4fab-8299-a911c7620198}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\network">
+      <UniqueIdentifier>{e2396666-0467-482b-bb10-cd1413de31e5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\app">
+      <UniqueIdentifier>{fe353eb0-be6f-448c-8148-3ec3f54fa608}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\serial">
+      <UniqueIdentifier>{8697ac8f-ffc3-4f58-9625-d087cdf22db8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -62,6 +83,18 @@
     </ClInclude>
     <ClInclude Include="..\..\include\ff\ff_config.h">
       <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\process\ProcessImpl.h">
+      <Filter>源文件\process</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\process\ProcessImplLinux.h">
+      <Filter>源文件\process</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\process\ProcessImplWindows.h">
+      <Filter>源文件\process</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\app\ApplicationImpl.h">
+      <Filter>源文件\app</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -130,6 +163,72 @@
     </ClCompile>
     <ClCompile Include="..\..\src\file\File.cpp">
       <Filter>源文件\file</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\log\Log.cpp">
+      <Filter>源文件\log</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\log\Logger.cpp">
+      <Filter>源文件\log</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\log\LogInfo.cpp">
+      <Filter>源文件\log</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\log\StdoutAppender.cpp">
+      <Filter>源文件\log</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\process\FileLock.cpp">
+      <Filter>源文件\process</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\process\Process.cpp">
+      <Filter>源文件\process</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\process\ProcessImplLinux.cpp">
+      <Filter>源文件\process</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\process\ProcessImplWindows.cpp">
+      <Filter>源文件\process</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\random\Random.cpp">
+      <Filter>源文件\random</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\random\UUID.cpp">
+      <Filter>源文件\random</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thread\Runnable.cpp">
+      <Filter>源文件\thread</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thread\Semaphore.cpp">
+      <Filter>源文件\thread</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thread\Synchronizable.cpp">
+      <Filter>源文件\thread</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thread\Thread.cpp">
+      <Filter>源文件\thread</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thread\ThreadPool.cpp">
+      <Filter>源文件\thread</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\network\Socket.cpp">
+      <Filter>源文件\network</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\network\IP.cpp">
+      <Filter>源文件\network</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\app\Application.cpp">
+      <Filter>源文件\app</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\app\ApplicationImpl.cpp">
+      <Filter>源文件\app</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\network\EPoll.cpp">
+      <Filter>源文件\network</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\network\TcpConnection.cpp">
+      <Filter>源文件\network</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\serial\Serial.cpp">
+      <Filter>源文件\serial</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

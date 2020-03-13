@@ -226,8 +226,7 @@ bool IP::parseV6(const std::string &ip) {
 				// move digits to right
 				{
 					for (int i = 0; i < digit_count; i++) {
-						digits[digit_count - 1 - i] = HexAToI(
-								digits[digit_count - 1 - i]);
+						digits[digit_count - 1 - i] = HexAToI(digits[digit_count - 1 - i]);
 //						ATOI(digits[digit_count - 1 - i]);
 						digits[3 - i] = digits[digit_count - 1 - i];
 					}
@@ -278,8 +277,7 @@ bool IP::parseV6(const std::string &ip) {
 			{
 				// move digits to right
 				for (int i = 0; i < digit_count; i++) {
-					digits[digit_count - 1 - i] = HexAToI(
-							digits[digit_count - 1 - i]);
+					digits[digit_count - 1 - i] = HexAToI(digits[digit_count - 1 - i]);
 					digits[3 - i] = digits[digit_count - 1 - i];
 				}
 			}

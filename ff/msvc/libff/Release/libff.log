@@ -1,0 +1,683 @@
+﻿  Buffer.cpp
+D:\Projects\libff\ff\include\ff/Exception.h(24): warning C4275: 非 dll 接口 class“std::exception”用作 dll 接口 class“ff::Exception”的基
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\vcruntime_exception.h(43): note: 参见“std::exception”的声明
+  D:\Projects\libff\ff\include\ff/Exception.h(24): note: 参见“ff::Exception”的声明
+D:\Projects\libff\ff\include\ff/Exception.h(41): warning C4251: “ff::Exception::functionName”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::Exception”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/Exception.h(42): warning C4251: “ff::Exception::fileName”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::Exception”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/Exception.h(43): warning C4251: “ff::Exception::msg”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::Exception”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/String.h : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+D:\Projects\libff\ff\include\ff/String.h(60): warning C4251: “ff::IDelimiter::m_delimiterStr”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::IDelimiter”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/String.h(83): warning C4251: “std::_String_alloc<std::_String_base_types<_Elem,_Alloc>>::_Mypair”: class“std::_Compressed_pair<std::_Wrap_alloc<std::allocator<char>>,std::_String_val<std::_Simple_types<char>>,true>”需要有 dll 接口由 class“std::_String_alloc<std::_String_base_types<_Elem,_Alloc>>”的客户端使用
+          with
+          [
+              _Elem=char,
+              _Alloc=std::allocator<char>
+          ]
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(743): note: 参见“std::_Compressed_pair<std::_Wrap_alloc<std::allocator<char>>,std::_String_val<std::_Simple_types<char>>,true>”的声明
+..\..\src\buffer\Buffer.cpp(161): warning C4244: “参数”: 从“std::streamoff”转换到“unsigned int”，可能丢失数据
+..\..\src\buffer\Buffer.cpp(163): warning C4244: “参数”: 从“std::streamoff”转换到“unsigned int”，可能丢失数据
+  BufferImpl.cpp
+D:\Projects\libff\ff\include\ff/Exception.h(24): warning C4275: 非 dll 接口 class“std::exception”用作 dll 接口 class“ff::Exception”的基
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\vcruntime_exception.h(43): note: 参见“std::exception”的声明
+  D:\Projects\libff\ff\include\ff/Exception.h(24): note: 参见“ff::Exception”的声明
+D:\Projects\libff\ff\include\ff/Exception.h(41): warning C4251: “ff::Exception::functionName”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::Exception”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/Exception.h(42): warning C4251: “ff::Exception::fileName”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::Exception”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/Exception.h(43): warning C4251: “ff::Exception::msg”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::Exception”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/String.h : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+D:\Projects\libff\ff\include\ff/String.h(60): warning C4251: “ff::IDelimiter::m_delimiterStr”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::IDelimiter”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/String.h(83): warning C4251: “std::_String_alloc<std::_String_base_types<_Elem,_Alloc>>::_Mypair”: class“std::_Compressed_pair<std::_Wrap_alloc<std::allocator<char>>,std::_String_val<std::_Simple_types<char>>,true>”需要有 dll 接口由 class“std::_String_alloc<std::_String_base_types<_Elem,_Alloc>>”的客户端使用
+          with
+          [
+              _Elem=char,
+              _Alloc=std::allocator<char>
+          ]
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(743): note: 参见“std::_Compressed_pair<std::_Wrap_alloc<std::allocator<char>>,std::_String_val<std::_Simple_types<char>>,true>”的声明
+..\..\src\buffer\BufferImpl.cpp(52): warning C4018: “>”: 有符号/无符号不匹配
+..\..\src\buffer\BufferImpl.cpp(101): warning C4244: “=”: 从“float”转换到“unsigned int”，可能丢失数据
+..\..\src\buffer\BufferImpl.cpp(161): warning C4244: “=”: 从“float”转换到“unsigned int”，可能丢失数据
+..\..\src\buffer\BufferImpl.cpp(194): warning C4244: “=”: 从“float”转换到“unsigned int”，可能丢失数据
+..\..\src\buffer\BufferImpl.cpp(235): warning C4244: “=”: 从“float”转换到“unsigned int”，可能丢失数据
+  DateTime.cpp
+D:\Projects\libff\ff\include\ff/Exception.h(24): warning C4275: 非 dll 接口 class“std::exception”用作 dll 接口 class“ff::Exception”的基
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\vcruntime_exception.h(43): note: 参见“std::exception”的声明
+  D:\Projects\libff\ff\include\ff/Exception.h(24): note: 参见“ff::Exception”的声明
+D:\Projects\libff\ff\include\ff/Exception.h(41): warning C4251: “ff::Exception::functionName”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::Exception”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/Exception.h(42): warning C4251: “ff::Exception::fileName”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::Exception”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/Exception.h(43): warning C4251: “ff::Exception::msg”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::Exception”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+..\..\src\datetime\DateTime.cpp(201): warning C4244: “return”: 从“time_t”转换到“long”，可能丢失数据
+  Tick.cpp
+D:\Projects\libff\ff\include\ff/Exception.h(24): warning C4275: 非 dll 接口 class“std::exception”用作 dll 接口 class“ff::Exception”的基
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\vcruntime_exception.h(43): note: 参见“std::exception”的声明
+  D:\Projects\libff\ff\include\ff/Exception.h(24): note: 参见“ff::Exception”的声明
+D:\Projects\libff\ff\include\ff/Exception.h(41): warning C4251: “ff::Exception::functionName”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::Exception”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/Exception.h(42): warning C4251: “ff::Exception::fileName”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::Exception”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/Exception.h(43): warning C4251: “ff::Exception::msg”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::Exception”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+  Timestamp.cpp
+D:\Projects\libff\ff\include\ff/Exception.h(24): warning C4275: 非 dll 接口 class“std::exception”用作 dll 接口 class“ff::Exception”的基
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\vcruntime_exception.h(43): note: 参见“std::exception”的声明
+  D:\Projects\libff\ff\include\ff/Exception.h(24): note: 参见“ff::Exception”的声明
+D:\Projects\libff\ff\include\ff/Exception.h(41): warning C4251: “ff::Exception::functionName”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::Exception”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/Exception.h(42): warning C4251: “ff::Exception::fileName”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::Exception”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/Exception.h(43): warning C4251: “ff::Exception::msg”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::Exception”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+  Sqlite3DataBase.cpp
+..\..\src\db\Sqlite3DataBase.cpp : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+D:\Projects\libff\ff\include\ff/Sqlite3DataBase.h : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+  Base64.cpp
+  CRC.cpp
+D:\Projects\libff\ff\include\ff/CRC.h : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+D:\Projects\libff\ff\include\ff/CRC.h(102): warning C4251: “ff::CrcParamInfo::m_name”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::CrcParamInfo”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/CRC.h(131): warning C4251: “ff::CrcParams::m_crcParamInfos”: class“std::map<ff::CrcAlgorithms,ff::CrcParamInfo,std::less<_Kty>,std::allocator<std::pair<const _Kty,_Ty>>>”需要有 dll 接口由 class“ff::CrcParams”的客户端使用
+          with
+          [
+              _Kty=ff::CrcAlgorithms,
+              _Ty=ff::CrcParamInfo
+          ]
+  D:\Projects\libff\ff\include\ff/CRC.h(112): note: 参见“std::map<ff::CrcAlgorithms,ff::CrcParamInfo,std::less<_Kty>,std::allocator<std::pair<const _Kty,_Ty>>>”的声明
+          with
+          [
+              _Kty=ff::CrcAlgorithms,
+              _Ty=ff::CrcParamInfo
+          ]
+D:\Projects\libff\ff\include\ff/Exception.h(24): warning C4275: 非 dll 接口 class“std::exception”用作 dll 接口 class“ff::Exception”的基
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\vcruntime_exception.h(43): note: 参见“std::exception”的声明
+  D:\Projects\libff\ff\include\ff/Exception.h(24): note: 参见“ff::Exception”的声明
+D:\Projects\libff\ff\include\ff/Exception.h(41): warning C4251: “ff::Exception::functionName”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::Exception”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/Exception.h(42): warning C4251: “ff::Exception::fileName”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::Exception”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/Exception.h(43): warning C4251: “ff::Exception::msg”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::Exception”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/String.h : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+D:\Projects\libff\ff\include\ff/String.h(60): warning C4251: “ff::IDelimiter::m_delimiterStr”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::IDelimiter”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/String.h(83): warning C4251: “std::_String_alloc<std::_String_base_types<_Elem,_Alloc>>::_Mypair”: class“std::_Compressed_pair<std::_Wrap_alloc<std::allocator<char>>,std::_String_val<std::_Simple_types<char>>,true>”需要有 dll 接口由 class“std::_String_alloc<std::_String_base_types<_Elem,_Alloc>>”的客户端使用
+          with
+          [
+              _Elem=char,
+              _Alloc=std::allocator<char>
+          ]
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(743): note: 参见“std::_Compressed_pair<std::_Wrap_alloc<std::allocator<char>>,std::_String_val<std::_Simple_types<char>>,true>”的声明
+..\..\src\encrypt\CRC.cpp(197): warning C4334: “<<”: 32 位移位的结果被隐式转换为 64 位(是否希望进行 64 位移位?)
+  MD5.cpp
+..\..\src\encrypt\MD5.cpp(117): warning C4244: “参数”: 从“std::streamsize”转换到“unsigned int”，可能丢失数据
+  Rijndael.cpp
+D:\Projects\libff\ff\include\ff/Exception.h(24): warning C4275: 非 dll 接口 class“std::exception”用作 dll 接口 class“ff::Exception”的基
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\vcruntime_exception.h(43): note: 参见“std::exception”的声明
+  D:\Projects\libff\ff\include\ff/Exception.h(24): note: 参见“ff::Exception”的声明
+D:\Projects\libff\ff\include\ff/Exception.h(41): warning C4251: “ff::Exception::functionName”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::Exception”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/Exception.h(42): warning C4251: “ff::Exception::fileName”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::Exception”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/Exception.h(43): warning C4251: “ff::Exception::msg”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::Exception”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+  Endian.cpp
+..\..\src\endian\Endian.cpp : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+D:\Projects\libff\ff\include\ff/Endian.h : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+D:\Projects\libff\ff\include\ff/Exception.h(24): warning C4275: 非 dll 接口 class“std::exception”用作 dll 接口 class“ff::Exception”的基
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\vcruntime_exception.h(43): note: 参见“std::exception”的声明
+  D:\Projects\libff\ff\include\ff/Exception.h(24): note: 参见“ff::Exception”的声明
+D:\Projects\libff\ff\include\ff/Exception.h(41): warning C4251: “ff::Exception::functionName”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::Exception”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/Exception.h(42): warning C4251: “ff::Exception::fileName”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::Exception”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/Exception.h(43): warning C4251: “ff::Exception::msg”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::Exception”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/String.h : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+D:\Projects\libff\ff\include\ff/String.h(60): warning C4251: “ff::IDelimiter::m_delimiterStr”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::IDelimiter”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/String.h(83): warning C4251: “std::_String_alloc<std::_String_base_types<_Elem,_Alloc>>::_Mypair”: class“std::_Compressed_pair<std::_Wrap_alloc<std::allocator<char>>,std::_String_val<std::_Simple_types<char>>,true>”需要有 dll 接口由 class“std::_String_alloc<std::_String_base_types<_Elem,_Alloc>>”的客户端使用
+          with
+          [
+              _Elem=char,
+              _Alloc=std::allocator<char>
+          ]
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(743): note: 参见“std::_Compressed_pair<std::_Wrap_alloc<std::allocator<char>>,std::_String_val<std::_Simple_types<char>>,true>”的声明
+  ErrNo.cpp
+  Exception.cpp
+D:\Projects\libff\ff\include\ff/Exception.h(24): warning C4275: 非 dll 接口 class“std::exception”用作 dll 接口 class“ff::Exception”的基
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\vcruntime_exception.h(43): note: 参见“std::exception”的声明
+  D:\Projects\libff\ff\include\ff/Exception.h(24): note: 参见“ff::Exception”的声明
+D:\Projects\libff\ff\include\ff/Exception.h(41): warning C4251: “ff::Exception::functionName”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::Exception”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/Exception.h(42): warning C4251: “ff::Exception::fileName”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::Exception”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/Exception.h(43): warning C4251: “ff::Exception::msg”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::Exception”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+  File.cpp
+..\..\src\file\File.cpp : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+D:\Projects\libff\ff\include\ff/Exception.h(24): warning C4275: 非 dll 接口 class“std::exception”用作 dll 接口 class“ff::Exception”的基
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\vcruntime_exception.h(43): note: 参见“std::exception”的声明
+  D:\Projects\libff\ff\include\ff/Exception.h(24): note: 参见“ff::Exception”的声明
+D:\Projects\libff\ff\include\ff/Exception.h(41): warning C4251: “ff::Exception::functionName”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::Exception”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/Exception.h(42): warning C4251: “ff::Exception::fileName”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::Exception”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/Exception.h(43): warning C4251: “ff::Exception::msg”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::Exception”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/File.h(80): warning C4251: “ff::File::path”: class“std::list<std::string,std::allocator<_Ty>>”需要有 dll 接口由 class“ff::File”的客户端使用
+          with
+          [
+              _Ty=std::string
+          ]
+  D:\Projects\libff\ff\include\ff/File.h(44): note: 参见“std::list<std::string,std::allocator<_Ty>>”的声明
+          with
+          [
+              _Ty=std::string
+          ]
+D:\Projects\libff\ff\include\ff/String.h : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+D:\Projects\libff\ff\include\ff/String.h(60): warning C4251: “ff::IDelimiter::m_delimiterStr”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::IDelimiter”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/String.h(83): warning C4251: “std::_String_alloc<std::_String_base_types<_Elem,_Alloc>>::_Mypair”: class“std::_Compressed_pair<std::_Wrap_alloc<std::allocator<char>>,std::_String_val<std::_Simple_types<char>>,true>”需要有 dll 接口由 class“std::_String_alloc<std::_String_base_types<_Elem,_Alloc>>”的客户端使用
+          with
+          [
+              _Elem=char,
+              _Alloc=std::allocator<char>
+          ]
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(743): note: 参见“std::_Compressed_pair<std::_Wrap_alloc<std::allocator<char>>,std::_String_val<std::_Simple_types<char>>,true>”的声明
+  Log.cpp
+..\..\src\log\Log.cpp : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+D:\Projects\libff\ff\include\ff/Log.h : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+D:\Projects\libff\ff\include\ff/LogInfo.h : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+D:\Projects\libff\ff\include\ff/Exception.h(24): warning C4275: 非 dll 接口 class“std::exception”用作 dll 接口 class“ff::Exception”的基
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\vcruntime_exception.h(43): note: 参见“std::exception”的声明
+  D:\Projects\libff\ff\include\ff/Exception.h(24): note: 参见“ff::Exception”的声明
+D:\Projects\libff\ff\include\ff/Exception.h(41): warning C4251: “ff::Exception::functionName”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::Exception”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/Exception.h(42): warning C4251: “ff::Exception::fileName”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::Exception”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/Exception.h(43): warning C4251: “ff::Exception::msg”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::Exception”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/LogInfo.h(57): warning C4251: “ff::LogInfo::m_logMessage”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::LogInfo”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/LogInfo.h(58): warning C4251: “ff::LogInfo::m_logModule”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::LogInfo”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/LogInfo.h(60): warning C4251: “ff::LogInfo::m_fileName”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::LogInfo”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/LogInfo.h(61): warning C4251: “ff::LogInfo::m_functionName”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::LogInfo”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/Logger.h(35): warning C4251: “ff::Logger::m_mutex”: class“std::mutex”需要有 dll 接口由 class“ff::Logger”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\mutex(78): note: 参见“std::mutex”的声明
+D:\Projects\libff\ff\include\ff/Logger.h(36): warning C4251: “ff::Logger::m_module”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::Logger”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/Logger.h(38): warning C4251: “ff::Logger::m_appenders”: class“std::set<ff::AppenderPtr,std::less<_Kty>,std::allocator<_Kty>>”需要有 dll 接口由 class“ff::Logger”的客户端使用
+          with
+          [
+              _Kty=ff::AppenderPtr
+          ]
+  D:\Projects\libff\ff\include\ff/Logger.h(38): note: 参见“std::set<ff::AppenderPtr,std::less<_Kty>,std::allocator<_Kty>>”的声明
+          with
+          [
+              _Kty=ff::AppenderPtr
+          ]
+D:\Projects\libff\ff\include\ff/String.h : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+D:\Projects\libff\ff\include\ff/String.h(60): warning C4251: “ff::IDelimiter::m_delimiterStr”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::IDelimiter”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/String.h(83): warning C4251: “std::_String_alloc<std::_String_base_types<_Elem,_Alloc>>::_Mypair”: class“std::_Compressed_pair<std::_Wrap_alloc<std::allocator<char>>,std::_String_val<std::_Simple_types<char>>,true>”需要有 dll 接口由 class“std::_String_alloc<std::_String_base_types<_Elem,_Alloc>>”的客户端使用
+          with
+          [
+              _Elem=char,
+              _Alloc=std::allocator<char>
+          ]
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(743): note: 参见“std::_Compressed_pair<std::_Wrap_alloc<std::allocator<char>>,std::_String_val<std::_Simple_types<char>>,true>”的声明
+D:\Projects\libff\ff\include\ff/StringWrapper.h(18): warning C4251: “std::basic_stringstream<char,std::char_traits<char>,std::allocator<char>>::_Stringbuffer”: class“std::basic_stringbuf<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“std::basic_stringstream<char,std::char_traits<char>,std::allocator<char>>”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\iosfwd(681): note: 参见“std::basic_stringbuf<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/Log.h(67): warning C4251: “ff::Log::s_loggers”: class“std::map<std::string,ff::LoggerPtr,std::less<_Kty>,std::allocator<std::pair<const _Kty,_Ty>>>”需要有 dll 接口由 class“ff::Log”的客户端使用
+          with
+          [
+              _Kty=std::string,
+              _Ty=ff::LoggerPtr
+          ]
+  D:\Projects\libff\ff\include\ff/Log.h(66): note: 参见“std::map<std::string,ff::LoggerPtr,std::less<_Kty>,std::allocator<std::pair<const _Kty,_Ty>>>”的声明
+          with
+          [
+              _Kty=std::string,
+              _Ty=ff::LoggerPtr
+          ]
+D:\Projects\libff\ff\include\ff/Log.h(68): warning C4251: “ff::Log::s_mutex”: class“std::mutex”需要有 dll 接口由 class“ff::Log”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\mutex(78): note: 参见“std::mutex”的声明
+  Logger.cpp
+D:\Projects\libff\ff\include\ff/LogInfo.h : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+D:\Projects\libff\ff\include\ff/Exception.h(24): warning C4275: 非 dll 接口 class“std::exception”用作 dll 接口 class“ff::Exception”的基
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\vcruntime_exception.h(43): note: 参见“std::exception”的声明
+  D:\Projects\libff\ff\include\ff/Exception.h(24): note: 参见“ff::Exception”的声明
+D:\Projects\libff\ff\include\ff/Exception.h(41): warning C4251: “ff::Exception::functionName”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::Exception”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/Exception.h(42): warning C4251: “ff::Exception::fileName”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::Exception”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/Exception.h(43): warning C4251: “ff::Exception::msg”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::Exception”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/LogInfo.h(57): warning C4251: “ff::LogInfo::m_logMessage”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::LogInfo”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/LogInfo.h(58): warning C4251: “ff::LogInfo::m_logModule”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::LogInfo”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/LogInfo.h(60): warning C4251: “ff::LogInfo::m_fileName”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::LogInfo”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/LogInfo.h(61): warning C4251: “ff::LogInfo::m_functionName”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::LogInfo”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/Logger.h(35): warning C4251: “ff::Logger::m_mutex”: class“std::mutex”需要有 dll 接口由 class“ff::Logger”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\mutex(78): note: 参见“std::mutex”的声明
+D:\Projects\libff\ff\include\ff/Logger.h(36): warning C4251: “ff::Logger::m_module”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::Logger”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/Logger.h(38): warning C4251: “ff::Logger::m_appenders”: class“std::set<ff::AppenderPtr,std::less<_Kty>,std::allocator<_Kty>>”需要有 dll 接口由 class“ff::Logger”的客户端使用
+          with
+          [
+              _Kty=ff::AppenderPtr
+          ]
+  D:\Projects\libff\ff\include\ff/Logger.h(38): note: 参见“std::set<ff::AppenderPtr,std::less<_Kty>,std::allocator<_Kty>>”的声明
+          with
+          [
+              _Kty=ff::AppenderPtr
+          ]
+  LogInfo.cpp
+..\..\src\log\LogInfo.cpp : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+D:\Projects\libff\ff\include\ff/LogInfo.h : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+D:\Projects\libff\ff\include\ff/Exception.h(24): warning C4275: 非 dll 接口 class“std::exception”用作 dll 接口 class“ff::Exception”的基
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\vcruntime_exception.h(43): note: 参见“std::exception”的声明
+  D:\Projects\libff\ff\include\ff/Exception.h(24): note: 参见“ff::Exception”的声明
+D:\Projects\libff\ff\include\ff/Exception.h(41): warning C4251: “ff::Exception::functionName”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::Exception”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/Exception.h(42): warning C4251: “ff::Exception::fileName”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::Exception”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/Exception.h(43): warning C4251: “ff::Exception::msg”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::Exception”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/LogInfo.h(57): warning C4251: “ff::LogInfo::m_logMessage”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::LogInfo”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/LogInfo.h(58): warning C4251: “ff::LogInfo::m_logModule”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::LogInfo”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/LogInfo.h(60): warning C4251: “ff::LogInfo::m_fileName”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::LogInfo”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/LogInfo.h(61): warning C4251: “ff::LogInfo::m_functionName”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::LogInfo”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/File.h(80): warning C4251: “ff::File::path”: class“std::list<std::string,std::allocator<_Ty>>”需要有 dll 接口由 class“ff::File”的客户端使用
+          with
+          [
+              _Ty=std::string
+          ]
+  D:\Projects\libff\ff\include\ff/File.h(44): note: 参见“std::list<std::string,std::allocator<_Ty>>”的声明
+          with
+          [
+              _Ty=std::string
+          ]
+  StdoutAppender.cpp
+D:\Projects\libff\ff\include\ff/LogInfo.h : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+D:\Projects\libff\ff\include\ff/Exception.h(24): warning C4275: 非 dll 接口 class“std::exception”用作 dll 接口 class“ff::Exception”的基
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\vcruntime_exception.h(43): note: 参见“std::exception”的声明
+  D:\Projects\libff\ff\include\ff/Exception.h(24): note: 参见“ff::Exception”的声明
+D:\Projects\libff\ff\include\ff/Exception.h(41): warning C4251: “ff::Exception::functionName”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::Exception”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/Exception.h(42): warning C4251: “ff::Exception::fileName”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::Exception”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/Exception.h(43): warning C4251: “ff::Exception::msg”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::Exception”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/LogInfo.h(57): warning C4251: “ff::LogInfo::m_logMessage”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::LogInfo”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/LogInfo.h(58): warning C4251: “ff::LogInfo::m_logModule”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::LogInfo”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/LogInfo.h(60): warning C4251: “ff::LogInfo::m_fileName”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::LogInfo”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/LogInfo.h(61): warning C4251: “ff::LogInfo::m_functionName”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::LogInfo”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+  IP.cpp
+..\..\src\network\IP.cpp : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+D:\Projects\libff\ff\include\ff/IP.h : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+D:\Projects\libff\ff\include\ff/Exception.h(24): warning C4275: 非 dll 接口 class“std::exception”用作 dll 接口 class“ff::Exception”的基
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\vcruntime_exception.h(43): note: 参见“std::exception”的声明
+  D:\Projects\libff\ff\include\ff/Exception.h(24): note: 参见“ff::Exception”的声明
+D:\Projects\libff\ff\include\ff/Exception.h(41): warning C4251: “ff::Exception::functionName”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::Exception”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/Exception.h(42): warning C4251: “ff::Exception::fileName”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::Exception”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/Exception.h(43): warning C4251: “ff::Exception::msg”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::Exception”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/String.h : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+D:\Projects\libff\ff\include\ff/String.h(60): warning C4251: “ff::IDelimiter::m_delimiterStr”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::IDelimiter”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/String.h(83): warning C4251: “std::_String_alloc<std::_String_base_types<_Elem,_Alloc>>::_Mypair”: class“std::_Compressed_pair<std::_Wrap_alloc<std::allocator<char>>,std::_String_val<std::_Simple_types<char>>,true>”需要有 dll 接口由 class“std::_String_alloc<std::_String_base_types<_Elem,_Alloc>>”的客户端使用
+          with
+          [
+              _Elem=char,
+              _Alloc=std::allocator<char>
+          ]
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(743): note: 参见“std::_Compressed_pair<std::_Wrap_alloc<std::allocator<char>>,std::_String_val<std::_Simple_types<char>>,true>”的声明
+  Socket.cpp
+D:\Projects\libff\ff\include\ff/Exception.h(24): warning C4275: 非 dll 接口 class“std::exception”用作 dll 接口 class“ff::Exception”的基
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\vcruntime_exception.h(43): note: 参见“std::exception”的声明
+  D:\Projects\libff\ff\include\ff/Exception.h(24): note: 参见“ff::Exception”的声明
+D:\Projects\libff\ff\include\ff/Exception.h(41): warning C4251: “ff::Exception::functionName”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::Exception”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/Exception.h(42): warning C4251: “ff::Exception::fileName”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::Exception”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/Exception.h(43): warning C4251: “ff::Exception::msg”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::Exception”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/String.h : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+D:\Projects\libff\ff\include\ff/String.h(60): warning C4251: “ff::IDelimiter::m_delimiterStr”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::IDelimiter”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/String.h(83): warning C4251: “std::_String_alloc<std::_String_base_types<_Elem,_Alloc>>::_Mypair”: class“std::_Compressed_pair<std::_Wrap_alloc<std::allocator<char>>,std::_String_val<std::_Simple_types<char>>,true>”需要有 dll 接口由 class“std::_String_alloc<std::_String_base_types<_Elem,_Alloc>>”的客户端使用
+          with
+          [
+              _Elem=char,
+              _Alloc=std::allocator<char>
+          ]
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(743): note: 参见“std::_Compressed_pair<std::_Wrap_alloc<std::allocator<char>>,std::_String_val<std::_Simple_types<char>>,true>”的声明
+D:\Projects\libff\ff\include\ff/IP.h : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+  正在编译...
+  Object.cpp
+  FileLock.cpp
+  Process.cpp
+D:\Projects\libff\ff\include\ff/Exception.h(24): warning C4275: 非 dll 接口 class“std::exception”用作 dll 接口 class“ff::Exception”的基
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\vcruntime_exception.h(43): note: 参见“std::exception”的声明
+  D:\Projects\libff\ff\include\ff/Exception.h(24): note: 参见“ff::Exception”的声明
+D:\Projects\libff\ff\include\ff/Exception.h(41): warning C4251: “ff::Exception::functionName”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::Exception”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/Exception.h(42): warning C4251: “ff::Exception::fileName”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::Exception”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/Exception.h(43): warning C4251: “ff::Exception::msg”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::Exception”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+d:\projects\libff\ff\src\process\ProcessImpl.h : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+d:\projects\libff\ff\src\process\ProcessImplLinux.h : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+d:\projects\libff\ff\src\process\ProcessImplWindows.h : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+  ProcessImplLinux.cpp
+..\..\src\process\ProcessImplLinux.cpp : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+  ProcessImplWindows.cpp
+..\..\src\process\ProcessImplWindows.cpp : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+d:\projects\libff\ff\src\process\ProcessImplWindows.h : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+D:\Projects\libff\ff\include\ff/Exception.h(24): warning C4275: 非 dll 接口 class“std::exception”用作 dll 接口 class“ff::Exception”的基
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\vcruntime_exception.h(43): note: 参见“std::exception”的声明
+  D:\Projects\libff\ff\include\ff/Exception.h(24): note: 参见“ff::Exception”的声明
+D:\Projects\libff\ff\include\ff/Exception.h(41): warning C4251: “ff::Exception::functionName”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::Exception”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/Exception.h(42): warning C4251: “ff::Exception::fileName”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::Exception”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/Exception.h(43): warning C4251: “ff::Exception::msg”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::Exception”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/String.h : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+D:\Projects\libff\ff\include\ff/String.h(60): warning C4251: “ff::IDelimiter::m_delimiterStr”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::IDelimiter”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/String.h(83): warning C4251: “std::_String_alloc<std::_String_base_types<_Elem,_Alloc>>::_Mypair”: class“std::_Compressed_pair<std::_Wrap_alloc<std::allocator<char>>,std::_String_val<std::_Simple_types<char>>,true>”需要有 dll 接口由 class“std::_String_alloc<std::_String_base_types<_Elem,_Alloc>>”的客户端使用
+          with
+          [
+              _Elem=char,
+              _Alloc=std::allocator<char>
+          ]
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(743): note: 参见“std::_Compressed_pair<std::_Wrap_alloc<std::allocator<char>>,std::_String_val<std::_Simple_types<char>>,true>”的声明
+  Random.cpp
+  UUID.cpp
+..\..\src\random\UUID.cpp(126): warning C4244: “=”: 从“unsigned long”转换到“uint16_t”，可能丢失数据
+..\..\src\random\UUID.cpp(127): warning C4244: “=”: 从“unsigned long”转换到“uint16_t”，可能丢失数据
+..\..\src\random\UUID.cpp(128): warning C4244: “=”: 从“unsigned long”转换到“uint16_t”，可能丢失数据
+..\..\src\random\UUID.cpp(134): warning C4244: “=”: 从“unsigned long”转换到“uint8_t”，可能丢失数据
+  Settings.cpp
+..\..\src\settings\Settings.cpp : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+D:\Projects\libff\ff\include\ff/Settings.h : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+D:\Projects\libff\ff\include\ff/Exception.h(24): warning C4275: 非 dll 接口 class“std::exception”用作 dll 接口 class“ff::Exception”的基
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\vcruntime_exception.h(43): note: 参见“std::exception”的声明
+  D:\Projects\libff\ff\include\ff/Exception.h(24): note: 参见“ff::Exception”的声明
+D:\Projects\libff\ff\include\ff/Exception.h(41): warning C4251: “ff::Exception::functionName”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::Exception”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/Exception.h(42): warning C4251: “ff::Exception::fileName”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::Exception”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/Exception.h(43): warning C4251: “ff::Exception::msg”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::Exception”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/String.h : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+D:\Projects\libff\ff\include\ff/String.h(60): warning C4251: “ff::IDelimiter::m_delimiterStr”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::IDelimiter”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/String.h(83): warning C4251: “std::_String_alloc<std::_String_base_types<_Elem,_Alloc>>::_Mypair”: class“std::_Compressed_pair<std::_Wrap_alloc<std::allocator<char>>,std::_String_val<std::_Simple_types<char>>,true>”需要有 dll 接口由 class“std::_String_alloc<std::_String_base_types<_Elem,_Alloc>>”的客户端使用
+          with
+          [
+              _Elem=char,
+              _Alloc=std::allocator<char>
+          ]
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(743): note: 参见“std::_Compressed_pair<std::_Wrap_alloc<std::allocator<char>>,std::_String_val<std::_Simple_types<char>>,true>”的声明
+D:\Projects\libff\ff\include\ff/Settings.h(42): warning C4251: “ff::Settings::m_values”: class“std::map<std::string,ff::Variant,std::less<_Kty>,std::allocator<std::pair<const _Kty,_Ty>>>”需要有 dll 接口由 class“ff::Settings”的客户端使用
+          with
+          [
+              _Kty=std::string,
+              _Ty=ff::Variant
+          ]
+  D:\Projects\libff\ff\include\ff/Settings.h(41): note: 参见“std::map<std::string,ff::Variant,std::less<_Kty>,std::allocator<std::pair<const _Kty,_Ty>>>”的声明
+          with
+          [
+              _Kty=std::string,
+              _Ty=ff::Variant
+          ]
+D:\Projects\libff\ff\include\ff/Settings.h(43): warning C4251: “ff::Settings::m_mutex”: class“std::mutex”需要有 dll 接口由 class“ff::Settings”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\mutex(78): note: 参见“std::mutex”的声明
+  String.cpp
+D:\Projects\libff\ff\include\ff/String.h : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+D:\Projects\libff\ff\include\ff/String.h(60): warning C4251: “ff::IDelimiter::m_delimiterStr”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::IDelimiter”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/String.h(83): warning C4251: “std::_String_alloc<std::_String_base_types<_Elem,_Alloc>>::_Mypair”: class“std::_Compressed_pair<std::_Wrap_alloc<std::allocator<char>>,std::_String_val<std::_Simple_types<char>>,true>”需要有 dll 接口由 class“std::_String_alloc<std::_String_base_types<_Elem,_Alloc>>”的客户端使用
+          with
+          [
+              _Elem=char,
+              _Alloc=std::allocator<char>
+          ]
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(743): note: 参见“std::_Compressed_pair<std::_Wrap_alloc<std::allocator<char>>,std::_String_val<std::_Simple_types<char>>,true>”的声明
+D:\Projects\libff\ff\include\ff/Exception.h(24): warning C4275: 非 dll 接口 class“std::exception”用作 dll 接口 class“ff::Exception”的基
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\vcruntime_exception.h(43): note: 参见“std::exception”的声明
+  D:\Projects\libff\ff\include\ff/Exception.h(24): note: 参见“ff::Exception”的声明
+  StringWrapper.cpp
+D:\Projects\libff\ff\include\ff/StringWrapper.h(18): warning C4251: “std::basic_stringstream<char,std::char_traits<char>,std::allocator<char>>::_Stringbuffer”: class“std::basic_stringbuf<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“std::basic_stringstream<char,std::char_traits<char>,std::allocator<char>>”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\iosfwd(681): note: 参见“std::basic_stringbuf<char,std::char_traits<char>,std::allocator<char>>”的声明
+  Runnable.cpp
+D:\Projects\libff\ff\include\ff/Exception.h(24): warning C4275: 非 dll 接口 class“std::exception”用作 dll 接口 class“ff::Exception”的基
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\vcruntime_exception.h(43): note: 参见“std::exception”的声明
+  D:\Projects\libff\ff\include\ff/Exception.h(24): note: 参见“ff::Exception”的声明
+D:\Projects\libff\ff\include\ff/Exception.h(41): warning C4251: “ff::Exception::functionName”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::Exception”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/Exception.h(42): warning C4251: “ff::Exception::fileName”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::Exception”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/Exception.h(43): warning C4251: “ff::Exception::msg”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::Exception”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+  Semaphore.cpp
+D:\Projects\libff\ff\include\ff/Semaphore.h(42): warning C4251: “ff::Semaphore::m_name”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::Semaphore”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+  Synchronizable.cpp
+D:\Projects\libff\ff\include\ff/Synchronizable.h(27): warning C4251: “ff::Synchronizable::m_mutex”: class“std::mutex”需要有 dll 接口由 class“ff::Synchronizable”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\mutex(78): note: 参见“std::mutex”的声明
+  Thread.cpp
+D:\Projects\libff\ff\include\ff/Exception.h(24): warning C4275: 非 dll 接口 class“std::exception”用作 dll 接口 class“ff::Exception”的基
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\vcruntime_exception.h(43): note: 参见“std::exception”的声明
+  D:\Projects\libff\ff\include\ff/Exception.h(24): note: 参见“ff::Exception”的声明
+D:\Projects\libff\ff\include\ff/Exception.h(41): warning C4251: “ff::Exception::functionName”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::Exception”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/Exception.h(42): warning C4251: “ff::Exception::fileName”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::Exception”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/Exception.h(43): warning C4251: “ff::Exception::msg”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::Exception”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/Thread.h(41): warning C4251: “ff::Thread::m_runnable”: class“std::shared_ptr<ff::Runnable>”需要有 dll 接口由 class“ff::Thread”的客户端使用
+  D:\Projects\libff\ff\include\ff/Runnable.h(28): note: 参见“std::shared_ptr<ff::Runnable>”的声明
+D:\Projects\libff\ff\include\ff/Thread.h(42): warning C4251: “ff::Thread::m_thread”: class“std::thread”需要有 dll 接口由 class“ff::Thread”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\thread(30): note: 参见“std::thread”的声明
+..\..\src\thread\Thread.cpp(34): warning C4101: “e”: 未引用的局部变量
+  ThreadPool.cpp
+D:\Projects\libff\ff\include\ff/Exception.h(24): warning C4275: 非 dll 接口 class“std::exception”用作 dll 接口 class“ff::Exception”的基
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\vcruntime_exception.h(43): note: 参见“std::exception”的声明
+  D:\Projects\libff\ff\include\ff/Exception.h(24): note: 参见“ff::Exception”的声明
+D:\Projects\libff\ff\include\ff/Exception.h(41): warning C4251: “ff::Exception::functionName”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::Exception”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/Exception.h(42): warning C4251: “ff::Exception::fileName”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::Exception”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/Exception.h(43): warning C4251: “ff::Exception::msg”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::Exception”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/Thread.h(41): warning C4251: “ff::Thread::m_runnable”: class“std::shared_ptr<ff::Runnable>”需要有 dll 接口由 class“ff::Thread”的客户端使用
+  D:\Projects\libff\ff\include\ff/Runnable.h(28): note: 参见“std::shared_ptr<ff::Runnable>”的声明
+D:\Projects\libff\ff\include\ff/Thread.h(42): warning C4251: “ff::Thread::m_thread”: class“std::thread”需要有 dll 接口由 class“ff::Thread”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\thread(30): note: 参见“std::thread”的声明
+D:\Projects\libff\ff\include\ff/ThreadPool.h(48): warning C4251: “ff::ThreadPool::m_mutex”: class“std::mutex”需要有 dll 接口由 class“ff::ThreadPool”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\mutex(78): note: 参见“std::mutex”的声明
+D:\Projects\libff\ff\include\ff/ThreadPool.h(49): warning C4251: “ff::ThreadPool::m_cond”: class“std::condition_variable”需要有 dll 接口由 class“ff::ThreadPool”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\mutex(536): note: 参见“std::condition_variable”的声明
+D:\Projects\libff\ff\include\ff/ThreadPool.h(51): warning C4251: “ff::ThreadPool::m_idelThreads”: class“std::set<ff::TaskThread *,std::less<_Kty>,std::allocator<_Kty>>”需要有 dll 接口由 class“ff::ThreadPool”的客户端使用
+          with
+          [
+              _Kty=ff::TaskThread *
+          ]
+  D:\Projects\libff\ff\include\ff/ThreadPool.h(51): note: 参见“std::set<ff::TaskThread *,std::less<_Kty>,std::allocator<_Kty>>”的声明
+          with
+          [
+              _Kty=ff::TaskThread *
+          ]
+D:\Projects\libff\ff\include\ff/ThreadPool.h(52): warning C4251: “ff::ThreadPool::m_busyThreads”: class“std::set<ff::TaskThread *,std::less<_Kty>,std::allocator<_Kty>>”需要有 dll 接口由 class“ff::ThreadPool”的客户端使用
+          with
+          [
+              _Kty=ff::TaskThread *
+          ]
+  D:\Projects\libff\ff\include\ff/ThreadPool.h(51): note: 参见“std::set<ff::TaskThread *,std::less<_Kty>,std::allocator<_Kty>>”的声明
+          with
+          [
+              _Kty=ff::TaskThread *
+          ]
+..\..\src\thread\ThreadPool.cpp(69): warning C4101: “e”: 未引用的局部变量
+  Variant.cpp
+D:\Projects\libff\ff\include\ff/Exception.h(24): warning C4275: 非 dll 接口 class“std::exception”用作 dll 接口 class“ff::Exception”的基
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\vcruntime_exception.h(43): note: 参见“std::exception”的声明
+  D:\Projects\libff\ff\include\ff/Exception.h(24): note: 参见“ff::Exception”的声明
+D:\Projects\libff\ff\include\ff/Exception.h(41): warning C4251: “ff::Exception::functionName”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::Exception”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/Exception.h(42): warning C4251: “ff::Exception::fileName”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::Exception”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/Exception.h(43): warning C4251: “ff::Exception::msg”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::Exception”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/String.h : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+D:\Projects\libff\ff\include\ff/String.h(60): warning C4251: “ff::IDelimiter::m_delimiterStr”: class“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”需要有 dll 接口由 class“ff::IDelimiter”的客户端使用
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(2633): note: 参见“std::basic_string<char,std::char_traits<char>,std::allocator<char>>”的声明
+D:\Projects\libff\ff\include\ff/String.h(83): warning C4251: “std::_String_alloc<std::_String_base_types<_Elem,_Alloc>>::_Mypair”: class“std::_Compressed_pair<std::_Wrap_alloc<std::allocator<char>>,std::_String_val<std::_Simple_types<char>>,true>”需要有 dll 接口由 class“std::_String_alloc<std::_String_base_types<_Elem,_Alloc>>”的客户端使用
+          with
+          [
+              _Elem=char,
+              _Alloc=std::allocator<char>
+          ]
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xstring(743): note: 参见“std::_Compressed_pair<std::_Wrap_alloc<std::allocator<char>>,std::_String_val<std::_Simple_types<char>>,true>”的声明
+..\..\src\variant\Variant.cpp(602): warning C4244: “return”: 从“unsigned short”转换到“unsigned char”，可能丢失数据
+..\..\src\variant\Variant.cpp(447): warning C4244: “=”: 从“const unsigned short”转换到“char”，可能丢失数据
+  ..\..\src\variant\Variant.cpp(582): note: 参见对正在编译的函数 模板 实例化“T ff::Variant::toValue<char>(void) const”的引用
+          with
+          [
+              T=char
+          ]
+..\..\src\variant\Variant.cpp(455): warning C4244: “=”: 从“const unsigned long”转换到“char”，可能丢失数据
+..\..\src\variant\Variant.cpp(459): warning C4244: “=”: 从“const unsigned __int64”转换到“char”，可能丢失数据
+..\..\src\variant\Variant.cpp(467): warning C4244: “=”: 从“const short”转换到“char”，可能丢失数据
+..\..\src\variant\Variant.cpp(475): warning C4244: “=”: 从“const long”转换到“char”，可能丢失数据
+..\..\src\variant\Variant.cpp(479): warning C4244: “=”: 从“const __int64”转换到“char”，可能丢失数据
+..\..\src\variant\Variant.cpp(483): warning C4244: “=”: 从“const float”转换到“char”，可能丢失数据
+..\..\src\variant\Variant.cpp(487): warning C4244: “=”: 从“const double”转换到“char”，可能丢失数据
+..\..\src\variant\Variant.cpp(455): warning C4244: “=”: 从“const unsigned long”转换到“short”，可能丢失数据
+  ..\..\src\variant\Variant.cpp(586): note: 参见对正在编译的函数 模板 实例化“T ff::Variant::toValue<short>(void) const”的引用
+          with
+          [
+              T=short
+          ]
+..\..\src\variant\Variant.cpp(459): warning C4244: “=”: 从“const unsigned __int64”转换到“short”，可能丢失数据
+..\..\src\variant\Variant.cpp(475): warning C4244: “=”: 从“const long”转换到“short”，可能丢失数据
+..\..\src\variant\Variant.cpp(479): warning C4244: “=”: 从“const __int64”转换到“short”，可能丢失数据
+..\..\src\variant\Variant.cpp(483): warning C4244: “=”: 从“const float”转换到“short”，可能丢失数据
+..\..\src\variant\Variant.cpp(487): warning C4244: “=”: 从“const double”转换到“short”，可能丢失数据
+..\..\src\variant\Variant.cpp(459): warning C4244: “=”: 从“const unsigned __int64”转换到“int”，可能丢失数据
+  ..\..\src\variant\Variant.cpp(590): note: 参见对正在编译的函数 模板 实例化“T ff::Variant::toValue<int>(void) const”的引用
+          with
+          [
+              T=int
+          ]
+..\..\src\variant\Variant.cpp(479): warning C4244: “=”: 从“const __int64”转换到“int”，可能丢失数据
+..\..\src\variant\Variant.cpp(483): warning C4244: “=”: 从“const float”转换到“int”，可能丢失数据
+..\..\src\variant\Variant.cpp(487): warning C4244: “=”: 从“const double”转换到“int”，可能丢失数据
+..\..\src\variant\Variant.cpp(459): warning C4244: “=”: 从“const unsigned __int64”转换到“long”，可能丢失数据
+  ..\..\src\variant\Variant.cpp(594): note: 参见对正在编译的函数 模板 实例化“T ff::Variant::toValue<long>(void) const”的引用
+          with
+          [
+              T=long
+          ]
+..\..\src\variant\Variant.cpp(479): warning C4244: “=”: 从“const __int64”转换到“long”，可能丢失数据
+..\..\src\variant\Variant.cpp(483): warning C4244: “=”: 从“const float”转换到“long”，可能丢失数据
+..\..\src\variant\Variant.cpp(487): warning C4244: “=”: 从“const double”转换到“long”，可能丢失数据
+..\..\src\variant\Variant.cpp(483): warning C4244: “=”: 从“const float”转换到“__int64”，可能丢失数据
+  ..\..\src\variant\Variant.cpp(598): note: 参见对正在编译的函数 模板 实例化“T ff::Variant::toValue<__int64>(void) const”的引用
+          with
+          [
+              T=__int64
+          ]
+..\..\src\variant\Variant.cpp(487): warning C4244: “=”: 从“const double”转换到“__int64”，可能丢失数据
+..\..\src\variant\Variant.cpp(455): warning C4244: “=”: 从“const unsigned long”转换到“unsigned short”，可能丢失数据
+  ..\..\src\variant\Variant.cpp(602): note: 参见对正在编译的函数 模板 实例化“T ff::Variant::toValue<unsigned short>(void) const”的引用
+          with
+          [
+              T=unsigned short
+          ]
+..\..\src\variant\Variant.cpp(459): warning C4244: “=”: 从“const unsigned __int64”转换到“unsigned short”，可能丢失数据
+..\..\src\variant\Variant.cpp(475): warning C4244: “=”: 从“const long”转换到“unsigned short”，可能丢失数据
+..\..\src\variant\Variant.cpp(479): warning C4244: “=”: 从“const __int64”转换到“unsigned short”，可能丢失数据
+..\..\src\variant\Variant.cpp(483): warning C4244: “=”: 从“const float”转换到“unsigned short”，可能丢失数据
+..\..\src\variant\Variant.cpp(487): warning C4244: “=”: 从“const double”转换到“unsigned short”，可能丢失数据
+..\..\src\variant\Variant.cpp(459): warning C4244: “=”: 从“const unsigned __int64”转换到“unsigned int”，可能丢失数据
+  ..\..\src\variant\Variant.cpp(610): note: 参见对正在编译的函数 模板 实例化“T ff::Variant::toValue<unsigned int>(void) const”的引用
+          with
+          [
+              T=unsigned int
+          ]
+..\..\src\variant\Variant.cpp(479): warning C4244: “=”: 从“const __int64”转换到“unsigned int”，可能丢失数据
+..\..\src\variant\Variant.cpp(483): warning C4244: “=”: 从“const float”转换到“unsigned int”，可能丢失数据
+..\..\src\variant\Variant.cpp(487): warning C4244: “=”: 从“const double”转换到“unsigned int”，可能丢失数据
+..\..\src\variant\Variant.cpp(459): warning C4244: “=”: 从“const unsigned __int64”转换到“unsigned long”，可能丢失数据
+  ..\..\src\variant\Variant.cpp(614): note: 参见对正在编译的函数 模板 实例化“T ff::Variant::toValue<unsigned long>(void) const”的引用
+          with
+          [
+              T=unsigned long
+          ]
+..\..\src\variant\Variant.cpp(479): warning C4244: “=”: 从“const __int64”转换到“unsigned long”，可能丢失数据
+..\..\src\variant\Variant.cpp(483): warning C4244: “=”: 从“const float”转换到“unsigned long”，可能丢失数据
+..\..\src\variant\Variant.cpp(487): warning C4244: “=”: 从“const double”转换到“unsigned long”，可能丢失数据
+..\..\src\variant\Variant.cpp(483): warning C4244: “=”: 从“const float”转换到“unsigned __int64”，可能丢失数据
+  ..\..\src\variant\Variant.cpp(618): note: 参见对正在编译的函数 模板 实例化“T ff::Variant::toValue<unsigned __int64>(void) const”的引用
+          with
+          [
+              T=unsigned __int64
+          ]
+..\..\src\variant\Variant.cpp(487): warning C4244: “=”: 从“const double”转换到“unsigned __int64”，可能丢失数据
+..\..\src\variant\Variant.cpp(451): warning C4244: “=”: 从“const unsigned int”转换到“float”，可能丢失数据
+  ..\..\src\variant\Variant.cpp(622): note: 参见对正在编译的函数 模板 实例化“T ff::Variant::toValue<float>(void) const”的引用
+          with
+          [
+              T=float
+          ]
+..\..\src\variant\Variant.cpp(455): warning C4244: “=”: 从“const unsigned long”转换到“float”，可能丢失数据
+..\..\src\variant\Variant.cpp(459): warning C4244: “=”: 从“const unsigned __int64”转换到“float”，可能丢失数据
+..\..\src\variant\Variant.cpp(471): warning C4244: “=”: 从“const int”转换到“float”，可能丢失数据
+..\..\src\variant\Variant.cpp(475): warning C4244: “=”: 从“const long”转换到“float”，可能丢失数据
+..\..\src\variant\Variant.cpp(479): warning C4244: “=”: 从“const __int64”转换到“float”，可能丢失数据
+..\..\src\variant\Variant.cpp(487): warning C4244: “=”: 从“const double”转换到“float”，可能丢失数据
+..\..\src\variant\Variant.cpp(459): warning C4244: “=”: 从“const unsigned __int64”转换到“double”，可能丢失数据
+  ..\..\src\variant\Variant.cpp(626): note: 参见对正在编译的函数 模板 实例化“T ff::Variant::toValue<double>(void) const”的引用
+          with
+          [
+              T=double
+          ]
+..\..\src\variant\Variant.cpp(479): warning C4244: “=”: 从“const __int64”转换到“double”，可能丢失数据
+  libff.cpp
+  stdafx.cpp
+  dllmain.cpp
+    正在创建库 D:\Projects\libff\ff\msvc\libff\Release\libff.lib 和对象 D:\Projects\libff\ff\msvc\libff\Release\libff.exp
+  正在生成代码
+  All 3077 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  已完成代码的生成
+  libff.vcxproj -> D:\Projects\libff\ff\msvc\libff\Release\libff.dll
+  libff.vcxproj -> D:\Projects\libff\ff\msvc\libff\Release\libff.pdb (Full PDB)

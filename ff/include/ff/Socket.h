@@ -18,6 +18,7 @@
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #define SHUT_RDWR 2
+#define in_addr_t	ULONG
 
 #else
 
@@ -54,13 +55,13 @@ enum class SocketType {
 };
 #endif
 
-typedef __socket_type SockType;
+typedef int SockType;
 
 enum class IpVersion : char {
 	Unknown, V4, V6
 };
 
-struct SockAddr_t {
+struct LIBFF_API SockAddr_t {
 	sockaddr_storage sockaddr;
 
 	sockaddr_in* V4() const {
@@ -72,7 +73,7 @@ struct SockAddr_t {
 	}
 };
 
-class SockAddr {
+class LIBFF_API SockAddr {
 public:
 	SockAddr();
 	SockAddr(const std::string& host, uint16_t port);
@@ -157,6 +158,7 @@ public:
 private:
 	SocketFd m_socketFd;
 	bool m_useSelect;
+	IpVersion m_ipVer;
 };
 
 typedef std::shared_ptr<Socket> SocketPtr;

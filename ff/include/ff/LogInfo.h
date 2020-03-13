@@ -19,7 +19,7 @@
 namespace NS_FF {
 
 enum class LogLevel {
-	VERBOSE, DEBUG, INFO, WARNING, ERROR, FATAL
+	Verbose, Debug, Info, Warning, Error, Fatal
 };
 
 LIBFF_API std::string LogLevel2Str(LogLevel ll);

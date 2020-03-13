@@ -7,6 +7,10 @@ include_directories(
   include
 )
 
+add_definitions(
+	-DLIBFF_EXPORTS
+)
+
 add_compile_options(-Wno-narrowing)
 
 file(GLOB src_files "*.cpp" "src/*.cpp" "src/*/*.cpp")

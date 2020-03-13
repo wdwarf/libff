@@ -8,6 +8,7 @@
 #ifndef FF_IP_H_
 #define FF_IP_H_
 
+#include <ff/ff_config.h>
 #include <ff/Object.h>
 #include <ff/Exception.h>
 #include <ff/Buffer.h>
@@ -16,7 +17,7 @@
 
 namespace NS_FF {
 
-class LIBFF_API IP: public Object {
+class LIBFF_API IP {
 public:
 	IP();
 	IP(const std::string& ip);

@@ -9,176 +9,115 @@
 #include <ff/File.h>
 #include <mutex>
 #include <iostream>
+#include <direct.h>
 
 using namespace std;
 
+#ifdef _WIN32
+#define _getcwd_ _getcwd
+#else
+#define _getcwd_ getcwd
+#endif
+
 namespace NS_FF {
 
-Application::ApplicationImpl::ApplicationImpl(Application* _app, int argc,
+	Application::ApplicationImpl::ApplicationImpl(Application* _app, int argc,
 		char** argv) :
 		m_app(_app), m_exitCode(0), m_running(false) {
-	for (int i = 0; i < argc; ++i) {
-		this->m_cmdLines.push_back(argv[i]);
-	}
-}
-
-Application::ApplicationImpl::~ApplicationImpl() {
-}
-
-int Application::ApplicationImpl::run() {
-	{
-		std::lock_guard<mutex> lk(this->m_mutex);
-
-		if (this->m_running)
-			return -1;
-		this->m_exitCode = 0;
-		this->m_running = true;
-	}
-
-	this->m_app->onInitialize();
-	this->m_app->onRun();
-
-	thread eventThread([&] {
-		while (this->m_running) {
-			this->update(100);
+		for (int i = 0; i < argc; ++i) {
+			this->m_cmdLines.push_back(argv[i]);
 		}
-	});
-	eventThread.join();
-
-	this->m_app->onUninitialize();
-
-	std::lock_guard<mutex> lk(this->m_mutex);
-	this->m_running = false;
-	return this->m_exitCode;
-}
-
-void Application::ApplicationImpl::exit(int code) {
-	std::lock_guard<mutex> lk(this->m_mutex);
-
-	if (!this->m_running)
-		return;
-
-	this->signal(APP_MSG_EXIT, code);
-}
-
-int Application::ApplicationImpl::getExitCode() const {
-	return this->m_exitCode;
-}
-
-const std::vector<std::string>& Application::ApplicationImpl::getCommandLines() const {
-	return this->m_cmdLines;
-}
-
-const std::string& Application::ApplicationImpl::getCommandLine(
-		int index) const {
-	return this->m_cmdLines[index];
-}
-
-int Application::ApplicationImpl::getCommandLineCount() const {
-	return this->m_cmdLines.size();
-}
-
-const Variant& Application::ApplicationImpl::getValue(
-		const std::string& key) const {
-	return this->m_settings.getValue(key);
-}
-
-void Application::ApplicationImpl::setValue(const std::string& key,
-		const Variant& value) {
-	this->m_settings.setValue(key, value);
-}
-
-bool Application::ApplicationImpl::hasValue(const std::string& key) const {
-	return this->m_settings.hasValue(key);
-}
-
-void Application::ApplicationImpl::removeValue(const std::string& key) {
-	this->m_settings.removeValue(key);
-}
-
-std::set<std::string> Application::ApplicationImpl::getKeys() const {
-	return this->m_settings.getKeys();
-}
-
-void Application::ApplicationImpl::saveSettings(const std::string& file) {
-	this->m_settings.saveToFile(file);
-}
-
-void Application::ApplicationImpl::loadSettings(const std::string& file) {
-	this->m_settings.loadFromFile(file);
-}
-
-void Application::ApplicationImpl::sendMessage(uint32_t msgId, uint32_t msgData,
-		MsgHandler callBack, int32_t timeoutMs) {
-	auto serialNum = this->signal(msgId, msgData);
-	if (callBack) {
-		std::lock_guard<mutex> lk(this->m_serialNum2MsgCallbackMutex);
-		this->m_serialNum2MsgCallback.insert(make_pair(serialNum, callBack));
 	}
-}
 
-void Application::ApplicationImpl::responseMessage(uint32_t serialNum, uint64_t msgId, uint64_t msgData){
-	this->signalRsp(serialNum, msgId, msgData);
-}
+	Application::ApplicationImpl::~ApplicationImpl() {
+	}
 
-void Application::ApplicationImpl::subscribeMsgHandler(uint32_t msgId,
-		MsgHandler handler) {
-	std::lock_guard<mutex> lk(this->m_msgId2MsgCallbackMutex);
-	this->m_msgId2MsgCallback.insert(make_pair(msgId, handler));
-}
+	int Application::ApplicationImpl::run() {
+		{
+			std::lock_guard<std::mutex> lk(this->m_mutex);
 
-void Application::ApplicationImpl::onSignal(const SignalInfo& sig) {
-	switch (sig.sigId) {
-	case APP_MSG_EXIT: {
+			if (this->m_running)
+				return -1;
+			this->m_exitCode = 0;
+			this->m_running = true;
+		}
+
+		this->m_app->onInitialize();
+		this->m_app->onRun();
+
+		{
+			std::unique_lock<std::mutex> lk(this->m_mutex);
+			this->m_cond.wait(lk, [&] { return (false == this->m_running); });
+		}
+
+		this->m_app->onUninitialize();
+
+		std::lock_guard<std::mutex> lk(this->m_mutex);
+		this->m_running = false;
+		return this->m_exitCode;
+	}
+
+	void Application::ApplicationImpl::exit(int code) {
+		std::lock_guard<std::mutex> lk(this->m_mutex);
+
 		if (!this->m_running)
 			return;
-		std::lock_guard<mutex> lk(this->m_mutex);
-		this->m_exitCode = sig.sigEvent;
 		this->m_running = false;
-		break;
-	}
-	default: {
-		std::lock_guard<mutex> lk(this->m_msgId2MsgCallbackMutex);
-	    auto callbackRange = this->m_msgId2MsgCallback.equal_range(sig.sigId);
-	    if(callbackRange.first != this->m_msgId2MsgCallback.end())
-	    {
-	        for (auto it = callbackRange.first ; it != callbackRange.second; ++it)
-	        	it->second(sig.serialNum, sig.sigId, sig.sigEvent);
-	    }
-	    break;
-	}
-	}
-}
-
-void Application::ApplicationImpl::onSignalRsp(const SignalInfo& sigRsp) {
-	MsgHandler func;
-	{
-		std::lock_guard<mutex> lk(this->m_serialNum2MsgCallbackMutex);
-		auto it = this->m_serialNum2MsgCallback.find(sigRsp.serialNum);
-		if (it == this->m_serialNum2MsgCallback.end())
-			return;
-		func = it->second;
-		this->m_serialNum2MsgCallback.erase(it);
+		this->m_exitCode = code;
+		this->m_cond.notify_one();
 	}
 
-	if(func)
-		func(sigRsp.serialNum, sigRsp.sigId, sigRsp.sigEvent);
-}
-
-std::string Application::ApplicationImpl::GetApplicationPath() {
-	char path[256] = { 0 };
-	if (::readlink("/proc/self/exe", path, 256) <= 0) {
-		return "";
+	int Application::ApplicationImpl::getExitCode() const {
+		return this->m_exitCode;
 	}
-	return path;
-}
 
-std::string Application::ApplicationImpl::GetApplicationName() {
-	return File(Application::ApplicationImpl::GetApplicationPath()).getName();
-}
+	bool Application::ApplicationImpl::isRunning() const {
+		return this->m_running;
+	}
 
-std::string Application::ApplicationImpl::GetCurrentWorkDir() {
-	return ::getcwd(NULL, 0);
-}
+	const std::vector<std::string>& Application::ApplicationImpl::getCommandLines() const {
+		return this->m_cmdLines;
+	}
+
+	const std::string& Application::ApplicationImpl::getCommandLine(
+		int index) const {
+		return this->m_cmdLines[index];
+	}
+
+	int Application::ApplicationImpl::getCommandLineCount() const {
+		return this->m_cmdLines.size();
+	}
+
+	std::string Application::ApplicationImpl::GetApplicationPath() {
+#ifdef _WIN32
+		TCHAR cPath[1024] = { 0 };
+		::ZeroMemory(cPath, 1024);
+		GetModuleFileName(NULL, cPath, 1024);
+		return cPath;
+#else
+		char path[256] = { 0 };
+		if (::readlink("/proc/self/exe", path, 256) <= 0) {
+			return "";
+		}
+		return path;
+#endif
+	}
+
+	std::string Application::ApplicationImpl::GetApplicationName() {
+		auto path = Application::ApplicationImpl::GetApplicationPath();
+		auto pos = path.find_last_of('/');
+		if (string::npos == pos)
+		{
+			pos = path.find_last_of('\\');
+			if (string::npos == pos)
+				return path;
+		}
+
+		return path.substr(pos + 1);
+	}
+
+	std::string Application::ApplicationImpl::GetCurrentWorkDir() {
+		return _getcwd_(NULL, 0);
+	}
 
 } /* namespace NS_FF */

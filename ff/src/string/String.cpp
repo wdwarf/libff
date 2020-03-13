@@ -5,13 +5,13 @@
  *      Author: ducky
  */
 
+#include <ff/String.h>
 #include <string>
 #include <cstring>
 #include <sstream>
 #include <functional>
 #include <algorithm>
 #include <ff/Exception.h>
-#include <ff/String.h>
 
 using namespace std;
 

@@ -8,6 +8,8 @@
 #ifndef FF_EPOLL_H_
 #define FF_EPOLL_H_
 
+#ifndef _WIN32
+
 #include <functional>
 #include <mutex>
 #include <map>
@@ -103,4 +105,5 @@ private:
 
 } /* namespace NS_FF */
 
+#endif
 #endif /* FF_EPOLL_H_ */

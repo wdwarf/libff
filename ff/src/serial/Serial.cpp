@@ -5,6 +5,8 @@
  *      Author: liyawu
  */
 
+#ifndef _WIN32
+
 #include <ff/Serial.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -540,3 +542,4 @@ void Serial::setStopBit(StopBit stopBit) {
 
 } /* namespace NS_FF */
 
+#endif

@@ -22,7 +22,7 @@ namespace NS_FF {
 class LIBFF_API Logger: public Noncopyable {
 public:
 	Logger(const std::string& module,
-			LogLevel logLevel = LogLevel::INFO);
+			LogLevel logLevel = LogLevel::Info);
 	virtual ~Logger();
 
 	const std::string& getModule() const;

@@ -366,7 +366,7 @@ long long File::getSize() const {
 		return 0;
 #else
 	if (S_ISDIR(buf.st_mode)) {
-		rturn 0;
+		return 0;
 	}
 #endif
 

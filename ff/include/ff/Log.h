@@ -28,7 +28,7 @@ public:
 	virtual ~Log();
 
 	static LoggerPtr CreateLogger(const std::string &module, LogLevel logLevel =
-			LogLevel::INFO);
+			LogLevel::Info);
 	static bool HasLogger(const std::string &module);
 	static LoggerPtr GetLogger(const std::string &module);
 	static void RemoveLogger(const std::string &module);

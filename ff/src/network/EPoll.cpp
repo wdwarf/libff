@@ -4,7 +4,7 @@
  *  Created on: Jan 10, 2020
  *      Author: liyawu
  */
-
+#ifndef _WIN32
 #include <ff/EPoll.h>
 #include <cstring>
 #include <memory>
@@ -336,3 +336,4 @@ void PollMgr::pollThreadFunc() {
 }
 
 } /* namespace NS_FF */
+#endif

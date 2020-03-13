@@ -8,6 +8,7 @@
 #ifndef FF_PROCESSIMPL_H_
 #define FF_PROCESSIMPL_H_
 
+#include <ff/ff_config.h>
 #include "ProcessImplLinux.h"
 #include "ProcessImplWindows.h"
 

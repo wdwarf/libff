@@ -145,9 +145,10 @@ int Process::ProcessImpl::Exec(const std::string &command, bool wait) {
 
 int Process::ProcessImpl::GetPidByName(const std::string &processName) {
 	File proc("/proc");
-	list<File> files = proc.list();
-	for (list<File>::iterator it = files.begin(); it != files.end(); ++it) {
-		File status(*it, "status");
+	auto it = proc.iterator();
+	while(it.next()){
+		auto currFile = it.getFile();
+		File status(currFile, "status");
 		if (!status.isExists())
 			continue;
 
@@ -169,7 +170,7 @@ int Process::ProcessImpl::GetPidByName(const std::string &processName) {
 			break;
 		}
 		if (name == processName) {
-			return Variant(it->getName());
+			return Variant(currFile.getName());
 		}
 	}
 	return -1;
@@ -189,9 +190,10 @@ bool Process::ProcessImpl::Kill(const std::string &processName, int code) {
 std::map<int, std::string> Process::ProcessImpl::ListProcesses() {
 	std::map<int, std::string> re;
 	File proc("/proc");
-	list<File> files = proc.list();
-	for (list<File>::iterator it = files.begin(); it != files.end(); ++it) {
-		File status(*it, "status");
+	auto it = proc.iterator();
+	while(it.next()){
+		auto currFile = it.getFile();
+		File status(currFile, "status");
 		if (!status.isExists())
 			continue;
 
@@ -209,7 +211,7 @@ std::map<int, std::string> Process::ProcessImpl::ListProcesses() {
 			if (string::npos == pos)
 				continue;
 			string name = TrimCopy(line.substr(pos + 1));
-			int pid = Variant(it->getName());
+			int pid = Variant(currFile.getName());
 			re.insert(make_pair(pid, name));
 			break;
 		}

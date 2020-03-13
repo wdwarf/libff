@@ -10,6 +10,10 @@
 
 #include <ff/ff_config.h>
 
+#ifdef _WIN32
+#include <Wincrypt.h>
+#endif
+
 namespace NS_FF {
 
 /**
@@ -41,7 +45,11 @@ public:
 	void getRandomBytes(void *buf, uint32_t size);
 
 private:
+#ifdef _WIN32
+	HCRYPTPROV m_fd;
+#else
 	int m_fd;
+#endif
 };
 
 } /* namespace NS_FF */
