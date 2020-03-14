@@ -9,15 +9,16 @@
 #include <ff/File.h>
 #include <mutex>
 #include <iostream>
-#include <direct.h>
-
-using namespace std;
 
 #ifdef _WIN32
+#include <direct.h>
+
 #define _getcwd_ _getcwd
 #else
 #define _getcwd_ getcwd
 #endif
+
+using namespace std;
 
 namespace NS_FF {
 

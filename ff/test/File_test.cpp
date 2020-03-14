@@ -17,13 +17,6 @@ using namespace NS_FF;
 TEST(FileTest, FileTest){
 	File file("/");
 
-	auto list = file.list();
-	for(auto f : list){
-		cout << f << endl;
-	}
-
-	cout << "========================" << endl;
-
 	auto iter = file.iterator();
 
 	while(iter.next()){

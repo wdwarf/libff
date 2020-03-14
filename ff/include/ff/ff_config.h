@@ -20,10 +20,14 @@
 #ifndef LIBFF_API
 #ifdef _WIN32
 
+#ifdef __MINGW32__
+#define LIBFF_API
+#else
 #ifdef LIBFF_EXPORTS
 #define LIBFF_API __declspec(dllexport)
 #else
 #define LIBFF_API __declspec(dllimport)
+#endif
 #endif
 
 #else

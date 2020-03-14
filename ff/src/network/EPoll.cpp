@@ -4,7 +4,7 @@
  *  Created on: Jan 10, 2020
  *      Author: liyawu
  */
-#ifndef _WIN32
+
 #include <ff/EPoll.h>
 #include <cstring>
 #include <memory>
@@ -12,9 +12,7 @@
 #include <algorithm>
 #include <unistd.h>
 #include <fcntl.h>
-#include <pthread.h>
 #include <sys/epoll.h>
-#include <sys/socket.h>
 #include <errno.h>
 #include <ff/Bind.h>
 
@@ -22,52 +20,29 @@ using namespace std;
 
 namespace NS_FF {
 
-SignalInfo::SignalInfo() : serialNum(0), sigId(0), sigEvent(0){
-}
-
-SignalInfo::SignalInfo(uint64_t sigId, uint64_t sigEvent) : serialNum(0){
-	this->sigId = sigId;
-	this->sigEvent = sigEvent;
-}
-
 EPoll::EPoll() :
 		m_epFd(epoll_create1(0)), m_fdChanged(false) {
 	this->initSignalPipe();
 
-	this->addFd(this->m_signalPipe[0], Bind(&EPoll::onSignalEvents, this));
+	this->addFd(this->m_signalPipe[0], Bind(&EPoll::onPipeEvents, this));
 	this->addEvents(this->m_signalPipe[0], POLLIN);
-
-	this->addFd(this->m_signalPipe[1], Bind(&EPoll::onSignalRspEvents, this));
-	this->addEvents(this->m_signalPipe[1], POLLIN);
 }
 
 EPoll::~EPoll() {
 	if (this->m_epFd >= 0)
 		::close(this->m_epFd);
-	this->uninitSignalPipe();
 }
 
 bool EPoll::initSignalPipe() {
 	this->m_signalPipe[0] = -1;
 	this->m_signalPipe[1] = -1;
 
-	//pipe(this->m_signalPipe)
-	if (0 != socketpair(PF_LOCAL, SOCK_STREAM, 0, this->m_signalPipe)
+	if (0 != pipe(this->m_signalPipe)
 			|| -1 == fcntl(this->m_signalPipe[0], F_SETFL, O_NONBLOCK)
 			|| -1 == fcntl(this->m_signalPipe[1], F_SETFL, O_NONBLOCK)) {
 		return false;
 	}
 	return true;
-}
-
-void EPoll::uninitSignalPipe() {
-	for (size_t i = 0; i < sizeof(this->m_signalPipe); ++i) {
-		if (this->m_signalPipe[i] <= 0)
-			continue;
-		this->delFd(this->m_signalPipe[i]);
-		::close(this->m_signalPipe[i]);
-		this->m_signalPipe[i] = -1;
-	}
 }
 
 bool EPoll::addFd(int fd, const FdUpdateFunc& updateFunc) {
@@ -165,20 +140,12 @@ bool EPoll::delFdFromPoll(int fd) {
 	return (0 == ::epoll_ctl(this->m_epFd, EPOLL_CTL_DEL, fd, nullptr));
 }
 
-uint32_t EPoll::signal(uint64_t sigId, uint64_t sigEvent) {
-	static uint32_t serialNum = 0;
+void EPoll::signal() {
 	unique_lock<mutex> lk(this->m_signalMutex, defer_lock);
-	SignalInfo sigInfo(sigId, sigEvent);
-	sigInfo.serialNum = serialNum++;
-	::write(this->m_signalPipe[1], &sigInfo, sizeof(sigInfo));
-	return sigInfo.serialNum;
-}
-
-void EPoll::signalRsp(uint32_t serialNum, uint64_t sigId, uint64_t sigEvent){
-	unique_lock<mutex> lk(this->m_signalMutex, defer_lock);
-	SignalInfo sigInfo(sigId, sigEvent);
-	sigInfo.serialNum = serialNum;
-	::write(this->m_signalPipe[0], &sigInfo, sizeof(sigInfo));
+	if (!lk.try_lock())
+		return;
+	char b = true;
+	::write(this->m_signalPipe[1], &b, 1);
 }
 
 bool EPoll::setEvent2Fd(int fd, int events) {
@@ -283,20 +250,10 @@ void EPoll::update(int pollTimeout) {
 
 }
 
-void EPoll::onSignalEvents(int fd, int events) {
+void EPoll::onPipeEvents(int fd, int events) {
 	if (events & POLLIN) {
-		SignalInfo sig;
-		if (read(fd, &sig, sizeof(SignalInfo)) == sizeof(SignalInfo)) {
-			this->onSignal(sig);
-		};
-	}
-}
-
-void EPoll::onSignalRspEvents(int fd, int events) {
-	if (events & POLLIN) {
-		SignalInfo sig;
-		if (read(fd, &sig, sizeof(SignalInfo)) == sizeof(SignalInfo)) {
-			this->onSignalRsp(sig);
+		char b;
+		while (read(fd, &b, 1) > 0) {
 		};
 	}
 }
@@ -336,4 +293,3 @@ void PollMgr::pollThreadFunc() {
 }
 
 } /* namespace NS_FF */
-#endif

@@ -23,15 +23,6 @@ namespace NS_FF {
 
 typedef std::function<void(int, int)> FdUpdateFunc;
 
-struct SignalInfo{
-	uint32_t serialNum;
-	uint64_t sigId;
-	uint64_t sigEvent;
-
-	SignalInfo();
-	SignalInfo(uint64_t sigId, uint64_t sigEvent);
-};
-
 class EPoll {
 public:
 	EPoll();
@@ -43,8 +34,7 @@ public:
 	bool delEvents(int fd, int events);
 	void update(int pollTimeout);
 
-	uint32_t signal(uint64_t sigId = 0, uint64_t sigEvent = 0);
-	void signalRsp(uint32_t serialNum, uint64_t sigRspId = 0, uint64_t sigEvent = 0);
+	void signal();
 protected:
 	int m_epFd;
 	int m_signalPipe[2];
@@ -71,10 +61,7 @@ protected:
 	bool setEvent2Fd(int fd, int events);
 
 	void createNativePolls();
-	virtual void onSignal(const SignalInfo& sig){}
-	virtual void onSignalRsp(const SignalInfo& sigRsp){}
-	void onSignalEvents(int fd, int events);
-	void onSignalRspEvents(int fd, int events);
+	void onPipeEvents(int fd, int events);
 	bool doPoll(std::vector<pollfd>& ofds, int epFd, pollfd *fds, nfds_t nfds,
 			int timeout);
 };

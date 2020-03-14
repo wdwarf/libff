@@ -24,6 +24,10 @@ using namespace NS_FF;
 TEST(TcpConnectionTest, TcpConnectionTest4) {
 	bool stoped = false;
 	bool exitFlag = false;
+
+	bool svrAccepted = false;
+	bool dataRecved = false;
+
 	mutex m;
 	condition_variable cond;
 	std::unique_lock<mutex> lk(m);
@@ -31,14 +35,11 @@ TEST(TcpConnectionTest, TcpConnectionTest4) {
 	TcpConnectionPtr svr = TcpConnection::CreateInstance();
 	TcpConnectionPtr clientPtr = TcpConnection::CreateInstance();
 
-	if(!svr->listen(5678, "127.0.0.1", IpVersion::V4)){
-		LOGD << "server listen failed.";
-		return;
-	}
+	EXPECT_TRUE(svr->listen(5678, "127.0.0.1", IpVersion::V4)) << "server listen failed.";
 	set<TcpConnectionPtr> clients;
 	svr->onAccept([&](const TcpConnectionPtr& tcpSock) {
+		svrAccepted = true;
 		clients.insert(tcpSock);
-		cout << clients.size() << endl;
 		LOGD << "tcp client connected." << tcpSock->getSocket().getRemoteAddress()
 				<< ":" << tcpSock->getSocket().getRemotePort();
 		//client = tcpSock;
@@ -68,9 +69,10 @@ TEST(TcpConnectionTest, TcpConnectionTest4) {
 		cond.notify_one();
 	});
 
-	clientPtr->connect(5678, "127.0.0.1", 5679, "127.0.0.1");
+	EXPECT_TRUE(clientPtr->connect(5678, "127.0.0.1", 5679, "127.0.0.1"));
 	clientPtr->onData(
-			[&clientPtr](const uint8_t* data, uint32_t len, const TcpConnectionPtr& conn) {
+			[&clientPtr, &dataRecved](const uint8_t* data, uint32_t len, const TcpConnectionPtr& conn) {
+				dataRecved = true;
 				LOGD << "server rsp data: " << Buffer::ToHexString(data, len) << endl;
 				clientPtr->send("exit", 4);
 			});
@@ -80,6 +82,9 @@ TEST(TcpConnectionTest, TcpConnectionTest4) {
 	clientPtr->send("1234", 4);
 
 	cond.wait_for(lk, seconds(5), [&] {return stoped;});
+
+	EXPECT_TRUE(svrAccepted);
+	EXPECT_TRUE(dataRecved);
 }
 
 TEST(TcpConnectionTest, TcpConnectionTest6) {
@@ -99,7 +104,6 @@ TEST(TcpConnectionTest, TcpConnectionTest6) {
 	set<TcpConnectionPtr> clients;
 	svr->onAccept([&](const TcpConnectionPtr& tcpSock) {
 		clients.insert(tcpSock);
-		cout << clients.size() << endl;
 		LOGD << "tcp client connected." << tcpSock->getSocket().getRemoteAddress()
 				<< ":" << tcpSock->getSocket().getRemotePort();
 		//client = tcpSock;
@@ -114,11 +118,8 @@ TEST(TcpConnectionTest, TcpConnectionTest6) {
 					});
 			tcpSock->onClose([&exitFlag, &svr, &clients](const TcpConnectionPtr& conn) {
 						LOGD << "tcp client closed";
-						//svr.stop();
 						clients.erase(conn);
-						cout << clients.size() << endl;
 						if(exitFlag && clients.empty()) svr->close();
-						//cout << "tcpSock.use_count(): " << tcpSock.use_count() << endl;
 					});
 
 		});
