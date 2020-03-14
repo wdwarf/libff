@@ -5,6 +5,8 @@
  *      Author: liyawu
  */
 
+#ifndef _WIN32
+
 #include <ff/EPoll.h>
 #include <cstring>
 #include <memory>
@@ -272,6 +274,8 @@ EPoll& PollMgr::getEPoll() {
 }
 
 void PollMgr::start() {
+	if(!this->m_stoped)
+		return;
 	this->m_stoped = false;
 	this->m_pollThread = thread(&PollMgr::pollThreadFunc, this);
 }
@@ -293,3 +297,4 @@ void PollMgr::pollThreadFunc() {
 }
 
 } /* namespace NS_FF */
+#endif
