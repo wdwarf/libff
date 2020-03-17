@@ -55,6 +55,7 @@ public:
 	void zero();
 
 	String toHexString() const;
+	String toBinaryString() const;
 	void fromHexString(const String& hexStr);
 	int read(void* buf, unsigned int size);
 	void resetReadPos();
@@ -91,7 +92,7 @@ public:
 	Buffer& operator<<(std::istream& i);
 	Buffer& operator<<(const String& s);
 
-	friend std::ostream& operator<<(std::ostream& o, const Buffer& buffer);
+	friend LIBFF_API std::ostream& operator<<(std::ostream& o, const Buffer& buffer);
 	static void ReverseBytes(void* buf, int size);
 	static String ToHexString(const void* buf, int size);
 

@@ -13,20 +13,20 @@ Endian Endian::GetHostEndian() {
 	static unsigned short n = 0x1234;
 	unsigned char* buf = (unsigned char*) &n;
 	if (0x34 == buf[0]) {
-		return Endian(EndianType::SMALL);
+		return Endian(EndianType::Small);
 	} else {
-		return Endian(EndianType::BIG);
+		return Endian(EndianType::Big);
 	}
 }
 
 Endian Endian::GetDefEndian() {
 	switch (Endian::GetHostEndian().getEndianType()) {
-	case EndianType::SMALL:
-		return Endian(EndianType::BIG);
-	case EndianType::BIG:
-		return EndianType::SMALL;
+	case EndianType::Small:
+		return Endian(EndianType::Big);
+	case EndianType::Big:
+		return EndianType::Small;
 	}
-	return Endian(EndianType::SMALL);
+	return Endian(EndianType::Small);
 }
 
 EndianType Endian::getEndianType() const {

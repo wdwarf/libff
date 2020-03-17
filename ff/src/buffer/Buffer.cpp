@@ -118,6 +118,10 @@ String Buffer::toHexString() const {
 	return this->impl->toHexString();
 }
 
+String Buffer::toBinaryString() const {
+	return this->impl->toBinaryString();
+}
+
 void Buffer::fromHexString(const String& hexStr){
 	return this->impl->fromHexString(hexStr);
 }

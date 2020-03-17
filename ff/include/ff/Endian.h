@@ -13,7 +13,7 @@
 namespace NS_FF {
 
 enum class EndianType {
-	BIG, SMALL
+	Big, Small
 };
 
 #define __REVERSE_T T v = val;\
@@ -35,14 +35,14 @@ public:
 	bool isDifferenceEndian() const;
 
 	template<typename T> T toBig(const T& val) const {
-		if (EndianType::BIG == endianType) {
+		if (EndianType::Big == endianType) {
 			return val;
 		}
 		__REVERSE_T
 	}
 
 	template<typename T> T toSmall(const T& val) const {
-		if (EndianType::SMALL == endianType) {
+		if (EndianType::Small == endianType) {
 			return val;
 		}
 		__REVERSE_T

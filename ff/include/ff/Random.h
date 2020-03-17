@@ -23,21 +23,23 @@ namespace NS_FF {
  * 	uint64_t randomUint64Value = ran;
  */
 
-class Random {
+class LIBFF_API Random {
 public:
 	Random();
 	~Random();
 
 	template<typename T>
 	T random(){
-		T t = 0;
+		T t;
+		memset(&t, 0, sizeof(T));
 		getRandomBytes(&t, sizeof(T));
 		return t;
 	}
 
 	template<typename T>
 	operator T() {
-		T t = 0;
+		T t;
+		memset(&t, 0, sizeof(T));
 		getRandomBytes(&t, sizeof(T));
 		return t;
 	}

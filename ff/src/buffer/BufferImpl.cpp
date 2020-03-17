@@ -265,6 +265,17 @@ String Buffer::BufferImpl::toHexString() {
 	return ToHexString(this->getData(), this->getSize());
 }
 
+String Buffer::BufferImpl::toBinaryString() {
+	stringstream str;
+	for (int i = 0; i < this->getSize(); ++i) {
+		for (int j = 7; j >= 0; --j) {
+			str << ((this->data[i] >> j) & 0x01);
+		}
+		str << " ";
+	}
+	return str.str();
+}
+
 void Buffer::BufferImpl::fromHexString(const String& hexStr){
 	this->clear();
 

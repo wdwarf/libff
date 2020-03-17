@@ -43,6 +43,7 @@ public:
 	void zero();
 
 	String toHexString();
+	String toBinaryString();
 	void fromHexString(const String& hexStr);
 	int read(void* buf, unsigned int size);
 	void resetReadPos();

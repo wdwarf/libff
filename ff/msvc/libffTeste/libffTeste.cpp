@@ -7,10 +7,13 @@
 #include <ff/DateTime.h>
 #include <ff/File.h>
 #include <ff/Socket.h>
+#include <ff/Buffer.h>
 #include <cstring>
 #include <errno.h>
 #include <ff/Application.h>
 #include <ff/Variant.h>
+#include <ff/Random.h>
+#include <ff/Endian.h>
 
 using namespace std;
 using namespace ff;
@@ -21,8 +24,27 @@ namespace Test {
 	};
 }
 
+struct SS {
+	int n;
+	int m;
+	char buf[16];
+};
+
 int main()
 {
+	float f = 0.01;
+	cout << Buffer(&f, sizeof(f)).toHexString() << endl;
+	cout << Buffer(&f, sizeof(f)).toBinaryString() << endl;
+	int n = 0x01;
+	cout << Buffer(&n, 4).toHexString() << endl;
+	auto endian = Endian::GetHostEndian();
+	n = endian.toBig(n);
+	cout << Buffer(&n, 4).toHexString() << endl;
+	int i = 0;
+	Random rand;
+	while (++i < 50) {
+		cout << Buffer((rand.random<SS>()).buf, 16).toHexString() << endl;
+	}
 	Variant v = 10;
 	cout << v << endl;
 	cout << Application::GetApplicationPath() << endl;
