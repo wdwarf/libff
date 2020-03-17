@@ -11,6 +11,7 @@
 #include <cstring>
 #include <sstream>
 #include <iomanip>
+#include <algorithm>
 #include <vector>
 #include <ff/String.h>
 
@@ -119,11 +120,9 @@ void Buffer::BufferImpl::ReverseBytes(void* buf, int size) {
 	}
 
 	auto pH = static_cast<unsigned char*>(buf);
-	auto pE = static_cast<unsigned char*>(buf) + size - 1;
+	auto pE = pH + size - 1;
 	while (pH < pE) {
-		char c = *pH;
-		*pH = *pE;
-		*pE = c;
+		swap(*pH, *pE);
 		++pH;
 		--pE;
 	}
@@ -267,7 +266,7 @@ String Buffer::BufferImpl::toHexString() {
 
 String Buffer::BufferImpl::toBinaryString() {
 	stringstream str;
-	for (int i = 0; i < this->getSize(); ++i) {
+	for (unsigned int i = 0; i < this->getSize(); ++i) {
 		for (int j = 7; j >= 0; --j) {
 			str << ((this->data[i] >> j) & 0x01);
 		}
