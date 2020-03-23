@@ -634,6 +634,12 @@ int Socket::recvFrom(char* buf, socklen_t readBytes, string& ip, int& port,
 	return re;
 }
 
+void Socket::enableUdpBroadcast(bool enable)
+{
+	const int on = enable ? 1 : 0;
+	this->setsockOpt(SOL_SOCKET, SO_BROADCAST, &on, sizeof(on));
+}
+
 bool Socket::SetBlocking(int m_socketFd, bool isNonBlocking) {
 #if defined(WIN32) || defined(__MINGW32__)
 	unsigned long isFIONBIO = 1;

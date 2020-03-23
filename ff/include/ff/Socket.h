@@ -147,6 +147,7 @@ public:
 			int timeoutMs = -1);
 	int recvFrom(char* buf, socklen_t readBytes, std::string& ip, int& port,
 			int timeoutMs = -1);
+	void enableUdpBroadcast(bool enable = true);
 
 	static bool SetBlocking(int sockFd, bool isNonBlocking = true);
 	static bool IsNonBlocking(int sockFd);
