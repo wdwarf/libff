@@ -33,10 +33,7 @@ Buffer::Buffer(const Buffer& buffer) :
 		impl(new Buffer::BufferImpl(*buffer.impl)) {
 }
 
-Buffer::Buffer(Buffer&& buffer){
-	if(nullptr != this->impl)
-		delete this->impl;
-
+Buffer::Buffer(Buffer&& buffer) : impl(nullptr){
 	this->impl = buffer.impl;
 	buffer.impl = nullptr;
 }

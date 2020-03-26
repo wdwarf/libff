@@ -30,7 +30,6 @@ public:
 
 	bool next();
 	File getFile();
-
 private:
 	class FileIteratorImpl;
 	FileIteratorImpl* m_impl;
@@ -64,6 +63,7 @@ public:
 	bool moveTo(const std::string& path, bool forceReplace = false) const;
 
 	FileIterator iterator() const;
+
 	File cut(int count = 1) const;
 	DateTime getModifyTime() const;
 	DateTime getCreateTime() const;
