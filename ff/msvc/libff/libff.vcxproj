@@ -160,6 +160,7 @@
     <ClInclude Include="..\..\include\ff\Buffer.h" />
     <ClInclude Include="..\..\include\ff\CRC.h" />
     <ClInclude Include="..\..\include\ff\DateTime.h" />
+    <ClInclude Include="..\..\include\ff\DllLoader.h" />
     <ClInclude Include="..\..\include\ff\Endian.h" />
     <ClInclude Include="..\..\include\ff\EPoll.h" />
     <ClInclude Include="..\..\include\ff\ErrNo.h" />
@@ -215,6 +216,7 @@
     <ClCompile Include="..\..\src\datetime\Tick.cpp" />
     <ClCompile Include="..\..\src\datetime\Timestamp.cpp" />
     <ClCompile Include="..\..\src\db\Sqlite3DataBase.cpp" />
+    <ClCompile Include="..\..\src\dll\DllLoader.cpp" />
     <ClCompile Include="..\..\src\encrypt\Base64.cpp" />
     <ClCompile Include="..\..\src\encrypt\CRC.cpp" />
     <ClCompile Include="..\..\src\encrypt\MD5.cpp" />

@@ -67,6 +67,9 @@
     <Filter Include="源文件\serial">
       <UniqueIdentifier>{8697ac8f-ffc3-4f58-9625-d087cdf22db8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="源文件\dll">
+      <UniqueIdentifier>{2444edec-8eda-4b17-9852-8c484a15973a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -228,6 +231,9 @@
     <ClInclude Include="..\..\include\ff\Variant.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\ff\DllLoader.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -361,6 +367,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\serial\Serial.cpp">
       <Filter>源文件\serial</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\dll\DllLoader.cpp">
+      <Filter>源文件\dll</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
