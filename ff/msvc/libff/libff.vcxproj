@@ -199,6 +199,12 @@
     <ClInclude Include="..\..\include\ff\Timestamp.h" />
     <ClInclude Include="..\..\include\ff\UUID.h" />
     <ClInclude Include="..\..\include\ff\Variant.h" />
+    <ClInclude Include="..\..\include\ff\windows\AdoCatalog.h" />
+    <ClInclude Include="..\..\include\ff\windows\AdoConnection.h" />
+    <ClInclude Include="..\..\include\ff\windows\AdoField.h" />
+    <ClInclude Include="..\..\include\ff\windows\AdoFields.h" />
+    <ClInclude Include="..\..\include\ff\windows\AdoObject.h" />
+    <ClInclude Include="..\..\include\ff\windows\AdoRecordSet.h" />
     <ClInclude Include="..\..\src\app\ApplicationImpl.h" />
     <ClInclude Include="..\..\src\buffer\BufferImpl.h" />
     <ClInclude Include="..\..\src\process\ProcessImpl.h" />
@@ -250,6 +256,12 @@
     <ClCompile Include="..\..\src\thread\Thread.cpp" />
     <ClCompile Include="..\..\src\thread\ThreadPool.cpp" />
     <ClCompile Include="..\..\src\variant\Variant.cpp" />
+    <ClCompile Include="..\..\src\windows\AdoCatalog.cpp" />
+    <ClCompile Include="..\..\src\windows\AdoConnection.cpp" />
+    <ClCompile Include="..\..\src\windows\AdoField.cpp" />
+    <ClCompile Include="..\..\src\windows\AdoFields.cpp" />
+    <ClCompile Include="..\..\src\windows\AdoObject.cpp" />
+    <ClCompile Include="..\..\src\windows\AdoRecordSet.cpp" />
     <ClCompile Include="dllmain.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">

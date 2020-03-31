@@ -14,6 +14,7 @@
 #include <ff/Variant.h>
 #include <ff/Random.h>
 #include <ff/Endian.h>
+#include <ff/DllLoader.h>
 
 using namespace std;
 using namespace ff;
@@ -32,6 +33,22 @@ struct SS {
 
 int main()
 {
+	try {
+		typedef int (*FntestDll)(void);
+		FntestDll f = nullptr;
+		DllLoader ld("D:\\Projects\\libff\\ff\\msvc\\libff\\Debug\\testDll.dll");
+		f = (FntestDll)ld.getProc("fntestDll");
+		cout << f() << endl;
+
+
+	}
+	catch (exception& e) {
+		cout << e.what() << endl;
+		cin.get();
+		return -1;
+	}
+
+
 	float f = 0.01;
 	cout << Buffer(&f, sizeof(f)).toHexString() << endl;
 	cout << Buffer(&f, sizeof(f)).toBinaryString() << endl;

@@ -41,7 +41,7 @@ public:
 	bool connect(uint16_t remotePort, const std::string& remoteHost,
 			uint16_t localPort = 0, const std::string& localIp = "");
 
-	void send(const void* buf, u32 bufSize);
+	void send(const void* buf, uint32_t bufSize);
 	TcpConnection& onData(const OnDataFunc& func);
 	TcpConnection& onClose(const OnCloseFunc& func);
 	TcpConnection& onAccept(const OnAcceptFunc& func);

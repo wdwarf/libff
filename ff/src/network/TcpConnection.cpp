@@ -129,7 +129,7 @@ const Socket& TcpConnection::getSocket() const {
 	return this->m_socket;
 }
 
-void TcpConnection::send(const void* buf, u32 bufSize) {
+void TcpConnection::send(const void* buf, uint32_t bufSize) {
 	if (this->m_isServer)
 		return;
 

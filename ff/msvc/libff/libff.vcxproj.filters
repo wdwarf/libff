@@ -70,6 +70,12 @@
     <Filter Include="源文件\dll">
       <UniqueIdentifier>{2444edec-8eda-4b17-9852-8c484a15973a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="源文件\windows">
+      <UniqueIdentifier>{8b9c7fac-6839-49db-a791-6454c554a939}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\windows">
+      <UniqueIdentifier>{cdd7dd8c-5684-4e98-9b99-9deebe8120bf}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -234,6 +240,24 @@
     <ClInclude Include="..\..\include\ff\DllLoader.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\ff\windows\AdoObject.h">
+      <Filter>头文件\windows</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\ff\windows\AdoCatalog.h">
+      <Filter>头文件\windows</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\ff\windows\AdoConnection.h">
+      <Filter>头文件\windows</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\ff\windows\AdoField.h">
+      <Filter>头文件\windows</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\ff\windows\AdoFields.h">
+      <Filter>头文件\windows</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\ff\windows\AdoRecordSet.h">
+      <Filter>头文件\windows</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -370,6 +394,24 @@
     </ClCompile>
     <ClCompile Include="..\..\src\dll\DllLoader.cpp">
       <Filter>源文件\dll</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\windows\AdoObject.cpp">
+      <Filter>源文件\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\windows\AdoRecordSet.cpp">
+      <Filter>源文件\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\windows\AdoCatalog.cpp">
+      <Filter>源文件\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\windows\AdoConnection.cpp">
+      <Filter>源文件\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\windows\AdoField.cpp">
+      <Filter>源文件\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\windows\AdoFields.cpp">
+      <Filter>源文件\windows</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

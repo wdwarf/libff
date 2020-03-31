@@ -9,6 +9,9 @@
 #define FF_FF_CONFIG_H_
 
 #include <cstdint>
+#include <string>
+#include <sstream>
+#include <iostream>
 
 #define NS_FF ff
 
@@ -36,21 +39,26 @@
 #endif
 
 
-namespace NS_FF {
+#ifdef UNICODE
 
-typedef unsigned char boolean;
+#define _W(var) w##var
 
-typedef char i8;
-typedef short i16;
-typedef int i32;
-typedef long long i64;
+#ifndef _T
+#define _T(x)	L##x
+#endif
 
-typedef unsigned char u8;
-typedef unsigned short u16;
-typedef unsigned int u32;
-typedef unsigned long long u64;
+#else
 
-}
+#define _W(var) var
+
+#ifndef _T
+#define _T(x)	x
+#endif
+
+#endif
+
+using StringT = std::_W(string);
+using SStreamT = std::_W(stringstream);
 
 //#define __USE_SQLITE3_DB__
 

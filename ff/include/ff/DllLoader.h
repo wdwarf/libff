@@ -27,7 +27,7 @@ EXCEPTION_DEF(DllException);
 /**
  * @bref 动态库加载器
  */
-class DllLoader: public Noncopyable {
+class LIBFF_API DllLoader: public Noncopyable {
 public:
 	DllLoader();
 	DllLoader(const std::string &dllPath) _throws(DllException);

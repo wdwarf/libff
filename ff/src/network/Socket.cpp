@@ -301,7 +301,7 @@ bool Socket::createUdp(IpVersion ver) {
 	return this->create(IpVersion::V4 == ver ? PF_INET : PF_INET6, SOCK_DGRAM);
 }
 
-bool Socket::connect(const std::string& host, u16 port, int msTimeout) {
+bool Socket::connect(const std::string& host, uint16_t port, int msTimeout) {
 	if (this->m_socketFd <= 0) {
 		return false;
 	}
@@ -347,7 +347,7 @@ bool Socket::connect(const std::string& host, u16 port, int msTimeout) {
 	return re;
 }
 
-bool Socket::bind(u16 port, const std::string& ip) {
+bool Socket::bind(uint16_t port, const std::string& ip) {
 	if (this->m_socketFd <= 0)
 		return false;
 
