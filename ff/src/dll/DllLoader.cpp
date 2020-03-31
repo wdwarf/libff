@@ -13,6 +13,8 @@
 #include <dlfcn.h>
 #endif
 
+#include <ff/ErrNo.h>
+
 using namespace std;
 
 namespace NS_FF {
@@ -21,7 +23,7 @@ DllLoader::DllLoader() :
 		m_handle(NULL) {
 }
 
-DllLoader::DllLoader(const std::string& dllPath) :
+DllLoader::DllLoader(const std::string &dllPath) :
 		m_handle(NULL) {
 	this->load(dllPath);
 }
@@ -30,23 +32,31 @@ DllLoader::~DllLoader() {
 	this->unload();
 }
 
-bool DllLoader::load(const std::string& dllPath) {
+void DllLoader::load(const std::string &dllPath) {
 	this->unload();
 #ifdef _WIN32
 	this->m_handle = LoadLibrary(dllPath.c_str());
 #else
 	this->m_handle = dlopen(dllPath.c_str(), RTLD_LAZY);
 #endif
-	return (NULL != this->m_handle);
+	if (NULL == this->m_handle) {
+#ifdef _WIN32
+		ErrNo errNo;
+		THROW_EXCEPTION(DllException, errNo.getErrorStr(), errNo.getErrorNo());
+#else
+		THROW_EXCEPTION(DllException, dlerror(), 0);
+#endif
+
+	}
 }
 
 bool DllLoader::isLoaded() const {
 	return (NULL != this->m_handle);
 }
 
-bool DllLoader::unload() {
+void DllLoader::unload() {
 	if (NULL == this->m_handle)
-		return true;
+		return;
 
 #ifdef _WIN32
 	FreeLibrary(this->m_handle);
@@ -54,10 +64,9 @@ bool DllLoader::unload() {
 	dlclose(this->m_handle);
 #endif
 	this->m_handle = NULL;
-	return true;
 }
 
-void* DllLoader::getProc(const std::string& procName) {
+void* DllLoader::getProc(const std::string &procName) {
 	if (!this->isLoaded() || procName.empty())
 		return NULL;
 
@@ -72,11 +81,11 @@ DLLHANDLE DllLoader::getModuleHandle() {
 	return this->m_handle;
 }
 
-DllLoader::operator bool() const{
+DllLoader::operator bool() const {
 	return this->isLoaded();
 }
 
-void* DllLoader::operator()(const std::string& procName){
+void* DllLoader::operator()(const std::string &procName) {
 	return this->getProc(procName);
 }
 

@@ -20,19 +20,27 @@ public:
 	StringWrapper();
 	virtual ~StringWrapper();
 
-	template<class T> StringWrapper(const std::initializer_list<T>& args) {
-		for (auto& arg : args)
-			*((std::stringstream*) this) << arg;
-	}
-
 	template<class T> StringWrapper(const T& t) {
 		std::stringstream& str = *this;
 		str << t;
 	}
 
+	template <typename T, typename... TAIL>
+	StringWrapper(const T& t, const TAIL&... tail){
+		this->operator()(t);
+		this->operator()(std::forward<TAIL>(tail)...);
+	}
+
 	template<class T> StringWrapper& operator()(const T& t) {
 		std::stringstream& str = *this;
 		str << t;
+		return *this;
+	}
+
+	template <typename T, typename... TAIL>
+	StringWrapper& operator()(const T& t, const TAIL&... tail) {
+		this->operator()(t);
+		this->operator()(std::forward<TAIL>(tail)...);
 		return *this;
 	}
 

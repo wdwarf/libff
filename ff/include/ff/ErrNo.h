@@ -13,19 +13,29 @@
 
 #ifdef _WIN32
 #include <Windows.h>
-typedef DWORD ErrorNo;
+typedef DWORD ErrorNo_t;
 #else
 #include <errno.h>
-typedef error_t ErrorNo;
+typedef error_t ErrorNo_t;
 #endif
 
 namespace NS_FF {
 
-LIBFF_API void SetLastErr(ErrorNo errNo, const std::string& errInfo = "");
-LIBFF_API ErrorNo GetLastErr();
-LIBFF_API std::string& GetLastErrInfo();
+class LIBFF_API ErrNo {
+public:
+	static ErrNo LastError();
 
-LIBFF_API ErrorNo GetSysLastErr();
+	ErrNo(ErrorNo_t errNo = 0);
+	~ErrNo() = default;
+
+	ErrorNo_t getErrorNo() const;
+	operator ErrorNo_t() const;
+	std::string getErrorStr() const;
+	operator std::string() const;
+
+private:
+	ErrorNo_t m_errNo;
+};
 
 } /* namespace NS_FF */
 

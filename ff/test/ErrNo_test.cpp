@@ -18,19 +18,5 @@ void f() {
 }
 
 TEST(TestErrNo, TestErrNo) {
-	thread t1([]() {
-		SetLastErr(123, "err info");
-		this_thread::sleep_for(std::chrono::seconds(1));
-		LOGD << "last errno: " << GetLastErr();
-		LOGD << "last err info: " << GetLastErrInfo();
-	});
 
-	thread t2([]() {
-		SetLastErr(1234, "err info 2");
-		LOGD << "last errno: " << GetLastErr();
-		LOGD << "last err info: " << GetLastErrInfo();
-	});
-
-	t1.join();
-	t2.join();
 }
