@@ -37,12 +37,12 @@ tick_t Tick::GetTickCount() {
 #endif
 }
 
-tick_t Tick::start() {
+tick_t Tick::tick() {
 	this->m_tick = Tick::GetTickCount();
 	return this->m_tick;
 }
 
-tick_t Tick::count() const {
+tick_t Tick::tock() const {
 	return (Tick::GetTickCount() - this->m_tick);
 }
 

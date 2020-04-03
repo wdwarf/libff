@@ -21,8 +21,8 @@ public:
 	Tick();
 	virtual ~Tick();
 
-	tick_t start() _throws(TickException);
-	tick_t count() const _throws(TickException);
+	tick_t tick() _throws(TickException);
+	tick_t tock() const _throws(TickException);
 
 	static tick_t GetTickCount() _throws(TickException);
 
