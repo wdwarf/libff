@@ -85,7 +85,7 @@ TEST(Base64Test, Base64Test){
 
 	int i = 0;
 	Tick tick;
-	tick.start();
+	tick.tick();
 	while (++i < 1000) {
 		auto strEnc = Base64::Encrypt(str);
 		//cout << strEnc << endl;
@@ -94,5 +94,5 @@ TEST(Base64Test, Base64Test){
 		//cout << ostr.str() << endl;
 		EXPECT_EQ(str, ostr.str());
 	}
-	cout << "tick: " << tick.count() << endl;
+	cout << "tick: " << tick.tock() << endl;
 }

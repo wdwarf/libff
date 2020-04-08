@@ -64,11 +64,11 @@ TEST(TestThreadPool, TestThreadPoolTimeout) {
 
 	Tick tick;
 	EXPECT_FALSE(tp.exec([]() { LOGD << "thread should not be executed."; }, 2000));
-	LOGD << "tick: " << tick.count();
+	LOGD << "tick: " << tick.tock();
 
 	this_thread::sleep_for(std::chrono::milliseconds(100));
 	LOGD << "begin thread 3";
-	tick.start();
+	tick.tick();
 	EXPECT_TRUE(tp.exec([]() { LOGD << "thread should be executed."; }, 5000));
-	LOGD << "tick2: " << tick.count();
+	LOGD << "tick2: " << tick.tock();
 }

@@ -71,9 +71,9 @@ void* DllLoader::getProc(const std::string &procName) {
 		return NULL;
 
 #ifdef _WIN32
-	return GetProcAddress(this->m_handle, procName.c_str());
+	return (void*)GetProcAddress(this->m_handle, procName.c_str());
 #else
-	return dlsym(this->m_handle, procName.c_str());
+	return (void*)dlsym(this->m_handle, procName.c_str());
 #endif
 }
 

@@ -15,7 +15,7 @@
 
 using namespace std;
 
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(__MINGW32__)
 #define strcasecmp		_strcmpi
 #endif
 
