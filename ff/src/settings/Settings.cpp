@@ -9,14 +9,11 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
-
 #include <errno.h>
 #include <cstring>
-
+#include <json/json.h>
 #include <ff/String.h>
 #include <ff/Base64.h>
-
-//#include <json/json.h>
 
 using namespace std;
 
@@ -31,7 +28,7 @@ Settings::~Settings() {
 	//
 }
 
-const Variant& Settings::getValue(const std::string& key) const {
+const Variant& Settings::getValue(const std::string &key) const {
 	std::lock_guard<mutex> lk(this->m_mutex);
 	ValueMap::const_iterator it = this->m_values.find(key);
 	if (it == this->m_values.end()) {
@@ -40,8 +37,8 @@ const Variant& Settings::getValue(const std::string& key) const {
 	return it->second;
 }
 
-Variant Settings::getValue(const std::string& key,
-		const Variant& defaultValue) const {
+Variant Settings::getValue(const std::string &key,
+		const Variant &defaultValue) const {
 	std::lock_guard<mutex> lk(this->m_mutex);
 	ValueMap::const_iterator it = this->m_values.find(key);
 	if (it == this->m_values.end()) {
@@ -50,22 +47,22 @@ Variant Settings::getValue(const std::string& key,
 	return it->second;
 }
 
-void Settings::setValue(const std::string& key, const Variant& value) {
+void Settings::setValue(const std::string &key, const Variant &value) {
 	std::lock_guard<mutex> lk(this->m_mutex);
 	this->m_values[key] = value;
 }
 
-bool Settings::hasValue(const std::string& key) const {
+bool Settings::hasValue(const std::string &key) const {
 	std::lock_guard<mutex> lk(this->m_mutex);
 	return (this->m_values.find(key) != this->m_values.end());
 }
 
-void Settings::removeValue(const std::string& key) {
+void Settings::removeValue(const std::string &key) {
 	std::lock_guard<mutex> lk(this->m_mutex);
 	this->m_values.erase(key);
 }
 
-const Variant& Settings::operator[](const std::string& key) const {
+const Variant& Settings::operator[](const std::string &key) const {
 	return this->getValue(key);
 }
 
@@ -86,58 +83,116 @@ std::set<std::string> Settings::getKeys() const {
 	return keys;
 }
 
-void Settings::saveToFile(const std::string& file) {
-	std::lock_guard<mutex> lk(this->m_mutex);
-	fstream f;
-	f.open(file.c_str(), ios::out | ios::trunc);
-	if (!f.is_open()) {
-		THROW_EXCEPTION(SettingsException,
-				"file[" + file + "] open failed. " + strerror(errno), errno);
+bool Settings::saveToFile(const std::string &file) {
+	std::lock_guard<std::mutex> lk(this->m_mutex);
+	Json::Value root;
+	for (auto p : this->m_values) {
+		auto names = Split(p.first, IsAnyOf("."),
+				StringCompressType::RemoveEmptyString);
+
+		Json::Value *pRoot = &root;
+		for (auto name : names) {
+			pRoot = &(*pRoot)[name];
+		}
+
+		switch (p.second.getVt()) {
+		case VariantType::BOOLEAN:
+			*pRoot = (bool) p.second;
+			break;
+		case VariantType::UCHAR:
+		case VariantType::USHORT:
+		case VariantType::UINT:
+		case VariantType::ULONG:
+		case VariantType::ULONGLONG:
+			*pRoot = (Json::UInt64) p.second;
+			break;
+		case VariantType::CHAR:
+		case VariantType::SHORT:
+		case VariantType::INT:
+		case VariantType::LONG:
+		case VariantType::LONGLONG:
+			*pRoot = (Json::Int64) p.second;
+			break;
+		case VariantType::FLOAT:
+		case VariantType::DOUBLE:
+			*pRoot = (double) p.second;
+			break;
+		default:
+			*pRoot = p.second.toString();
+			break;
+		}
 	}
 
-	for (ValueMap::iterator it = this->m_values.begin();
-			it != this->m_values.end(); ++it) {
-		f << Base64::Encrypt(it->first) << ":"
-				<< Base64::Encrypt(it->second.toString()) << endl;
-	}
+	Json::StreamWriterBuilder builder;
+	std::unique_ptr<Json::StreamWriter> writer(builder.newStreamWriter());
+	if (!writer)
+		return false;
 
-	f.close();
+	fstream f(file, ios::out | ios::trunc);
+	return (0 == writer->write(root, &f));
 }
 
-void Settings::loadFromFile(const std::string& file) {
-	std::lock_guard<mutex> lk(this->m_mutex);
-	fstream f;
-	f.open(file.c_str(), ios::in);
-	if (!f.is_open()) {
-		THROW_EXCEPTION(SettingsException,
-				"file[" + file + "] open failed. " + strerror(errno), errno);
+static void setVal_(Settings &settings, const std::string &name,
+		Json::Value &node) {
+	if (node.isString()) {
+		settings.setValue(name, node.asString());
+		return;
+	}
+	if (node.isBool()) {
+		settings.setValue(name, node.asBool());
+		return;
+	}
+	if (node.isInt() || node.isInt64()) {
+		settings.setValue(name, node.asInt64());
+		return;
+	}
+	if (node.isUInt() || node.isUInt64()) {
+		settings.setValue(name, node.asUInt64());
+		return;
+	}
+	if (node.isDouble()) {
+		settings.setValue(name, node.asDouble());
+		return;
 	}
 
-	while (!f.eof()) {
-		string line;
-		std::getline(f, line);
-		Trim(line);
-		if (line.empty())
+	settings.setValue(name, node.asString());
+}
+
+static void setVal(Settings &settings, const std::string &baseName,
+		Json::Value &node) {
+	for (auto name : node.getMemberNames()) {
+		string newName = name;
+		if (!baseName.empty())
+			newName = baseName + "." + newName;
+
+		auto n = node[name];
+		if (n.isObject()) {
+			setVal(settings, newName, n);
 			continue;
+		}
 
-		string::size_type pos = line.find(":");
-		if (pos == string::npos)
+		if (n.isArray()) {
+			for (int i = 0; i < n.size(); ++i) {
+				setVal(settings, newName + "." + std::to_string(i), n[i]);
+			}
 			continue;
+		}
 
-		string key = line.substr(0, pos);
-		string value = line.substr(pos + 1);
-		stringstream strKey;
-		stringstream strValue;
-		Base64::Decrypt(strKey, key);
-		Base64::Decrypt(strValue, value);
-
-		key = strKey.str();
-		value = strValue.str();
-
-		this->m_values.insert(make_pair(key, value));
+		setVal_(settings, newName, n);
 	}
+}
 
-	f.close();
+bool Settings::loadFromFile(const std::string &file) {
+	Json::CharReaderBuilder builder;
+
+	ifstream in(file);
+	Json::Value root;
+	std::string errInfo;
+	if (!Json::parseFromStream(builder, in, &root, &errInfo))
+		return false;
+
+	setVal(*this, "", root);
+	return true;
 }
 
 } /* namespace NS_FF */

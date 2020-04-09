@@ -11,6 +11,7 @@
 #include <ff/Object.h>
 #include <ff/Exception.h>
 #include <ff/Variant.h>
+#include <ff/Singleton.h>
 #include <mutex>
 #include <string>
 #include <map>
@@ -35,13 +36,15 @@ public:
 
 	std::set<std::string> getKeys() const;
 
-	virtual void saveToFile(const std::string& file);
-	virtual void loadFromFile(const std::string& file);
+	virtual bool saveToFile(const std::string& file);
+	virtual bool loadFromFile(const std::string& file);
 private:
 	typedef std::map<std::string, Variant> ValueMap;
 	ValueMap m_values;
 	mutable std::mutex m_mutex;
 };
+
+using GSettings = Singleton<Settings>;
 
 } /* namespace NS_FF */
 

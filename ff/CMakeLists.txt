@@ -7,6 +7,7 @@ MESSAGE(STATUS "operation system is ${CMAKE_SYSTEM}")
 
 include_directories(
   include
+  third_party/jsoncpp/include
 )
 
 add_definitions(
@@ -27,8 +28,14 @@ ELSEIF (UNIX)
 	MESSAGE(STATUS "Now is UNIX-like OS's.")
 ENDIF ()
 
+if(BUILDIN_JSONCPP)
+	MESSAGE(STATUS "make with jsoncpp source.")
+	file(GLOB jsoncpp_src "third_party/jsoncpp/src/lib_json/*.cpp" "third_party/jsoncpp/src/lib_json/*.inl")
+endif()
+
 add_library(ff
 	${windows_files}
+	${jsoncpp_src}
 	src/Object.cpp
 	src/app/Application.cpp
 	src/app/ApplicationImpl.cpp
