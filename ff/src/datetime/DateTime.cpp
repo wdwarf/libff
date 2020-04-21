@@ -201,7 +201,7 @@ long DateTime::operator-(const DateTime& t) const {
 	return (this->t - t.t);
 }
 
-DateTime DateTime::now() {
+DateTime DateTime::Now() {
 	return DateTime(time(0));
 }
 

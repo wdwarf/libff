@@ -28,8 +28,10 @@
 #else
 #ifdef LIBFF_EXPORTS
 #define LIBFF_API __declspec(dllexport)
-#else
+#elif defined(BUILD_SHARED_LIBS)
 #define LIBFF_API __declspec(dllimport)
+#else
+#define LIBFF_API 
 #endif
 #endif
 

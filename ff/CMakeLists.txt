@@ -60,6 +60,7 @@ add_library(ff
 	src/log/Logger.cpp
 	src/log/LogInfo.cpp
 	src/log/StdoutAppender.cpp
+	src/log/FileAppender.cpp
 	src/network/EPoll.cpp
 	src/network/IP.cpp
 	src/network/Socket.cpp
@@ -67,6 +68,7 @@ add_library(ff
 	src/process/FileLock.cpp
 	src/process/Process.cpp
 	src/process/ProcessImplLinux.cpp
+	src/process/ProcessImplWindows.cpp
 	src/random/Random.cpp
 	src/random/UUID.cpp
 	src/serial/Serial.cpp

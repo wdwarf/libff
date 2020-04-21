@@ -62,7 +62,7 @@ public:
 
 	bool setSystemTime();
 
-	static DateTime now();
+	static DateTime Now();
 
 private:
 	time_t t;

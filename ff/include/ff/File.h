@@ -62,6 +62,8 @@ public:
 	bool copyTo(const std::string& path, bool forceReplace = false) const;
 	bool moveTo(const std::string& path, bool forceReplace = false) const;
 
+	bool isEmpty() const;
+
 	FileIterator iterator() const;
 
 	File cut(int count = 1) const;

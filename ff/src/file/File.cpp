@@ -513,6 +513,11 @@ bool File::moveTo(const std::string& path, bool forceReplace) const {
 	return (this->copyTo(path, forceReplace) && this->remove(true));
 }
 
+bool File::isEmpty() const
+{
+	return this->path.empty();
+}
+
 DateTime File::getModifyTime() const {
 	if (!this->isExists()) {
 		return DateTime(0);

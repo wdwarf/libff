@@ -21,6 +21,8 @@
 
 using namespace std;
 
+#define EPOCHFILETIME   (116444736000000000UL)
+
 namespace NS_FF {
 
 class Timestamp::TimestampImpl {
@@ -31,7 +33,18 @@ public:
 
 	void setCurrentTime() {
 #ifdef _WIN32
-		DateTime(this->ts.tv_sec).setSystemTime();
+
+		FILETIME ft;
+		GetSystemTimeAsFileTime(&ft);
+
+		LARGE_INTEGER li;
+		int64_t tt = 0;
+		
+		li.LowPart = ft.dwLowDateTime;
+		li.HighPart = ft.dwHighDateTime;
+		li.QuadPart -= EPOCHFILETIME;
+		ts.tv_sec = (long)(li.QuadPart / (10000 * 1000));
+		ts.tv_nsec = (long)((li.QuadPart % (10000 * 1000)) * 100);
 #else
 		clock_gettime(CLOCK_REALTIME, &ts);
 #endif
