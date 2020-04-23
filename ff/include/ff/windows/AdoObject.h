@@ -23,7 +23,7 @@
 
 namespace NS_FF {
 
-class AdoObject {
+class LIBFF_API AdoObject {
 public:
 	AdoObject();
 	virtual ~AdoObject();

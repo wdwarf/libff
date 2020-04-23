@@ -15,7 +15,7 @@
 
 namespace NS_FF {
 
-class AdoFields: public AdoObject {
+class LIBFF_API AdoFields: public AdoObject {
 public:
 	AdoFields(void);
 	AdoFields(const AdoFields &fields);

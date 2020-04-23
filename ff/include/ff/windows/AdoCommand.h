@@ -17,7 +17,7 @@
 
 namespace NS_FF {
 
-class AdoParameter: public AdoObject {
+class LIBFF_API AdoParameter: public AdoObject {
 public:
 	AdoParameter(void);
 	AdoParameter(_ParameterPtr param);
@@ -72,7 +72,7 @@ private:
 	_ParameterPtr param;
 };
 
-class AdoParameters: public AdoObject {
+class LIBFF_API AdoParameters: public AdoObject {
 public:
 	AdoParameters(void);
 	AdoParameters(ParametersPtr params);
@@ -93,9 +93,10 @@ private:
 	ParametersPtr params;
 };
 
-class AdoCommand: public AdoObject {
+class LIBFF_API AdoCommand: public AdoObject {
 public:
 	AdoCommand(void);
+	AdoCommand(const AdoConnection& conn);
 	AdoCommand(_CommandPtr cmd);
 	virtual ~AdoCommand(void);
 

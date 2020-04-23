@@ -15,7 +15,7 @@
 
 namespace NS_FF {
 
-class AdoRecordSet: public AdoObject {
+class LIBFF_API AdoRecordSet: public AdoObject {
 public:
 	AdoRecordSet(void);
 	AdoRecordSet(_RecordsetPtr rs);

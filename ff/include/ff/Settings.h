@@ -48,4 +48,8 @@ using GSettings = Singleton<Settings>;
 
 } /* namespace NS_FF */
 
+#define G_VAL(name, defVal) GSettings::getInstance()->getValue(name, defVal)
+#define S_VAL(name, val) GSettings::getInstance()->setValue(name, val);
+
+
 #endif /* FF_SETTINGS_H_ */

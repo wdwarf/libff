@@ -17,7 +17,7 @@
 
 namespace NS_FF {
 
-class ColumnInfo {
+class LIBFF_API ColumnInfo {
 public:
 	ColumnInfo() :
 			isPrimaryKey(false) {
@@ -129,7 +129,7 @@ private:
 	bool isPrimaryKey;
 };
 
-class TableInfo {
+class LIBFF_API TableInfo {
 public:
 	TableInfo() {
 	}
@@ -238,7 +238,7 @@ private:
 	std::map<StringT, ColumnInfo> columns;
 };
 
-class AdoConnection: public AdoObject {
+class LIBFF_API AdoConnection: public AdoObject {
 public:
 	AdoConnection(void);
 	AdoConnection(const _ConnectionPtr &conn);
@@ -255,18 +255,18 @@ public:
 	_ConnectionPtr& operator->();
 
 	void setAccessConnStr(const StringT &dbFilePath, const StringT &password =
-			_T(""));
+			(""));
 	void setODBCConnStr(const StringT &dataSourceName, const StringT &dbName,
-			const StringT &userId = _T(""), const StringT &password = _T(""));
+			const StringT &userId = (""), const StringT &password = (""));
 	void setSQLServerConnStr(const StringT &serverName, const StringT &dbName,
 			const StringT &userId, const StringT &password);
 	void setMYSQLConnStr(const StringT &serverName, const StringT &dbName,
 			const StringT &userId, const StringT &password,
-			const StringT &port = _T("3306"),
-			const StringT &driverName = _T("MySQL ODBC 5.2 ANSI Driver"));
+			const StringT &port = ("3306"),
+			const StringT &driverName = ("MySQL ODBC 5.2 ANSI Driver"));
 	void setORACLEConnStr(const StringT &serverName, const StringT &serviceName,
 			const StringT &userId, const StringT &password,
-			const StringT &port = _T("1521"));
+			const StringT &port = ("1521"));
 
 	void setConnectString(const StringT &connStr);
 	StringT getConnectionString() const;
@@ -287,8 +287,8 @@ public:
 	TableInfo getTableInfo(const StringT &tableName);
 	std::set<StringT> getTableNames();
 	std::set<StringT> getPrimaryKeys(const StringT &tableName,
-			const StringT &tableSchema = _T(""), const StringT &tableCatalog =
-					_T(""));
+			const StringT &tableSchema = (""), const StringT &tableCatalog =
+					(""));
 	std::map<StringT, StringT>& getProperties();
 	StringT getProperty(const StringT &propName);
 
@@ -302,7 +302,7 @@ public:
 	static StringT PromptDataSource(HWND hWndParent = NULL);
 	static bool PromptDataSource(AdoConnection &conn, HWND hWndParent = NULL);
 	static bool CreateAccessFile(const StringT &dbFilePath,
-			const StringT &password = _T(""));
+			const StringT &password = (""));
 
 private:
 	//bstr_t connStr;

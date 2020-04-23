@@ -5,7 +5,6 @@
 #include <map>
 #include <memory>
 #include <mutex>
-#include <bits/allocator.h>
 #include <ff/Object.h>
 #include <ff/Exception.h>
 

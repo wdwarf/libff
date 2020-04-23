@@ -275,6 +275,13 @@ AdoCommand::AdoCommand(void) {
 	this->cmd->Prepared = true;
 }
 
+AdoCommand::AdoCommand(const AdoConnection& conn)
+{
+	this->cmd.CreateInstance(__uuidof(Command));
+	this->cmd->Prepared = true;
+	this->setConnection(conn);
+}
+
 AdoCommand::AdoCommand(_CommandPtr cmd) {
 	this->cmd = cmd;
 }

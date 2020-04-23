@@ -59,8 +59,8 @@
 
 #endif
 
-using StringT = std::_W(string);
-using SStreamT = std::_W(stringstream);
+using StringT = std::string;
+using SStreamT = std::stringstream;
 
 //#define __USE_SQLITE3_DB__
 

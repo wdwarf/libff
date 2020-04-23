@@ -66,14 +66,14 @@ private:\
 	Ptr ptr
 ////////end of #define DEFINE_WADO_OBJ
 
-class Key {
+class LIBFF_API Key {
 private:
 	std::vector<StringT> columnNames;
 	StringT name;
 	int type;
 };
 
-class AdoTable {
+class LIBFF_API AdoTable {
 public:
 	StringT getName();
 	StringT getType();
@@ -82,7 +82,7 @@ public:
 DEFINE_WADO_OBJ(AdoTable, _Table, Table);
 };
 
-class AdoTables {
+class LIBFF_API AdoTables {
 public:
 	AdoTable operator[](long i);
 	long getCount();
@@ -90,7 +90,7 @@ public:
 DEFINE_WADO_OBJ(AdoTables, Tables, Tables);
 };
 
-class AdoCatalog: public AdoObject {
+class LIBFF_API AdoCatalog: public AdoObject {
 public:
 	void setConnection(_ConnectionPtr conn);
 	AdoTables getTables();
