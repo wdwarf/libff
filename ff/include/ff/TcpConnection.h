@@ -8,9 +8,8 @@
 #ifndef FF_TCPCONNECTION_H_
 #define FF_TCPCONNECTION_H_
 
-#ifndef _WIN32
-
 #include <string>
+#include <functional>
 #include <memory>
 #include <mutex>
 #include <map>
@@ -19,7 +18,11 @@
 #include <ff/Socket.h>
 #include <ff/Buffer.h>
 #include <ff/BlockingList.h>
+#ifdef _WIN32
+#include <ff/windows/IOCP.h>
+#else
 #include <ff/EPoll.h>
+#endif
 
 namespace NS_FF {
 
@@ -29,7 +32,7 @@ typedef std::function<void(const uint8_t*, uint32_t, const TcpConnectionPtr&)> O
 typedef std::function<void(const TcpConnectionPtr&)> OnAcceptFunc;
 typedef std::function<void(const TcpConnectionPtr&)> OnCloseFunc;
 
-class TcpConnection: public std::enable_shared_from_this<TcpConnection> {
+class LIBFF_API TcpConnection: public std::enable_shared_from_this<TcpConnection> {
 public:
 	~TcpConnection();
 
@@ -54,7 +57,19 @@ private:
 	TcpConnection(const TcpConnection&) = delete;
 	TcpConnection& operator=(const TcpConnection&) = delete;
 
+#ifdef _WIN32
+	IocpContext m_context;
+	char recvBuffer[2048];
+	void workThreadFunc(LPDWORD lpNumberOfBytesTransferred,
+		PULONG_PTR lpCompletionKey,
+		LPOVERLAPPED* lpOverlapped);
+#else
 	EPoll* m_ep;
+	
+	void onSocketUpdate(int fd, int events);
+	void onSvrSocketUpdate(int fd, int events);
+	void onClientSocketUpdate(int fd, int events);
+#endif
 	bool m_isServer;
 	Socket m_socket;
 	Buffer m_readBuffer;
@@ -66,12 +81,9 @@ private:
 	std::mutex m_sendMutex;
 
 	void resetCallbackFunctions();
-	void onSocketUpdate(int fd, int events);
-	void onSvrSocketUpdate(int fd, int events);
-	void onClientSocketUpdate(int fd, int events);
+
 };
 
 } /* namespace NS_FF */
 
-#endif
 #endif /* FF_TCPCONNECTION_H_ */

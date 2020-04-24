@@ -1,0 +1,68 @@
+/*
+ * IOCP.h
+ *
+ *  Created on: Mar 31, 2020
+ *      Author: u16
+ */
+
+#ifndef FF_IOCP_H_
+#define FF_IOCP_H_
+
+#include <ff/ff_config.h>
+#include <thread>
+#include <vector>
+#include <map>
+#include <functional>
+#include <ff/Singleton.h>
+
+namespace NS_FF {
+
+	enum class IocpEvent {
+		Recv,
+		Send
+	};
+
+	class IocpContext : public OVERLAPPED
+	{
+	public:
+		IocpContext();
+		IocpContext(HANDLE handle, IocpEvent event);
+
+		HANDLE handle;
+		IocpEvent iocpEevent;
+		WSABUF buffer;
+	};
+
+	using PIocpContext = IocpContext*;
+
+	using IocpWorkThreadFunc = std::function<void(LPDWORD lpNumberOfBytesTransferred,
+		PULONG_PTR lpCompletionKey,
+		LPOVERLAPPED* lpOverlapped)>;
+
+	class IOCP
+	{
+	public:
+		IOCP(DWORD concurrentThreads = 4);
+		~IOCP();
+
+		void close();
+		bool create(DWORD numberOfConcurrentThreads);
+		bool connect(HANDLE fileHandle, ULONG_PTR completionKey, IocpWorkThreadFunc iocpWorkThreadFunc);
+		operator HANDLE() const;
+		operator bool() const;
+		bool getQueuedCompletionStatus(
+			LPDWORD lpNumberOfBytesTransferred,
+			PULONG_PTR lpCompletionKey,
+			LPOVERLAPPED* lpOverlapped,
+			DWORD dwMilliseconds);
+
+	private:
+		HANDLE m_handle;
+		std::vector<std::thread> m_workThreads;
+		std::map<HANDLE, IocpWorkThreadFunc> m_iocpWorkThreadFuncs;
+	};
+
+	using GIocp = Singleton<IOCP>;
+}
+
+#endif /* FF_IOCP_H_ */
