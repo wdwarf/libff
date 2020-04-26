@@ -32,22 +32,6 @@ namespace NS_FF {
 
 		GIocp::getInstance()->connect((HANDLE)this->m_socket.getHandle(), (ULONG_PTR)&m_context,
 			Bind(&TcpConnection::workThreadFunc, this));
-
-		DWORD flags = MSG_PARTIAL;
-		DWORD numToRecvd = 0;
-
-		m_context.handle = (HANDLE)this->m_socket.getHandle();
-		m_context.iocpEevent = IocpEvent::Recv;
-		m_context.buffer.buf = this->recvBuffer;
-		m_context.buffer.len = 2048;
-
-		int ret = WSARecv(this->m_socket.getHandle(),
-			&m_context.buffer,
-			1,
-			&numToRecvd,
-			&flags,
-			&m_context,
-			NULL);
 	}
 
 	TcpConnection::~TcpConnection() {
@@ -78,8 +62,6 @@ namespace NS_FF {
 		{
 			if (0 == *lpNumberOfBytesTransferred)
 			{
-				this->m_socket.close();
-
 				OnCloseFunc func;
 				{
 					lock_guard<mutex> lk(this->m_mutex);
@@ -87,17 +69,11 @@ namespace NS_FF {
 				}
 				if (func)
 					func(this->shared_from_this());
+
+				this->m_socket.close();
+
 				break;
 			}
-
-			OnDataFunc func;
-			{
-				lock_guard<mutex> lk(this->m_mutex);
-				func = this->m_onDataFunc;
-			}
-			if (func)
-				func((const uint8_t*)context->buffer.buf, *lpNumberOfBytesTransferred,
-					this->shared_from_this());
 
 			DWORD flags = MSG_PARTIAL;
 			DWORD numToRecvd = 0;
@@ -109,6 +85,16 @@ namespace NS_FF {
 				&flags,
 				&m_context,
 				NULL);
+
+			OnDataFunc func;
+			{
+				lock_guard<mutex> lk(this->m_mutex);
+				func = this->m_onDataFunc;
+			}
+			if (func)
+				func((const uint8_t*)context->buffer.buf, *lpNumberOfBytesTransferred,
+					this->shared_from_this());
+
 			break;
 		}
 		case IocpEvent::Send:
@@ -119,7 +105,7 @@ namespace NS_FF {
 
 	bool TcpConnection::listen(uint16_t port, const std::string& ip,
 		IpVersion ipVer) {
-		this->resetCallbackFunctions();
+		// this->resetCallbackFunctions();
 
 		try {
 			if (!this->m_socket.createTcp(ipVer))
@@ -162,7 +148,7 @@ namespace NS_FF {
 
 	bool TcpConnection::connect(uint16_t remotePort, const std::string& remoteHost,
 		uint16_t localPort, const std::string& localIp) {
-		this->resetCallbackFunctions();
+		// this->resetCallbackFunctions();
 
 		this->m_isServer = false;
 		try {
@@ -172,7 +158,7 @@ namespace NS_FF {
 				ipVer = addr.getVersion();
 			}
 
-			if (this->m_socket.createTcp(ipVer) <= 0)
+			if (!this->m_socket.createTcp(ipVer))
 				THROW_EXCEPTION(Exception, "Create socket failed.", errno);
 
 			if (localPort > 0) {
@@ -195,25 +181,8 @@ namespace NS_FF {
 		}
 
 		/** TODO add to iocp */
-
 		GIocp::getInstance()->connect((HANDLE)this->m_socket.getHandle(), this->m_socket.getHandle(),
 			Bind(&TcpConnection::workThreadFunc, this));
-
-		DWORD flags = MSG_PARTIAL;
-		DWORD numToRecvd = 0;
-
-		m_context.handle = (HANDLE)this->m_socket.getHandle();
-		m_context.iocpEevent = IocpEvent::Recv;
-		m_context.buffer.buf = this->recvBuffer;
-		m_context.buffer.len = 2048;
-
-		int ret = WSARecv(this->m_socket.getHandle(),
-			&m_context.buffer,
-			1,
-			&numToRecvd,
-			&flags,
-			&m_context,
-			NULL);
 		return true;
 	}
 
@@ -249,6 +218,23 @@ namespace NS_FF {
 	TcpConnection& TcpConnection::onData(const OnDataFunc& func) {
 		lock_guard<mutex> lk(this->m_mutex);
 		this->m_onDataFunc = func;
+
+		DWORD flags = MSG_PARTIAL;
+		DWORD numToRecvd = 0;
+
+		m_context.handle = (HANDLE)this->m_socket.getHandle();
+		m_context.iocpEevent = IocpEvent::Recv;
+		m_context.buffer.buf = this->recvBuffer;
+		m_context.buffer.len = 2048;
+
+		int ret = WSARecv(this->m_socket.getHandle(),
+			&m_context.buffer,
+			1,
+			&numToRecvd,
+			&flags,
+			&m_context,
+			NULL);
+
 		return *this;
 	}
 

@@ -7,6 +7,7 @@
 
 #include <ff/LogInfo.h>
 #include <ff/File.h>
+#include <ff/String.h>
 #include <sstream>
 
 using namespace std;
@@ -30,6 +31,17 @@ std::string LogLevel2Str(LogLevel ll) {
 	default:
 		return "";
 	}
+}
+
+LogLevel LogLevelFromStr(const std::string& ll) {
+	string lvl = ToLowerCopy(TrimCopy(ll));
+	return "debug" == lvl || "d" == lvl ? LogLevel::Debug
+		: "error" == lvl || "e" == lvl ? LogLevel::Error
+		: "fatal" == lvl || "f" == lvl ? LogLevel::Fatal
+		: "info" == lvl || "i" == lvl ? LogLevel::Info
+		: "verbose" == lvl || "v" == lvl ? LogLevel::Verbose
+		: "warning" == lvl || "w" == lvl ? LogLevel::Warning
+		: LogLevel::Info;
 }
 
 LogInfo::LogInfo() :

@@ -71,13 +71,18 @@ namespace NS_FF
 						|| (0 == completionKey && nullptr == lpOverlapped))
 						break;
 
+					
 					PIocpContext context = (PIocpContext)lpOverlapped;
-					auto it = this->m_iocpWorkThreadFuncs.find(context->handle);
-					if (it != this->m_iocpWorkThreadFuncs.end())
+
+					IocpWorkThreadFunc func;
 					{
-						if (it->second)
-							it->second(&numberOfBytesTransferred, &completionKey, &lpOverlapped);
+						lock_guard<mutex> lk(this->m_mutex);
+						auto it = this->m_iocpWorkThreadFuncs.find(context->handle);
+						if (it != this->m_iocpWorkThreadFuncs.end())
+							func = it->second;
 					}
+					if(func)
+						func(&numberOfBytesTransferred, &completionKey, &lpOverlapped);
 				}
 				});
 		}
@@ -93,6 +98,7 @@ namespace NS_FF
 			completionKey,
 			0);
 		if (hCp != this->m_handle) return false;
+		lock_guard<mutex> lk(this->m_mutex);
 		this->m_iocpWorkThreadFuncs[fileHandle] = iocpWorkThreadFunc;
 		return true;
 	}

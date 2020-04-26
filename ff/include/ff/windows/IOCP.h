@@ -12,6 +12,7 @@
 #include <thread>
 #include <vector>
 #include <map>
+#include <mutex>
 #include <functional>
 #include <ff/Singleton.h>
 
@@ -58,6 +59,7 @@ namespace NS_FF {
 
 	private:
 		HANDLE m_handle;
+		std::mutex m_mutex;
 		std::vector<std::thread> m_workThreads;
 		std::map<HANDLE, IocpWorkThreadFunc> m_iocpWorkThreadFuncs;
 	};

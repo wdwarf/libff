@@ -16,7 +16,7 @@ namespace NS_FF {
  * 这个单例会在第一次调用时初始化
  * */
 template<class T>
-class Singleton: public T, public Object {
+class Singleton: public T {
 public:
 	static T* getInstance() {
 		static Singleton<T> instance;
@@ -38,7 +38,7 @@ private:
  * 这个单例会在main函数执行之前初始化
  * */
 template<class T>
-class Singleton2: public T, public Object {
+class Singleton2: public T {
 private:
 	struct object_creator {
 		object_creator() {

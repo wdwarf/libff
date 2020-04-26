@@ -23,6 +23,7 @@ enum class LogLevel {
 };
 
 LIBFF_API std::string LogLevel2Str(LogLevel ll);
+LIBFF_API LogLevel LogLevelFromStr(const std::string& ll);
 
 class LIBFF_API LogInfo {
 public:

@@ -29,7 +29,7 @@
 
 #ifndef socklen_t
 
-#ifdef WIN32
+#ifdef _WIN32
 #define socklen_t int
 #else
 #define socklen_t unsigned int
@@ -39,7 +39,11 @@
 
 namespace NS_FF {
 
-typedef int SocketFd;
+#ifdef _WIN32
+	typedef SOCKET SocketFd;
+#else
+	typedef int SocketFd;
+#endif
 
 #if 0
 enum class SocketType {
