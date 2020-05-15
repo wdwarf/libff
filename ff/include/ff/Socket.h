@@ -107,11 +107,11 @@ public:
 	bool create(int af, int style, int protocol = 0);
 	bool createTcp(IpVersion ver = IpVersion::V4);
 	bool createUdp(IpVersion ver = IpVersion::V4);
-	int getHandle();
+	SocketFd getHandle() const;
 	bool close();
 	Socket& shutdown(int type = SHUT_RDWR);
 	Socket& attach(int sockFd);
-	int dettach();
+	SocketFd dettach();
 	Socket& setBlocking(bool nonBlocking);
 	bool isNonBlocking() const;
 	bool isUseSelect() const;
@@ -132,7 +132,7 @@ public:
 			uint32_t interval = 10, uint32_t count = 9);
 
 	bool connect(const std::string& host, uint16_t port, int msTimeout = 3000);
-	bool isConnected();
+	bool isConnected() const;
 	bool bind(uint16_t port, const std::string& ip = "");
 	bool listen(int n = 10);
 	Socket accept(SockAddr& addr);
@@ -153,8 +153,8 @@ public:
 			int timeoutMs = -1);
 	void enableUdpBroadcast(bool enable = true);
 
-	static bool SetBlocking(int sockFd, bool isNonBlocking = true);
-	static bool IsNonBlocking(int sockFd);
+	static bool SetBlocking(SocketFd sockFd, bool isNonBlocking = true);
+	static bool IsNonBlocking(SocketFd sockFd);
 
 	static std::string Host2IpStr(const std::string& host);
 	static in_addr_t Host2Ip(const std::string& host);

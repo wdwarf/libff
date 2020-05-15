@@ -221,8 +221,8 @@ Socket& Socket::attach(int m_socketFd) {
 	return *this;
 }
 
-int Socket::dettach() {
-	int oldSock = this->m_socketFd;
+SocketFd Socket::dettach() {
+	SocketFd oldSock = this->m_socketFd;
 	this->m_socketFd = 0;
 	return oldSock;
 }
@@ -260,7 +260,7 @@ bool Socket::isNonBlocking() const {
 	return (this->m_socketFd > 0 && Socket::IsNonBlocking(this->m_socketFd));
 }
 
-int Socket::getHandle() {
+SocketFd Socket::getHandle() const {
 	return this->m_socketFd;
 }
 
@@ -502,7 +502,7 @@ int Socket::sendTo(const char* buf, socklen_t bufLen, const sockaddr* addr,
 	return ::sendto(this->m_socketFd, buf, bufLen, 0, addr, addrSize);
 }
 
-bool Socket::isConnected() {
+bool Socket::isConnected() const {
 	return (this->getRemotePort() > 0);
 }
 
@@ -640,7 +640,7 @@ void Socket::enableUdpBroadcast(bool enable)
 	this->setsockOpt(SOL_SOCKET, SO_BROADCAST, &on, sizeof(on));
 }
 
-bool Socket::SetBlocking(int m_socketFd, bool isNonBlocking) {
+bool Socket::SetBlocking(SocketFd m_socketFd, bool isNonBlocking) {
 #if defined(WIN32) || defined(__MINGW32__)
 	unsigned long isFIONBIO = 1;
 	return (0 == ioctlsocket(m_socketFd, FIONBIO, &isFIONBIO));
@@ -659,7 +659,7 @@ bool Socket::SetBlocking(int m_socketFd, bool isNonBlocking) {
 #endif
 }
 
-bool Socket::IsNonBlocking(int m_socketFd) {
+bool Socket::IsNonBlocking(SocketFd m_socketFd) {
 #if defined(WIN32) || defined(__MINGW32__)
 	unsigned long isFIONBIO = 1;
 	if(-1 == ioctlsocket(m_socketFd, FIONREAD, &isFIONBIO)) return false;

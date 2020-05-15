@@ -37,6 +37,7 @@ public:
 
 	unsigned int getIdelThreadCount() const;
 	unsigned int getActiveThreadCount() const;
+	void waitAll();
 
 private:
 	friend class TaskThread;

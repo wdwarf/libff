@@ -29,6 +29,7 @@ namespace NS_FF {
 	TcpConnection::TcpConnection(Socket&& socket) :
 		m_isServer(false), m_socket(std::move(socket)), m_readBuffer(1024) {
 		this->m_socket.setUseSelect(false);
+		this->m_socket.setBlocking(true);
 
 		GIocp::getInstance()->connect((HANDLE)this->m_socket.getHandle(), (ULONG_PTR)&m_context,
 			Bind(&TcpConnection::workThreadFunc, this));
@@ -36,6 +37,9 @@ namespace NS_FF {
 
 	TcpConnection::~TcpConnection() {
 		this->m_socket.close();
+		if (this->m_isServer) {
+			this->m_acceptThread.join();
+		}
 	}
 
 	bool TcpConnection::isServer() const {
@@ -124,12 +128,11 @@ namespace NS_FF {
 		this->m_isServer = true;
 
 		/** TODO start accept thread */
-		thread([this] {
+		this->m_acceptThread = thread([this] {
 			SockAddr addr;
-			while (true) {
+			while (this->m_socket.getHandle() > 0) {
 				Socket client = this->m_socket.accept(addr);
-				if (client.getHandle() <= 0) break;
-				client.setBlocking(true);
+				if (client.getHandle() <= 0 || this->m_socket.getHandle() <= 0) break;
 				TcpConnectionPtr tcpSock = TcpConnectionPtr(
 					new TcpConnection(move(client)));
 
@@ -141,7 +144,7 @@ namespace NS_FF {
 				if (func)
 					func(tcpSock);
 			}
-			}).detach();
+			});
 
 			return true;
 	}
@@ -174,6 +177,8 @@ namespace NS_FF {
 					errno);
 			}
 
+			this->m_socket.setBlocking(true);
+
 		}
 		catch (std::exception& e) {
 			this->m_socket.close();
@@ -199,7 +204,7 @@ namespace NS_FF {
 		}
 	}
 
-	const Socket& TcpConnection::getSocket() const {
+	Socket& TcpConnection::getSocket() {
 		return this->m_socket;
 	}
 
@@ -358,7 +363,7 @@ namespace NS_FF {
 		}
 	}
 
-	const Socket& TcpConnection::getSocket() const {
+	Socket& TcpConnection::getSocket() {
 		return this->m_socket;
 	}
 

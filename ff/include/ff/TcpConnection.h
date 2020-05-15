@@ -11,6 +11,7 @@
 #include <string>
 #include <functional>
 #include <memory>
+#include <thread>
 #include <mutex>
 #include <map>
 #include <list>
@@ -50,7 +51,7 @@ public:
 	TcpConnection& onAccept(const OnAcceptFunc& func);
 	void close();
 
-	const Socket& getSocket() const;
+	Socket& getSocket();
 private:
 	TcpConnection();
 	TcpConnection(Socket&& socket);
@@ -59,6 +60,7 @@ private:
 
 #ifdef _WIN32
 	IocpContext m_context;
+	std::thread m_acceptThread;
 	char recvBuffer[2048];
 	void workThreadFunc(LPDWORD lpNumberOfBytesTransferred,
 		PULONG_PTR lpCompletionKey,

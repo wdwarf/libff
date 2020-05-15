@@ -161,4 +161,10 @@ TaskThread* ThreadPool::getThread(int32_t timeoutMs) {
 
 }
 
+void ThreadPool::waitAll()
+{
+	unique_lock<mutex> lk(this->m_mutex);
+	this->m_cond.wait(lk, [&] {return this->m_busyThreads.empty(); });
+}
+
 } /* namespace NS_FF */
