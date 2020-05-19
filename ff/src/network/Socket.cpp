@@ -401,6 +401,13 @@ bool Socket::bind(uint16_t port, const std::string& ip) {
 	return (0 == ::bind(this->m_socketFd, pAddr, addrSize));
 }
 
+bool Socket::joinMulticastGroup(const std::string& ip) {
+	struct ip_mreq mreq;
+	mreq.imr_multiaddr.s_addr = inet_addr(ip.c_str());
+	mreq.imr_interface.s_addr = htonl(INADDR_ANY);
+	return (setsockopt(this->m_socketFd, IPPROTO_IP, IP_ADD_MEMBERSHIP, (char*)&mreq, sizeof(mreq)) >= 0);
+}
+
 bool Socket::listen(int n) {
 	return (0 == ::listen(this->m_socketFd, n));
 }
