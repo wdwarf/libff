@@ -134,6 +134,7 @@ public:
 	bool connect(const std::string& host, uint16_t port, int msTimeout = 3000);
 	bool isConnected() const;
 	bool bind(uint16_t port, const std::string& ip = "");
+	bool joinMulticastGroup(const std::string& ip);
 	bool listen(int n = 10);
 	Socket accept(SockAddr& addr);
 	Socket accept(sockaddr_in& addr);
