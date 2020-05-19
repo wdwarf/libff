@@ -2,7 +2,7 @@
  * AdoConnection.h
  *
  *  Created on: Mar 31, 2020
- *      Author: u16
+ *      Author: liyawu
  */
 
 #ifndef WINDOWS_ADOCONNECTION_H_

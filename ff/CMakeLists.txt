@@ -81,6 +81,7 @@ add_library(ff
 	src/thread/Thread.cpp
 	src/thread/ThreadPool.cpp
 	src/variant/Variant.cpp
+	src/rtp/RtpPacket.cpp
 )
 
 file(GLOB test_files "test/*.cpp")

@@ -22,12 +22,12 @@ namespace NS_FF {
 #ifdef _WIN32
 
 	TcpConnection::TcpConnection() :
-		m_isServer(false), m_readBuffer(1024) {
+		m_isServer(false), m_readBuffer(2048) {
 		this->m_socket.setUseSelect(false);
 	}
 
 	TcpConnection::TcpConnection(Socket&& socket) :
-		m_isServer(false), m_socket(std::move(socket)), m_readBuffer(1024) {
+		m_isServer(false), m_socket(std::move(socket)), m_readBuffer(2048) {
 		this->m_socket.setUseSelect(false);
 		this->m_socket.setBlocking(true);
 
@@ -82,14 +82,6 @@ namespace NS_FF {
 			DWORD flags = MSG_PARTIAL;
 			DWORD numToRecvd = 0;
 
-			int ret = WSARecv(this->m_socket.getHandle(),
-				&m_context.buffer,
-				1,
-				&numToRecvd,
-				&flags,
-				&m_context,
-				NULL);
-
 			OnDataFunc func;
 			{
 				lock_guard<mutex> lk(this->m_mutex);
@@ -98,6 +90,29 @@ namespace NS_FF {
 			if (func)
 				func((const uint8_t*)context->buffer.buf, *lpNumberOfBytesTransferred,
 					this->shared_from_this());
+
+			int ret = WSARecv(this->m_socket.getHandle(),
+				&m_context.buffer,
+				1,
+				&numToRecvd,
+				&flags,
+				&m_context,
+				NULL);
+			if (SOCKET_ERROR == ret)
+			{
+				if (WSA_IO_PENDING != WSAGetLastError())
+				{
+					OnCloseFunc func;
+					{
+						lock_guard<mutex> lk(this->m_mutex);
+						func = this->m_onCloseFunc;
+					}
+					if (func)
+						func(this->shared_from_this());
+
+					this->m_socket.close();
+				}
+			}
 
 			break;
 		}
@@ -229,8 +244,8 @@ namespace NS_FF {
 
 		m_context.handle = (HANDLE)this->m_socket.getHandle();
 		m_context.iocpEevent = IocpEvent::Recv;
-		m_context.buffer.buf = this->recvBuffer;
-		m_context.buffer.len = 2048;
+		m_context.buffer.buf = (char*)this->m_readBuffer.getData();
+		m_context.buffer.len = this->m_readBuffer.getSize();
 
 		int ret = WSARecv(this->m_socket.getHandle(),
 			&m_context.buffer,
@@ -256,13 +271,13 @@ namespace NS_FF {
 #else
 
 	TcpConnection::TcpConnection() :
-		m_isServer(false), m_readBuffer(1024) {
+		m_isServer(false), m_readBuffer(2048) {
 		this->m_socket.setUseSelect(false);
 		this->m_ep = &PollMgr::instance().getEPoll();
 	}
 
 	TcpConnection::TcpConnection(Socket&& socket) :
-		m_isServer(false), m_socket(std::move(socket)), m_readBuffer(1024) {
+		m_isServer(false), m_socket(std::move(socket)), m_readBuffer(2048) {
 		this->m_socket.setUseSelect(false);
 		this->m_ep = &PollMgr::instance().getEPoll();
 		this->m_ep->addFd(this->m_socket.getHandle(),

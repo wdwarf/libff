@@ -2,7 +2,7 @@
  * UUID_test.cpp
  *
  *  Created on: Jan 22, 2020
- *      Author: u16
+ *      Author: liyawu
  */
 
 #include <ff/UUID.h>

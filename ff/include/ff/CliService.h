@@ -2,7 +2,7 @@
  * CliService.h
  *
  *  Created on: Mar 25, 2020
- *      Author: u16
+ *      Author: liyawu
  */
 
 #ifndef CLI_CLISERVICE_H_
@@ -19,7 +19,7 @@ namespace NS_FF {
 
 using CliHandlerFunc = std::function<std::string(const CliPacket&)>;
 
-class CliService {
+class LIBFF_API CliService {
 public:
 	CliService();
 	virtual ~CliService();

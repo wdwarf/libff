@@ -2,7 +2,7 @@
  * AdoCatalog.cpp
  *
  *  Created on: Mar 31, 2020
- *      Author: u16
+ *      Author: liyawu
  */
 
 #include <ff/windows/AdoCatalog.h>

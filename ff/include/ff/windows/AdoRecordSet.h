@@ -2,7 +2,7 @@
  * AdoRecordSet.h
  *
  *  Created on: Mar 31, 2020
- *      Author: u16
+ *      Author: liyawu
  */
 
 #ifndef WINDOWS_ADORECORDSET_H_
