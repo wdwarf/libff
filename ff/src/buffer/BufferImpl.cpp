@@ -237,7 +237,7 @@ void Buffer::BufferImpl::resize(unsigned int size) {
 		this->size = 0;
 		throw MK_EXCEPTION(BufferException, "Alloc buffer failed", size);
 	}
-	memcpy(newData, this->data, size);
+	memcpy(newData, this->data, this->size);
 
 	if (NULL != this->data)
 		delete[] this->data;

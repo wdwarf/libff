@@ -17,17 +17,19 @@
 
 using namespace std;
 
+#define RD_BUF_SIZE 4096
+
 namespace NS_FF {
 
 #ifdef _WIN32
 
 	TcpConnection::TcpConnection() :
-		m_isServer(false), m_readBuffer(2048) {
+		m_isServer(false), m_readBuffer(RD_BUF_SIZE) {
 		this->m_socket.setUseSelect(false);
 	}
 
 	TcpConnection::TcpConnection(Socket&& socket) :
-		m_isServer(false), m_socket(std::move(socket)), m_readBuffer(2048) {
+		m_isServer(false), m_socket(std::move(socket)), m_readBuffer(RD_BUF_SIZE) {
 		this->m_socket.setUseSelect(false);
 		this->m_socket.setBlocking(true);
 
@@ -66,13 +68,14 @@ namespace NS_FF {
 		{
 			if (0 == *lpNumberOfBytesTransferred)
 			{
+				auto pThis = this->shared_from_this();
 				OnCloseFunc func;
 				{
 					lock_guard<mutex> lk(this->m_mutex);
 					func = this->m_onCloseFunc;
 				}
 				if (func)
-					func(this->shared_from_this());
+					func(pThis);
 
 				this->m_socket.close();
 
@@ -123,7 +126,7 @@ namespace NS_FF {
 	}
 
 	bool TcpConnection::listen(uint16_t port, const std::string& ip,
-		IpVersion ipVer) {
+		IpVersion ipVer, int backlog) {
 		// this->resetCallbackFunctions();
 
 		try {
@@ -133,7 +136,7 @@ namespace NS_FF {
 				THROW_EXCEPTION(Exception,
 					SW("Bind to ")(port)(":")(ip)(" failed. ")(strerror(errno)),
 					errno);
-			this->m_socket.listen();
+			this->m_socket.listen(backlog);
 		}
 		catch (std::exception& e) {
 			this->m_socket.close();
@@ -271,13 +274,13 @@ namespace NS_FF {
 #else
 
 	TcpConnection::TcpConnection() :
-		m_isServer(false), m_readBuffer(2048) {
+		m_isServer(false), m_readBuffer(RD_BUF_SIZE) {
 		this->m_socket.setUseSelect(false);
 		this->m_ep = &PollMgr::instance().getEPoll();
 	}
 
 	TcpConnection::TcpConnection(Socket&& socket) :
-		m_isServer(false), m_socket(std::move(socket)), m_readBuffer(2048) {
+		m_isServer(false), m_socket(std::move(socket)), m_readBuffer(RD_BUF_SIZE) {
 		this->m_socket.setUseSelect(false);
 		this->m_ep = &PollMgr::instance().getEPoll();
 		this->m_ep->addFd(this->m_socket.getHandle(),

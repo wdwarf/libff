@@ -29,8 +29,9 @@ public:
 
 	void start();
 	void stop();
-	void waitForFinished();
+	int waitForFinished();
 	int getProcessId() const;
+	int getExitCode() const;
 	const std::string& getCommand() const;
 	void setCommand(const std::string& command);
 	int readData(char* buf, int bufLen);
@@ -56,6 +57,7 @@ private:
 	std::string command;
 	int pipeFd[2];
 	int pid;
+	int m_exitCode;
 	bool asyncRead;
 	std::string workDir;
 	std::vector<std::string> args;
