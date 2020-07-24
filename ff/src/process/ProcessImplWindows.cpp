@@ -43,7 +43,7 @@ namespace NS_FF {
 	}
 
 	Process::ProcessImpl::ProcessImpl(Process* proc, const std::string& command) :
-		_proc(proc), asyncRead(true), hRead(INVALID_HANDLE_VALUE), hWrite(
+		_proc(proc), asyncRead(true), m_exitCode(-1), hRead(INVALID_HANDLE_VALUE), hWrite(
 			INVALID_HANDLE_VALUE) {
 		this->command = command;
 		memset(&this->pi, 0, sizeof(PROCESS_INFORMATION));
@@ -66,20 +66,20 @@ namespace NS_FF {
 		sa.lpSecurityDescriptor = NULL;
 		sa.bInheritHandle = TRUE;
 		if (!::CreatePipe(&this->hRead, &this->hWrite, &sa, 0)) {
-			THROW_EXCEPTION(ProcessException, "process start failed.",
+			THROW_EXCEPTION(ProcessException, "process start failed: CreatePipe failed.",
 				GetLastError());
 		}
 
-		STARTUPINFO si;
-		si.cb = sizeof(STARTUPINFO);
+		STARTUPINFOA si;
+		si.cb = sizeof(STARTUPINFOA);
 		GetStartupInfo(&si);
 		si.hStdError = hWrite;
 		si.hStdOutput = hWrite;
-		si.wShowWindow = SW_SHOW;
+		si.wShowWindow = SW_HIDE;// SW_SHOW;
 		si.dwFlags = STARTF_USESHOWWINDOW | STARTF_USESTDHANDLES;
-		if (!::CreateProcess(NULL, (LPSTR) this->command.c_str(),
-			NULL, NULL, TRUE, 0, NULL, this->workDir.c_str(), &si, &this->pi)) {
-			THROW_EXCEPTION(ProcessException, "process start failed.",
+		if (!::CreateProcessA(NULL, (LPSTR) this->command.c_str(),
+			NULL, NULL, TRUE, 0, NULL, this->workDir.empty() ? NULL : this->workDir.c_str(), &si, &this->pi)) {
+			THROW_EXCEPTION(ProcessException, "process start failed: CreateProcess[" + command + "] failed, errcode(" + to_string(GetLastError()) + ").",
 				GetLastError());
 		}
 
@@ -116,6 +116,10 @@ namespace NS_FF {
 		this->hWrite = INVALID_HANDLE_VALUE;
 	}
 
+	int Process::ProcessImpl::getExitCode() const {
+		return this->m_exitCode;
+	}
+
 	void Process::ProcessImpl::watchTerminated() {
 		this->waitForFinished();
 		if (INVALID_HANDLE_VALUE != this->hWrite) {
@@ -124,10 +128,14 @@ namespace NS_FF {
 		}
 	}
 
-	void Process::ProcessImpl::waitForFinished() {
+	int Process::ProcessImpl::waitForFinished() {
 		if (INVALID_HANDLE_VALUE == this->pi.hProcess)
-			return;
+			return -1;
 		::WaitForSingleObject(this->pi.hProcess, INFINITE);
+		DWORD exitCode = -1;
+		GetExitCodeProcess(pi.hProcess, &exitCode);
+		this->m_exitCode = exitCode;
+		return this->m_exitCode;
 	}
 
 	int Process::ProcessImpl::getProcessId() const {

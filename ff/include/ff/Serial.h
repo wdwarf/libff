@@ -5,8 +5,6 @@
  *      Author: liyawu
  */
 
-#ifndef _WIN32
-
 #ifndef FF_SERIAL_H_
 #define FF_SERIAL_H_
 
@@ -17,7 +15,10 @@
 #include <ff/Synchronizable.h>
 #include <string>
 #include <memory>
+
+#ifndef _WIN32
 #include <termios.h>
+#endif
 
 namespace NS_FF {
 
@@ -38,6 +39,13 @@ enum class StopBit {
 
 class LIBFF_API Serial: public Synchronizable, protected Noncopyable {
 public:
+
+#ifdef _WIN32
+	using Fd = HANDLE;
+#else
+	using Fd = int;
+#endif
+
 	Serial();
 	virtual ~Serial();
 
@@ -52,7 +60,7 @@ public:
 	void setBaudrate(int baudrate);
 	int getDatabit() const;
 	void setDatabit(int databit);
-	int getFd() const;
+	Fd getFd() const;
 	Parity getParity() const;
 	void setParity(Parity parity);
 	StopBit getStopBit() const;
@@ -60,9 +68,15 @@ public:
 	void flush();
 
 private:
-	int fd;
+	Fd m_fd;
+#ifndef _WIN32
 	struct termios newTermios;
 	struct termios oldTermios;
+#else
+	DWORD m_readTimeout;
+	COMMTIMEOUTS m_commTimeouts;
+	DCB m_dcb;
+#endif
 };
 
 std::shared_ptr<Serial> SerialPtr;
@@ -70,4 +84,3 @@ std::shared_ptr<Serial> SerialPtr;
 } /* namespace NS_FF */
 
 #endif /* FF_SERIAL_H_ */
-#endif

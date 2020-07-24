@@ -27,8 +27,9 @@ public:
 
 	void start();
 	void stop();
-	void waitForFinished();
+	int waitForFinished();
 	int getProcessId() const;
+	int getExitCode() const;
 	const std::string& getCommand() const;
 	void setCommand(const std::string &command);
 	int readData(char *buf, int bufLen);

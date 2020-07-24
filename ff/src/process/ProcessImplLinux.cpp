@@ -27,7 +27,7 @@ using namespace std;
 namespace NS_FF {
 
 Process::ProcessImpl::ProcessImpl(Process *proc, const std::string &command) :
-		_proc(proc), pid(0), asyncRead(true) {
+		_proc(proc), pid(0), asyncRead(true), m_exitCode(-1){
 	memset(this->pipeFd, 0, sizeof(this->pipeFd));
 	this->command = command;
 }
@@ -88,12 +88,18 @@ void Process::ProcessImpl::stop() {
 	memset(this->pipeFd, 0, sizeof(this->pipeFd));
 }
 
-void Process::ProcessImpl::waitForFinished() {
+int Process::ProcessImpl::getExitCode() const {
+	return this->m_exitCode;
+}
+
+int Process::ProcessImpl::waitForFinished() {
 	if (0 == this->pid)
-		return;
+		return -1;
 
 	int status = 0;
 	waitpid(this->pid, &status, 0);
+	this->m_exitCode = WEXITSTATUS(status);
+	return this->m_exitCode;
 }
 
 int Process::ProcessImpl::getProcessId() const {

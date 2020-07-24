@@ -13,6 +13,10 @@
 #include <string>
 #include <ctime>
 
+#define MILLI_SECS_PER_SEC	1000
+#define MICRO_SECS_PER_SEC	1000000
+#define NANO_SECS_PER_SEC	1000000000
+
 namespace NS_FF {
 
 EXCEPTION_DEF(DateTimeException);

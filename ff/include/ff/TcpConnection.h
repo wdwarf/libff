@@ -40,7 +40,7 @@ public:
 	static TcpConnectionPtr CreateInstance();
 
 	bool listen(uint16_t port, const std::string& ip = "", IpVersion ipVer =
-			IpVersion::V4);
+			IpVersion::V4, int backlog = 1000);
 	bool isServer() const;
 	bool connect(uint16_t remotePort, const std::string& remoteHost,
 			uint16_t localPort = 0, const std::string& localIp = "");

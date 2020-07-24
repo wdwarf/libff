@@ -27,8 +27,12 @@ void Process::stop() {
 	this->impl->stop();
 }
 
-void Process::waitForFinished() {
-	this->impl->waitForFinished();
+int Process::waitForFinished() {
+	return this->impl->waitForFinished();
+}
+
+int Process::getExitCode() const {
+	return this->impl->getExitCode();
 }
 
 int Process::GetPid() {

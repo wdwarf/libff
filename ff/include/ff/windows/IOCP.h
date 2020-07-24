@@ -43,7 +43,7 @@ namespace NS_FF {
 	class IOCP
 	{
 	public:
-		IOCP(DWORD concurrentThreads = 4);
+		IOCP(DWORD concurrentThreads = 8);
 		~IOCP();
 
 		void close();
