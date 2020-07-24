@@ -30,17 +30,21 @@ string CliService::handleCmd(const CliPacket &pkg) {
 	auto action = ToLowerCopy(pkg.getAction());
 	auto obj = ToLowerCopy(pkg.getObj());
 
-	lock_guard<mutex> lk(this->m_handlerMutex);
-	auto it = this->m_cliHandlers.find(make_pair(action, obj));
-	if (it == m_cliHandlers.end() && !obj.empty()) {
-		it = this->m_cliHandlers.find(make_pair(action, ""));
+	CliHandlerFunc func;
+
+	{
+		lock_guard<mutex> lk(this->m_handlerMutex);
+		auto it = this->m_cliHandlers.find(make_pair(action, obj));
+		if (it == m_cliHandlers.end() && !obj.empty()) {
+			it = this->m_cliHandlers.find(make_pair(action, ""));
+		}
+
+		if (it != m_cliHandlers.end()) {
+			func = it->second;
+		}
 	}
 
-	if (it != m_cliHandlers.end()) {
-		return it->second(pkg);
-	}
-
-	return "";
+	return func ? func(pkg) : "";
 }
 
 } /* namespace NS_FF */

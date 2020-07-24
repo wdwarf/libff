@@ -5,18 +5,168 @@
  *      Author: liyawu
  */
 
-#ifndef _WIN32
-
 #include <ff/Serial.h>
+#include <cstring>
+
+#ifndef _WIN32
 #include <unistd.h>
 #include <fcntl.h>
 #include <errno.h>
-#include <cstring>
-#include <termios.h>
+#endif
 
 using namespace std;
 
 namespace NS_FF {
+
+#ifdef _WIN32
+
+	Serial::Serial() :
+		m_fd(INVALID_HANDLE_VALUE), m_readTimeout(-1) {
+
+		memset(&this->m_commTimeouts, 0, sizeof(COMMTIMEOUTS));
+		memset(&this->m_dcb, 0, sizeof(DCB));
+		this->m_dcb.DCBlength = sizeof(DCB);
+		this->m_dcb.fBinary = true;
+		this->m_dcb.fParity = false;
+		this->m_dcb.fDtrControl = false;
+
+		this->m_commTimeouts.ReadIntervalTimeout = 150;
+		this->m_commTimeouts.ReadTotalTimeoutMultiplier = 0;
+		this->m_commTimeouts.ReadTotalTimeoutConstant = -1;
+		this->m_commTimeouts.ReadTotalTimeoutConstant = this->m_readTimeout;
+		this->m_commTimeouts.WriteTotalTimeoutConstant = 2000;
+		this->m_commTimeouts.WriteTotalTimeoutMultiplier = 0;
+
+		this->setBaudrate(9600);
+		this->setParity(Parity::NONE);
+		this->setDatabit(8);
+		this->setStopBit(StopBit::_1);
+	}
+
+	Serial::~Serial() {
+		this->close();
+	}
+
+	void Serial::open(const std::string& device) {
+		if (this->isOpen()) {
+			THROW_EXCEPTION(SerialException, device + " has opened.", 0);
+		}
+
+		_W(string) strPort = _T("\\\\.\\") + device;
+
+		this->m_fd = CreateFile(
+			strPort.c_str(),
+			GENERIC_READ | GENERIC_WRITE,
+			0,
+			0,
+			OPEN_EXISTING,
+			FILE_ATTRIBUTE_NORMAL,
+			0
+		);
+
+		if (INVALID_HANDLE_VALUE == this->m_fd)
+			THROW_EXCEPTION(SerialException,
+				device + " open failed." + strerror(errno), errno);
+
+		if (!SetupComm(this->m_fd, 1024, 1024) ||
+			!SetCommTimeouts(this->m_fd, &this->m_commTimeouts) ||
+			!SetCommState(this->m_fd, &this->m_dcb))
+		{
+			this->close();
+			THROW_EXCEPTION(SerialException,
+				device + " open failed." + strerror(errno), errno);
+		}
+	}
+
+	bool Serial::isOpen() const {
+		return (INVALID_HANDLE_VALUE != this->m_fd);
+	}
+
+	void Serial::close() {
+		if (!this->isOpen())
+			return;
+
+		CloseHandle(this->m_fd);
+		this->m_fd = INVALID_HANDLE_VALUE;
+	}
+
+	int Serial::read(char* buf, int len, int msTimeout) {
+		if (!this->isOpen())
+			return -1;
+
+		if (msTimeout != this->m_readTimeout) {
+			this->m_readTimeout = msTimeout;
+			this->m_commTimeouts.ReadTotalTimeoutConstant = this->m_readTimeout;
+			SetCommTimeouts(this->m_fd, &this->m_commTimeouts);
+		}
+
+		DWORD readBytes = 0;
+		return (ReadFile(this->m_fd, buf, len,
+			&readBytes, NULL)) ? readBytes : -1;
+	}
+
+	int Serial::send(const void* buf, int len) {
+		if (!this->isOpen())
+			return -1;
+
+		DWORD writeBytes = 0;
+		return (WriteFile(this->m_fd, buf, len,
+			&writeBytes, NULL)) ? writeBytes : -1;
+	}
+
+	void Serial::flush() {
+		//
+	}
+
+	int Serial::getBaudrate() const {
+		return this->m_dcb.BaudRate;
+	}
+
+	void Serial::setBaudrate(int baudrate) {
+		/** 设置波特率 **/
+		this->m_dcb.BaudRate = baudrate;
+		if (this->isOpen())
+			SetCommState(this->m_fd, &this->m_dcb);
+	}
+
+	int Serial::getDatabit() const {
+		return this->m_dcb.ByteSize;
+	}
+
+	void Serial::setDatabit(int databit) {
+		/** 设置数据位 **/
+		this->m_dcb.ByteSize = databit;
+		if (this->isOpen())
+			SetCommState(this->m_fd, &this->m_dcb);
+	}
+
+	Serial::Fd Serial::getFd() const {
+		return this->m_fd;
+	}
+
+	Parity Serial::getParity() const {
+		return Parity(this->m_dcb.Parity);
+	}
+
+	void Serial::setParity(Parity parity) {
+		/** 设置校验位 **/
+		this->m_dcb.Parity = (BYTE)parity;
+		if (this->isOpen())
+			SetCommState(this->m_fd, &this->m_dcb);
+	}
+
+	StopBit Serial::getStopBit() const {
+		return StopBit(this->m_dcb.StopBits);
+	}
+
+	void Serial::setStopBit(StopBit stopBit) {
+		/** 设置停止位 **/
+		this->m_dcb.StopBits = (BYTE)stopBit;
+		if (this->isOpen())
+			SetCommState(this->m_fd, &this->m_dcb);
+	}
+
+#else
 
 static int Baudrate(int baudrate) {
 	switch (baudrate) {
@@ -322,7 +472,7 @@ static int _Baudrate(int baudrate) {
 }
 
 Serial::Serial() :
-		fd(0) {
+	m_fd(0) {
 	//
 }
 
@@ -335,14 +485,14 @@ void Serial::open(const std::string &device) {
 		THROW_EXCEPTION(SerialException, device + " has opened.", 0);
 	}
 
-	this->fd = ::open(device.c_str(), O_RDWR | O_NOCTTY | O_NONBLOCK);
-	if (-1 == this->fd) {
+	this->m_fd = ::open(device.c_str(), O_RDWR | O_NOCTTY | O_NONBLOCK);
+	if (-1 == this->m_fd) {
 		THROW_EXCEPTION(SerialException,
 				device + " open failed." + strerror(errno), errno);
 	}
 
-	tcgetattr(this->fd, &oldTermios);
-	tcgetattr(this->fd, &newTermios);
+	tcgetattr(this->m_fd, &oldTermios);
+	tcgetattr(this->m_fd, &newTermios);
 
 	this->newTermios.c_cflag |= (CLOCAL | CREAD); // | CRTSCTS;
 
@@ -356,25 +506,25 @@ void Serial::open(const std::string &device) {
 
 	this->newTermios.c_cc[VTIME] = 0; /* unit: 1/10 second. */
 	this->newTermios.c_cc[VMIN] = 1; /* minimal characters for reading */
-	tcflush(this->fd, TCIFLUSH);
-	tcsetattr(this->fd, TCSANOW, &this->newTermios);
+	tcflush(this->m_fd, TCIFLUSH);
+	tcsetattr(this->m_fd, TCSANOW, &this->newTermios);
 }
 
 bool Serial::isOpen() const {
-	return (this->fd > 0);
+	return (this->m_fd > 0);
 }
 
 void Serial::close() {
 	/* flush output data before close and restore old attribute */
-	tcsetattr(this->fd, TCSADRAIN, &oldTermios);
-	::close(this->fd);
-	this->fd = -1;
+	tcsetattr(this->m_fd, TCSADRAIN, &oldTermios);
+	::close(this->m_fd);
+	this->m_fd = -1;
 }
 
 int Serial::read(char *buf, int len, int msTimeout) {
 	fd_set fs;
 	FD_ZERO(&fs);
-	FD_SET(this->fd, &fs);
+	FD_SET(this->m_fd, &fs);
 	timeval tv;
 	timeval *pTv = NULL;
 	if (msTimeout >= 0) {
@@ -382,9 +532,9 @@ int Serial::read(char *buf, int len, int msTimeout) {
 		tv.tv_usec = (msTimeout % 1000) * 1000;
 		pTv = &tv;
 	}
-	int re = ::select(this->fd + 1, &fs, 0, 0, pTv);
+	int re = ::select(this->m_fd + 1, &fs, 0, 0, pTv);
 	if (re > 0) {
-		return ::read(this->fd, buf, len);
+		return ::read(this->m_fd, buf, len);
 	}
 	return re;
 }
@@ -392,19 +542,19 @@ int Serial::read(char *buf, int len, int msTimeout) {
 int Serial::send(const void *buf, int len) {
 	fd_set fs;
 	FD_ZERO(&fs);
-	FD_SET(this->fd, &fs);
+	FD_SET(this->m_fd, &fs);
 	timeval tv;
 	tv.tv_sec = 5;
 	tv.tv_usec = 0;
-	int re = ::select(this->fd + 1, 0, &fs, 0, &tv);
+	int re = ::select(this->m_fd + 1, 0, &fs, 0, &tv);
 	if (re > 0) {
-		return ::write(this->fd, buf, len);
+		return ::write(this->m_fd, buf, len);
 	}
 	return re;
 }
 
 void Serial::flush() {
-	tcflush(this->fd, TCIOFLUSH);
+	tcflush(this->m_fd, TCIOFLUSH);
 }
 
 int Serial::getBaudrate() const {
@@ -420,8 +570,8 @@ void Serial::setBaudrate(int baudrate) {
 				string("Baudrate set failed.") + strerror(errno), errno);
 	}
 
-	tcflush(this->fd, TCIFLUSH);
-	if (0 != tcsetattr(this->fd, TCSANOW, &this->newTermios)) {
+	tcflush(this->m_fd, TCIFLUSH);
+	if (0 != tcsetattr(this->m_fd, TCSANOW, &this->newTermios)) {
 		THROW_EXCEPTION(SerialException,
 				string("Baudrate set failed.") + strerror(errno), errno);
 	}
@@ -462,15 +612,15 @@ void Serial::setDatabit(int databit) {
 		THROW_EXCEPTION(SerialException, "Invalid data bit.", databit);
 	}
 
-	tcflush(this->fd, TCIFLUSH);
-	if (0 != tcsetattr(this->fd, TCSANOW, &this->newTermios)) {
+	tcflush(this->m_fd, TCIFLUSH);
+	if (0 != tcsetattr(this->m_fd, TCSANOW, &this->newTermios)) {
 		THROW_EXCEPTION(SerialException,
 				string("Databit set failed.") + strerror(errno), errno);
 	}
 }
 
 int Serial::getFd() const {
-	return fd;
+	return this->m_fd;
 }
 
 Parity Serial::getParity() const {
@@ -505,8 +655,8 @@ void Serial::setParity(Parity parity) {
 		THROW_EXCEPTION(SerialException, "Invalid parity.", int(parity));
 	}
 
-	tcflush(this->fd, TCIFLUSH);
-	if (0 != tcsetattr(this->fd, TCSANOW, &this->newTermios)) {
+	tcflush(this->m_fd, TCIFLUSH);
+	if (0 != tcsetattr(this->m_fd, TCSANOW, &this->newTermios)) {
 		THROW_EXCEPTION(SerialException,
 				string("Parity set failed.") + strerror(errno), errno);
 	}
@@ -533,13 +683,15 @@ void Serial::setStopBit(StopBit stopBit) {
 		THROW_EXCEPTION(SerialException, "Invalid stop bit.", int(stopBit));
 	}
 
-	tcflush(this->fd, TCIFLUSH);
-	if (0 != tcsetattr(this->fd, TCSANOW, &this->newTermios)) {
+	tcflush(this->m_fd, TCIFLUSH);
+	if (0 != tcsetattr(this->m_fd, TCSANOW, &this->newTermios)) {
 		THROW_EXCEPTION(SerialException,
 				string("StopBit set failed.") + strerror(errno), errno);
 	}
 }
 
+#endif
+
 } /* namespace NS_FF */
 
-#endif
+
