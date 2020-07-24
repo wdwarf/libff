@@ -305,7 +305,7 @@ namespace NS_FF {
 	}
 
 	bool TcpConnection::listen(uint16_t port, const std::string& ip,
-		IpVersion ipVer) {
+		IpVersion ipVer, int backlog) {
 		this->resetCallbackFunctions();
 
 		try {
@@ -315,7 +315,7 @@ namespace NS_FF {
 				THROW_EXCEPTION(Exception,
 					SW("Bind to ")(port)(":")(ip)(" failed. ")(strerror(errno)),
 					errno);
-			this->m_socket.listen();
+			this->m_socket.listen(backlog);
 		}
 		catch (std::exception& e) {
 			this->m_socket.close();
