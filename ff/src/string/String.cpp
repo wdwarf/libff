@@ -11,6 +11,7 @@
 #include <sstream>
 #include <functional>
 #include <algorithm>
+#include <regex>
 #include <ff/Exception.h>
 
 using namespace std;
@@ -160,7 +161,7 @@ int IndexOf(const string& src, const string& find, bool ignoreCase) {
 	return re;
 }
 
-LIBFF_API bool EndsWith(const std::string &src, const std::string &find, bool ignoreCase)
+bool EndsWith(const std::string &src, const std::string &find, bool ignoreCase)
 {
 	if(src.length() < find.length()) return false;
 	string s = src.substr(src.length() - find.length());
@@ -171,7 +172,7 @@ LIBFF_API bool EndsWith(const std::string &src, const std::string &find, bool ig
 	return s == find;
 }
 
-LIBFF_API bool StartsWith(const std::string &src, const std::string &find, bool ignoreCase)
+bool StartsWith(const std::string &src, const std::string &find, bool ignoreCase)
 {
 	if(src.length() < find.length()) return false;
 	string s = src.substr(0, find.length());
@@ -180,6 +181,10 @@ LIBFF_API bool StartsWith(const std::string &src, const std::string &find, bool 
 	}
 
 	return s == find;
+}
+
+bool Match(const std::string& str, const std::string& reg){
+	return regex_match(str, regex(reg));
 }
 
 unsigned int HexAToI(char x) {
@@ -300,6 +305,10 @@ bool String::equals(const String& str, bool isEgnoreCase) const
 {
 	return (isEgnoreCase ? 0 == strcasecmp(this->c_str(), str.c_str())
 			: 0 == strcmp(this->c_str(), str.c_str()));
+}
+
+bool String::match(const String& regStr) const{
+	return Match(*this, regStr);
 }
 
 String String::trimLeft() const {

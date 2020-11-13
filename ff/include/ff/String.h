@@ -43,6 +43,7 @@ LIBFF_API bool EndsWith(const std::string& src, const std::string& find, bool ig
 		false);
 LIBFF_API bool StartsWith(const std::string& src, const std::string& find, bool ignoreCase =
 		false);
+LIBFF_API bool Match(const std::string& str, const std::string& reg);
 
 /** 十六进制字符转数字 */
 LIBFF_API unsigned int HexAToI(char x);
@@ -107,6 +108,7 @@ public:
 	String(const char* str, size_t len);
 
 	bool equals(const String& str, bool isEgnoreCase = false) const;
+	bool match(const String& regStr) const;
 
 	String trimLeft() const;
 	String trimRight() const;

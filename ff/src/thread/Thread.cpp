@@ -28,13 +28,13 @@ void Thread::run() {
 }
 
 void Thread::start() {
-	this->m_thread = thread([](void* p, RunnablePtr runnable) {
+	this->m_thread = thread([this] {
 		try {
-			runnable->run();
+			this->m_runnable->run();
 		} catch(std::exception& e) {
 			throw;
 		}
-	}, this, m_runnable);
+	});
 }
 
 void Thread::join() {
