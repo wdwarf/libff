@@ -7,6 +7,7 @@
 
 #include <ff/windows/IOCP.h>
 #include <cstring>
+#include <iostream>
 
 using namespace std;
 
@@ -67,9 +68,26 @@ namespace NS_FF
 					LPOVERLAPPED lpOverlapped = nullptr;
 
 					if (!this->getQueuedCompletionStatus(&numberOfBytesTransferred,
-						&completionKey, &lpOverlapped, -1)
-						|| (0 == completionKey && nullptr == lpOverlapped))
-						break;
+						&completionKey, &lpOverlapped, -1)) {
+						/*cout << "GetLastError: " << GetLastError() << endl;*/
+						if (0 != completionKey && nullptr != lpOverlapped) {
+							PIocpContext context = (PIocpContext)lpOverlapped;
+
+							IocpWorkThreadFunc func;
+							{
+								lock_guard<mutex> lk(this->m_mutex);
+								auto it = this->m_iocpWorkThreadFuncs.find(context->handle);
+								if (it != this->m_iocpWorkThreadFuncs.end())
+									func = it->second;
+							}
+							if (func)
+								func(&numberOfBytesTransferred, &completionKey, &lpOverlapped);
+						}
+
+						continue;
+					}
+
+					if ((0 == completionKey && nullptr == lpOverlapped)) break;
 
 					
 					PIocpContext context = (PIocpContext)lpOverlapped;
