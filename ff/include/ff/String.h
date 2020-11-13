@@ -39,6 +39,10 @@ LIBFF_API std::string ReplaceAllCopy(const std::string& src, const std::string& 
 
 LIBFF_API int IndexOf(const std::string& src, const std::string& find, bool ignoreCase =
 		false);
+LIBFF_API bool EndsWith(const std::string& src, const std::string& find, bool ignoreCase =
+		false);
+LIBFF_API bool StartsWith(const std::string& src, const std::string& find, bool ignoreCase =
+		false);
 
 /** 十六进制字符转数字 */
 LIBFF_API unsigned int HexAToI(char x);
@@ -114,6 +118,9 @@ public:
 	String replaceAll(const String& find, const String& replace,
 				bool ignoreCase = false) const;
 	int indexOf(const String& find, bool ignoreCase = false) const;
+	bool endsWith(const String& find, bool ignoreCase = false) const;
+	bool startsWith(const String& find, bool ignoreCase = false) const;
+
 	std::vector<String> split(const IDelimiter& delimiterChecker,
 			StringCompressType compressType = WithEmptyString);
 };

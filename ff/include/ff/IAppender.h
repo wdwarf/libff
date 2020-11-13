@@ -10,11 +10,12 @@
 
 #include <memory>
 #include <ff/ff_config.h>
+#include <ff/Object.h>
 
 namespace NS_FF {
 
 class LogInfo;
-class LIBFF_API IAppender {
+class LIBFF_API IAppender : public ff::Object {
 public:
 	IAppender() = default;
 	virtual ~IAppender() = default;

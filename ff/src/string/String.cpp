@@ -160,6 +160,28 @@ int IndexOf(const string& src, const string& find, bool ignoreCase) {
 	return re;
 }
 
+LIBFF_API bool EndsWith(const std::string &src, const std::string &find, bool ignoreCase)
+{
+	if(src.length() < find.length()) return false;
+	string s = src.substr(src.length() - find.length());
+	if(ignoreCase){
+		return ToLowerCopy(s) == ToLowerCopy(find);
+	}
+
+	return s == find;
+}
+
+LIBFF_API bool StartsWith(const std::string &src, const std::string &find, bool ignoreCase)
+{
+	if(src.length() < find.length()) return false;
+	string s = src.substr(0, find.length());
+	if(ignoreCase){
+		return ToLowerCopy(s) == ToLowerCopy(find);
+	}
+
+	return s == find;
+}
+
 unsigned int HexAToI(char x) {
 	if ((x >= 48) && (x <= 57))
 		x -= 48; /* 0-9 */
@@ -312,6 +334,14 @@ String String::replaceAll(const String &find, const String &replace,
 
 int String::indexOf(const String &find, bool ignoreCase) const {
 	return IndexOf(*this, find, ignoreCase);
+}
+
+bool String::endsWith(const String &find, bool ignoreCase) const {
+	return EndsWith(*this, find, ignoreCase);
+}
+
+bool String::startsWith(const String &find, bool ignoreCase) const {
+	return StartsWith(*this, find, ignoreCase);
 }
 
 std::vector<String> String::split(const IDelimiter &delimiterChecker,

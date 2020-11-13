@@ -14,8 +14,6 @@ add_definitions(
 	-DLIBFF_EXPORTS
 )
 
-add_compile_options(-Wno-narrowing)
-
 IF (MINGW)
 	MESSAGE(STATUS "Now is MinGW")
 	file(GLOB windows_files "src/windows/*.cpp")
@@ -26,6 +24,9 @@ ELSEIF (APPLE)
 	MESSAGE(STATUS "Now is Apple systens.")
 ELSEIF (UNIX)
 	MESSAGE(STATUS "Now is UNIX-like OS's.")
+
+	add_compile_options(-Wno-narrowing)
+#	add_compile_options(-mcpu=cortex-a7 -mthumb -O2 -ffunction-sections -fdata-sections)
 ENDIF ()
 
 if(BUILDIN_JSONCPP)
