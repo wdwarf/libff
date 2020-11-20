@@ -79,7 +79,7 @@ private:
 #endif
 };
 
-std::shared_ptr<Serial> SerialPtr;
+using SerialPtr = std::shared_ptr<Serial>;
 
 } /* namespace NS_FF */
 
