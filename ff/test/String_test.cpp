@@ -51,4 +51,7 @@ TEST(TestString, TestString){
 	auto v = replacedStr3.split(IsAnyOf(" "));
 	vector<string> v2{"test", "string~~~~~~~~~"};
 	EXPECT_TRUE(equal(v.begin(), v.end(), v2.begin()));
+
+	String s1 = "123456";
+	EXPECT_EQ("654321", s1.reverse());
 }

@@ -85,6 +85,17 @@ string TrimCopy(const string& str) {
 	return Trim(newStr);
 }
 
+
+string& Reverse(std::string& str){
+	reverse(str.begin(), str.end());
+	return str;
+}
+
+string ReverseCopy(const std::string& str){
+	string newStr = str;
+	return Reverse(newStr);
+}
+
 string& Replace(string& src, const string& find, const string& replace,
 		bool ignoreCase) {
 	string::size_type pos = string::npos;
@@ -329,6 +340,10 @@ String String::toLower() const {
 
 String String::toUpper() const {
 	return ToUpperCopy(*this);
+}
+
+String String::reverse() const{
+	return ReverseCopy(*this);
 }
 
 String String::replace(const String &find, const String &replace,

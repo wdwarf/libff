@@ -27,6 +27,8 @@ LIBFF_API std::string& TrimRight(std::string& str);
 LIBFF_API std::string TrimRightCopy(const std::string& str);
 LIBFF_API std::string& Trim(std::string& str);
 LIBFF_API std::string TrimCopy(const std::string& str);
+LIBFF_API std::string& Reverse(std::string& str);
+LIBFF_API std::string ReverseCopy(const std::string& str);
 
 LIBFF_API std::string& Replace(std::string& src, const std::string& find,
 		const std::string& replace, bool ignoreCase = false);
@@ -115,6 +117,7 @@ public:
 	String trim() const;
 	String toLower() const;
 	String toUpper() const;
+	String reverse() const;
 	String replace(const String& find, const String& replace,
 			bool ignoreCase = false) const;
 	String replaceAll(const String& find, const String& replace,
