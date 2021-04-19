@@ -41,6 +41,19 @@ public:
 		return *this;
 	}
 
+	BlockingList(BlockingList&& l) {
+		std::lock_guard<std::mutex> lk(l.m_mutex);
+		std::lock_guard<std::mutex> lk2(this->m_mutex);
+		this->m_list = std::move(l.m_list);
+	}
+
+	BlockingList& operator=(BlockingList&& l) {
+		std::lock_guard<std::mutex> lk(l.m_mutex);
+		std::lock_guard<std::mutex> lk2(this->m_mutex);
+		this->m_list = std::move(l.m_list);
+		return *this;
+	}
+
 	typename ListT::size_type size() const{
 		std::lock_guard<std::mutex> lk(this->m_mutex);
 		return this->m_list.size();

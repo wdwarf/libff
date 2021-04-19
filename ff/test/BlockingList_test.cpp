@@ -58,3 +58,22 @@ TEST(TestBlockingList, TestBlockingList2) {
 	t1.join();
 	EXPECT_TRUE(bl.empty());
 }
+
+TEST(TestBlockingList, Move) {
+	BlockingList<int> bl;
+	for(int i = 0; i < 10; ++i){
+		bl.push_back(i);
+	}
+
+	BlockingList<int> bl2 = std::move(bl);
+
+	EXPECT_EQ(0, bl.size());
+	EXPECT_EQ(10, bl2.size());
+
+	
+	BlockingList<int> bl3;
+	bl3 = std::move(bl2);
+
+	EXPECT_EQ(0, bl2.size());
+	EXPECT_EQ(10, bl3.size());
+}

@@ -38,8 +38,7 @@ tick_t Tick::GetTickCount() {
 }
 
 tick_t Tick::tick() {
-	this->m_tick = Tick::GetTickCount();
-	return this->m_tick;
+	return (this->m_tick = Tick::GetTickCount());
 }
 
 tick_t Tick::tock() const {

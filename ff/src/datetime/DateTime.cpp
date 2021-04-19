@@ -33,7 +33,7 @@ using namespace std;
 NS_FF_BEG
 
 DateTime::DateTime() :
-		t(0) {
+		t(time(nullptr)) {
 }
 
 DateTime::DateTime(const DateTime& t) {
@@ -202,7 +202,7 @@ long DateTime::operator-(const DateTime& t) const {
 }
 
 DateTime DateTime::Now() {
-	return DateTime(time(0));
+	return DateTime(time(nullptr));
 }
 
 bool DateTime::setSystemTime() {
