@@ -19,7 +19,7 @@ using namespace std;
 
 #define RD_BUF_SIZE 4096
 
-namespace NS_FF {
+NS_FF_BEG
 
 #ifdef _WIN32
 
@@ -514,4 +514,4 @@ namespace NS_FF {
 
 #endif
 
-} /* namespace NS_FF */
+NS_FF_END

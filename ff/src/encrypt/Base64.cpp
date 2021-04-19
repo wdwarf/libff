@@ -7,7 +7,7 @@
 
 using namespace std;
 
-namespace NS_FF {
+NS_FF_BEG
 
 namespace {
 

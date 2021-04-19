@@ -16,7 +16,7 @@
 #include <ff/Exception.h>
 #include <ff/Noncopyable.h>
 
-namespace NS_FF {
+NS_FF_BEG
 
 EXCEPTION_DEF2(ThreadException, RunnableException);
 
@@ -44,6 +44,6 @@ private:
 
 typedef std::shared_ptr<Thread> ThreadPtr;
 
-} /* namespace NS_FF */
+NS_FF_END
 
 #endif /* FF_THREAD_H_ */

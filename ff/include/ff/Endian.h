@@ -10,7 +10,7 @@
 
 #include <ff/Buffer.h>
 
-namespace NS_FF {
+NS_FF_BEG
 
 enum class EndianType {
 	Big, Small
@@ -69,6 +69,6 @@ private:
 	EndianType endianType;
 };
 
-} /* namespace NS_FF */
+NS_FF_END
 
 #endif /* FF_ENDIAN_H_ */

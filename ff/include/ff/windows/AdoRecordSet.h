@@ -13,7 +13,7 @@
 #include <ff/windows/AdoFields.h>
 #include <ff/windows/AdoConnection.h>
 
-namespace NS_FF {
+NS_FF_BEG
 
 class LIBFF_API AdoRecordSet: public AdoObject {
 public:
@@ -56,6 +56,6 @@ private:
 	_RecordsetPtr rs;
 };
 
-} /* namespace NS_FF */
+NS_FF_END
 
 #endif /* WINDOWS_ADORECORDSET_H_ */

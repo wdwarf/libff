@@ -13,7 +13,7 @@
 
 using namespace std;
 
-namespace NS_FF {
+NS_FF_BEG
 //---------------------------------------------------------------------------
 
 #define F(x,y,z) ((x & y) | (~x & z))

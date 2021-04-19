@@ -11,7 +11,7 @@
 #include <ff/ff_config.h>
 #include <functional>
 
-namespace NS_FF {
+NS_FF_BEG
 
 #if _MSC_VER
 #define __placeholder std::_Ph

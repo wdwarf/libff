@@ -13,7 +13,7 @@
 #include <string>
 #include <ostream>
 
-namespace NS_FF {
+NS_FF_BEG
 
 #ifndef _GLIBCXX_USE_NOEXCEPT
 #define _GLIBCXX_USE_NOEXCEPT throw()
@@ -43,7 +43,7 @@ private:
 	std::string msg;
 };
 
-#define EXCEPTION_DEF(exceptionName) class LIBFF_API exceptionName : public NS_FF::Exception{\
+#define EXCEPTION_DEF(exceptionName) class LIBFF_API exceptionName : public ff::Exception{\
 	public:\
 	exceptionName(const std::string& msg, int errNo = 0, int lineNumber = 0, \
 			const std::string& functionName = "", const std::string& fileName = "") _GLIBCXX_USE_NOEXCEPT \
@@ -62,6 +62,6 @@ private:
 #define MK_EXCEPTION(exceptionName, msg, errNo) exceptionName(msg, errNo, __LINE__, __FUNCTION__, __FILE__)
 #define THROW_EXCEPTION(exceptionName, msg, errNo) throw MK_EXCEPTION(exceptionName, msg, errNo)
 
-} /* namespace NS_FF */
+NS_FF_END
 
 #endif /* FF_EXCEPTION_H_ */

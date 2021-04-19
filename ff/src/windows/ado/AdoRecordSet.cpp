@@ -9,7 +9,7 @@
 
 using namespace std;
 
-namespace NS_FF {
+NS_FF_BEG
 
 AdoRecordSet::AdoRecordSet(void) {
 	this->rs.CreateInstance(__uuidof(Recordset));
@@ -118,4 +118,4 @@ _RecordsetPtr& AdoRecordSet::operator->() {
 	return this->rs;
 }
 
-} /* namespace NS_FF */
+NS_FF_END

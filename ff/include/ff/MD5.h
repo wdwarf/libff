@@ -14,7 +14,7 @@
 using std::string;
 using std::stringstream;
 
-namespace NS_FF {
+NS_FF_BEG
 
 struct MD5Result {
 	unsigned char result[16];

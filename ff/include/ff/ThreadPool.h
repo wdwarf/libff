@@ -16,7 +16,7 @@
 #include <ff/Thread.h>
 #include <ff/Noncopyable.h>
 
-namespace NS_FF {
+NS_FF_BEG
 
 class TaskThread;
 class LIBFF_API ThreadPool: public Noncopyable{
@@ -55,6 +55,6 @@ private:
 
 typedef std::shared_ptr<ThreadPool> ThreadPoolPtr;
 
-} /* namespace NS_FF */
+NS_FF_END
 
 #endif /* FF_THREADPOOL_H_ */

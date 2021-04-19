@@ -14,7 +14,7 @@
 
 using namespace std;
 
-namespace NS_FF {
+NS_FF_BEG
 
 static Application* __app = nullptr;
 
@@ -75,5 +75,5 @@ std::string Application::GetCurrentWorkDir() {
 	return Application::ApplicationImpl::GetCurrentWorkDir();
 }
 
-} /* namespace NS_FF */
+NS_FF_END /* namespace NS_FF */
 

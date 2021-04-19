@@ -19,7 +19,7 @@
  * cout << hex << c.calc(buf, bufSize) << endl;
  */
 
-namespace NS_FF {
+NS_FF_BEG
 
 enum class CrcAlgorithms {
 	Crc8,

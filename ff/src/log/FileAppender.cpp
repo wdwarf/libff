@@ -13,7 +13,7 @@
 
 using namespace std;
 
-namespace NS_FF {
+NS_FF_BEG
 
 	FileAppender::FileAppender(const std::string& logDir,
 		const std::string& fileNamePrefix, int32_t reservedCount)
@@ -72,4 +72,4 @@ namespace NS_FF {
 	}
 
 
-} /* namespace NS_FF */
+NS_FF_END

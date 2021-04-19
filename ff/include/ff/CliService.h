@@ -15,7 +15,7 @@
 #include <ff/ff_config.h>
 #include <ff/CliPacket.h>
 
-namespace NS_FF {
+NS_FF_BEG
 
 using CliHandlerFunc = std::function<std::string(const CliPacket&)>;
 
@@ -34,6 +34,6 @@ private:
 	std::map<std::pair<std::string, std::string>, CliHandlerFunc> m_cliHandlers;
 };
 
-} /* namespace NS_FF */
+NS_FF_END
 
 #endif /* CLI_CLISERVICE_H_ */

@@ -10,7 +10,7 @@
 #include <iostream>
 using namespace std;
 
-namespace NS_FF {
+NS_FF_BEG
 
 Semaphore::Semaphore() : m_named(false) {
 #ifdef _WIN32
@@ -99,5 +99,5 @@ void Semaphore::unlink() {
 #endif
 }
 
-} /* namespace NS_FF */
+NS_FF_END
 

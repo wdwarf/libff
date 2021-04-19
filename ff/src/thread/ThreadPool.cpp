@@ -11,7 +11,7 @@
 using namespace std;
 using namespace std::placeholders;
 
-namespace NS_FF {
+NS_FF_BEG
 
 class TaskThread: public Thread {
 public:
@@ -167,4 +167,4 @@ void ThreadPool::waitAll()
 	this->m_cond.wait(lk, [&] {return this->m_busyThreads.empty(); });
 }
 
-} /* namespace NS_FF */
+NS_FF_END

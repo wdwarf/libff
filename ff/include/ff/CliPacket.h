@@ -13,7 +13,7 @@
 #include <ff/ff_config.h>
 #include <ff/Variant.h>
 
-namespace NS_FF {
+NS_FF_BEG
 
 using CliMembers = std::map<std::string, Variant>;
 
@@ -35,6 +35,6 @@ private:
 	CliMembers m_members;
 };
 
-} /* namespace NS_FF */
+NS_FF_END
 
 #endif /* CLI_CLIPACKET_H_ */

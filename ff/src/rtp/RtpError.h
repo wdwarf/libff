@@ -11,12 +11,11 @@
 #include <ff/ff_config.h>
 #include <string>
 
-namespace NS_FF
-{
+NS_FF_BEG
 
 std::string LIBFF_API GetRtpErrStr(int errCode);
 
-} // namespace NS_FF
+NS_FF_END
 
 #define ERR_RTP_OUTOFMEM                                          -1
 #define ERR_RTP_NOTHREADSUPPORT                                   -2

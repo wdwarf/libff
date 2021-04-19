@@ -24,7 +24,7 @@
 
 using namespace std;
 
-namespace NS_FF {
+NS_FF_BEG
 
 Process::ProcessImpl::ProcessImpl(Process *proc, const std::string &command) :
 		_proc(proc), pid(0), asyncRead(true), m_exitCode(-1){
@@ -264,6 +264,6 @@ void Process::ProcessImpl::clearParameter() {
 	this->args.clear();
 }
 
-} /* namespace NS_FF */
+NS_FF_END
 
 #endif

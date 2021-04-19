@@ -14,6 +14,9 @@
 #include <iostream>
 
 #define NS_FF ff
+#define NS_FF_BEG namespace ff {
+#define NS_FF_END }
+#define USE_NS_FF using namespace ff;
 
 #ifdef _WIN32
 #include <WinSock2.h>

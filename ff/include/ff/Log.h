@@ -19,7 +19,7 @@
 #include <ff/StringWrapper.h>
 #include <ff/Noncopyable.h>
 
-namespace NS_FF {
+NS_FF_BEG
 
 class LIBFF_API Log: public std::stringstream, public Noncopyable {
 public:
@@ -68,6 +68,6 @@ private:
 	static std::mutex s_mutex;
 };
 
-} /* namespace NS_FF */
+NS_FF_END
 
 #endif /* FF_LOG_H_ */

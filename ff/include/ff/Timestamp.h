@@ -12,7 +12,7 @@
 #include <ff/Exception.h>
 #include <ff/DateTime.h>
 
-namespace NS_FF {
+NS_FF_BEG
 
 EXCEPTION_DEF(TimestampException);
 
@@ -40,6 +40,6 @@ private:
 	TimestampImpl* impl;
 };
 
-} /* namespace NS_FF */
+NS_FF_END
 
 #endif /* FF_TIMESTAMP_H_ */

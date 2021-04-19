@@ -10,8 +10,8 @@
 #include <ff/ff_config.h>
 #include <ff/Buffer.h>
 
-namespace NS_FF
-{
+NS_FF_BEG
+
     struct RtpHeader
     {
     public:
@@ -86,6 +86,6 @@ private:
 
     }; /* class RtpPacket */
 
-} // namespace NS_FF
+NS_FF_END
 
 #endif

@@ -14,7 +14,7 @@
 
 using namespace std;
 
-namespace NS_FF {
+NS_FF_BEG
 
 #define NONTHROW(stat) try{stat}catch(...){}
 //#define NONTHROW(stat) stat
@@ -966,4 +966,4 @@ void ColumnInfo::setIsComputed(bool IsComputed) {
 	this->IS_COMPUTED = IsComputed;
 }
 
-} /* namespace NS_FF */
+NS_FF_END

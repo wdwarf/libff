@@ -13,7 +13,7 @@
 
 using namespace std;
 
-namespace NS_FF{
+NS_FF_BEG
 
 /**
  * class Statment
@@ -470,6 +470,6 @@ TableInfo Sqlite3DataBase::getTableInfo(const string& tableName){
 	return tbInfo;
 }
 
-} /* namespace NS_FF */
+NS_FF_END
 
 #endif /* __USE_SQLITE3_DB__ */

@@ -14,9 +14,9 @@
 #include <fstream>
 #include <string>
 
-namespace NS_FF {
+NS_FF_BEG
 
-	class LIBFF_API FileAppender : public ff::IAppender {
+	class LIBFF_API FileAppender : public NS_FF::IAppender {
 	public:
 		FileAppender(const std::string& logDir,
 			const std::string& fileNamePrefix = "Log_", int32_t reservedCount = 7);
@@ -25,17 +25,17 @@ namespace NS_FF {
 		void log(const LogInfo& logInfo) override;
 
 	private:
-		std::ofstream m_logFile;	/** 当前的日志文件 */
-		ff::File m_logDir;			/** 日志文件目录 */
-		std::string m_prefix;		/** 日志文件前缀 */
-		std::string m_logFileName;	/** 当前日志文件名称 */
-		int32_t m_reservedCount;	/** 保留日志文件数量 */
+		std::ofstream m_logFile;
+		NS_FF::File m_logDir;
+		std::string m_prefix;
+		std::string m_logFileName;
+		int32_t m_reservedCount;
 
 		void checkLogFile();
 		std::string genLogFileName();
 		void clearOldFiles();
 	};
 
-} /* namespace NS_FF */
+NS_FF_END
 
 #endif /* FF_FILEAPPENDER_H_ */

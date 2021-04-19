@@ -9,7 +9,7 @@
 
 using namespace std;
 
-namespace NS_FF {
+NS_FF_BEG
 
 AdoFields::AdoFields(void) {
 	this->fields.CreateInstance(__uuidof(Fields));
@@ -68,4 +68,4 @@ vector<StringT> AdoFields::getFieldNames() {
 	return re;
 }
 
-} /* namespace NS_FF */
+NS_FF_END

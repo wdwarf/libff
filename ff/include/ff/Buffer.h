@@ -15,7 +15,7 @@
 #include <ff/Exception.h>
 #include <ff/String.h>
 
-namespace NS_FF {
+NS_FF_BEG
 
 EXCEPTION_DEF(BufferException);
 
@@ -104,6 +104,6 @@ private:
 
 typedef std::shared_ptr<Buffer> BufferPtr;
 
-} /* namespace NS_FF */
+NS_FF_END
 
 #endif /* FF_BUFFER_H_ */

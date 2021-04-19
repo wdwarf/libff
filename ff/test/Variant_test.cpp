@@ -11,7 +11,7 @@
 #include <iostream>
 
 using namespace std;
-using namespace NS_FF;
+USE_NS_FF
 
 TEST(TestVariant, TestVariant){
 	Variant v = 12;

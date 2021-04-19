@@ -17,7 +17,7 @@
 #define MICRO_SECS_PER_SEC	1000000
 #define NANO_SECS_PER_SEC	1000000000
 
-namespace NS_FF {
+NS_FF_BEG
 
 EXCEPTION_DEF(DateTimeException);
 
@@ -73,6 +73,6 @@ private:
 };
 
 
-} /* namespace NS_FF */
+NS_FF_END
 
 #endif /* FF_DATETIME_DATETIME_H_ */

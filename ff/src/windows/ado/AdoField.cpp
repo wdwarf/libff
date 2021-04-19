@@ -8,7 +8,7 @@
 #include <ff/windows/AdoField.h>
 #include <ctime>
 
-namespace NS_FF {
+NS_FF_BEG
 
 AdoField::AdoField(void) {
 	this->field.CreateInstance(__uuidof(Field));
@@ -112,4 +112,4 @@ AdoField::operator time_t() {
 	return this->valAsTime();
 }
 
-} /* namespace NS_FF */
+NS_FF_END

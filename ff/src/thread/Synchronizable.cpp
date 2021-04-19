@@ -9,7 +9,7 @@
 
 using namespace std;
 
-namespace NS_FF {
+NS_FF_BEG
 
 Synchronizable::Synchronizable() {
 }
@@ -29,4 +29,4 @@ bool Synchronizable::trylock(){
 	return this->m_mutex.try_lock();
 }
 
-} /* namespace NS_FF */
+NS_FF_END

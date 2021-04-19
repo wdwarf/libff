@@ -18,7 +18,7 @@
 #include <set>
 #include <functional>
 
-namespace NS_FF {
+NS_FF_BEG
 
 EXCEPTION_DEF(ApplicationException);
 
@@ -50,6 +50,6 @@ private:
 
 LIBFF_API Application* GetApp();
 
-} /* namespace NS_FF */
+NS_FF_END
 
 #endif /* FF_APPLICATION_H_ */

@@ -15,7 +15,7 @@
 #include <string>
 #include <ostream>
 
-namespace NS_FF {
+NS_FF_BEG
 
 class LIBFF_API IP {
 public:
@@ -55,7 +55,7 @@ private:
 	bool parseV6(const std::string& ip);
 };
 
-} /* namespace NS_FF */
+NS_FF_END
 
 #endif /* FF_IP_H_ */
 

@@ -16,7 +16,7 @@
 #include <semaphore.h>
 #endif
 
-namespace NS_FF {
+NS_FF_BEG
 
 using std::string;
 
@@ -43,6 +43,6 @@ private:
 	bool m_named;
 };
 
-} /* namespace NS_FF */
+NS_FF_END
 
 #endif /* FF_SEMAPHORE_H_ */

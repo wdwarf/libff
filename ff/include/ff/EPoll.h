@@ -19,7 +19,7 @@
 #include <poll.h>
 #include <ff/ff_config.h>
 
-namespace NS_FF {
+NS_FF_BEG
 
 typedef std::function<void(int, int)> FdUpdateFunc;
 
@@ -90,7 +90,7 @@ private:
 	void pollThreadFunc();
 };
 
-} /* namespace NS_FF */
+NS_FF_END
 
 #endif
 #endif /* FF_EPOLL_H_ */

@@ -10,7 +10,7 @@
 
 using namespace std;
 
-namespace NS_FF {
+NS_FF_BEG
 
 CliService::CliService() {
 }
@@ -47,4 +47,4 @@ string CliService::handleCmd(const CliPacket &pkg) {
 	return func ? func(pkg) : "";
 }
 
-} /* namespace NS_FF */
+NS_FF_END

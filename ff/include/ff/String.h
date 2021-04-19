@@ -15,7 +15,7 @@
 
 using std::string;
 
-namespace NS_FF {
+NS_FF_BEG
 
 LIBFF_API std::string& ToLower(std::string& str);
 LIBFF_API std::string ToLowerCopy(const std::string& str);
@@ -130,6 +130,6 @@ public:
 			StringCompressType compressType = WithEmptyString);
 };
 
-} /* namespace NS_FF */
+NS_FF_END
 
 #endif /* DUCKY_STRIING_STRING_H_ */

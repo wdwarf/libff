@@ -15,7 +15,7 @@
 
 using namespace std;
 
-namespace NS_FF {
+NS_FF_BEG
 
 Variant::Variant() :
 		vt(VariantType::UNKNOWN), size(0) {
@@ -748,5 +748,5 @@ Variant operator !=(const bool& p1, const Variant& p2) {
 	return (p1 != (bool) p2);
 }
 
-} /* namespace NS_FF */
+NS_FF_END
 

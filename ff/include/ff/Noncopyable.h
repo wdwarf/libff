@@ -10,7 +10,7 @@
 
 #include <ff/ff_config.h>
 
-namespace NS_FF {
+NS_FF_BEG
 
 class LIBFF_API Noncopyable {
 public:
@@ -22,6 +22,6 @@ private:
 	Noncopyable& operator=(const Noncopyable&) = delete;
 };
 
-} /* namespace NS_FF */
+NS_FF_END
 
 #endif /* FF_NONCOPYABLE_H_ */

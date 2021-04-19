@@ -20,7 +20,7 @@
 
 using namespace std;
 
-namespace NS_FF {
+NS_FF_BEG
 
 	Application::ApplicationImpl::ApplicationImpl(Application* _app, int argc,
 		char** argv) :
@@ -121,4 +121,4 @@ namespace NS_FF {
 		return _getcwd_(NULL, 0);
 	}
 
-} /* namespace NS_FF */
+NS_FF_END /* namespace NS_FF */

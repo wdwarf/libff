@@ -9,7 +9,7 @@
 
 using namespace std;
 
-namespace NS_FF {
+NS_FF_BEG
 
 //Rijndael (pronounced Reindaal) is a block cipher, designed by Joan Daemen and Vincent Rijmen as a candidate algorithm for the AES.
 //The cipher has a variable block length and key length. The authors currently specify how to use keys with a length
@@ -156,6 +156,6 @@ private:
 	int t[MAX_BC];
 };
 
-} /* namespace NS_FF */
+NS_FF_END
 #endif // FF_RIJNDAEL_H__
 

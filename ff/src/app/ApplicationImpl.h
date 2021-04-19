@@ -22,7 +22,7 @@
 #include <ff/Application.h>
 #include <ff/Settings.h>
 
-namespace NS_FF {
+NS_FF_BEG
 
 class Application::ApplicationImpl {
 public:
@@ -50,6 +50,6 @@ private:
 	bool m_running;
 };
 
-} /* namespace NS_FF */
+NS_FF_END
 
 #endif /* APP_APPLICATIONIMPL_H_ */

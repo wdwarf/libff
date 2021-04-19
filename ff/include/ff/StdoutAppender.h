@@ -11,9 +11,9 @@
 #include <ff/ff_config.h>
 #include <ff/IAppender.h>
 
-namespace NS_FF {
+NS_FF_BEG
 
-class LIBFF_API StdoutAppender: public ff::IAppender {
+class LIBFF_API StdoutAppender: public NS_FF::IAppender {
 public:
 	StdoutAppender();
 	virtual ~StdoutAppender();
@@ -21,6 +21,6 @@ public:
 	virtual void log(const LogInfo& logInfo) override;
 };
 
-} /* namespace NS_FF */
+NS_FF_END
 
 #endif /* FF_STDOUTAPPENDER_H_ */

@@ -10,8 +10,7 @@
 
 using namespace std;
 
-namespace NS_FF
-{
+NS_FF_BEG
 
 struct RTPErrorInfo
 {
@@ -238,5 +237,5 @@ std::string GetRtpErrStr(int errCode)
     return std::string("Unknown error code") + to_string(errCode);
 }
 
-} // namespace NS_FF
+NS_FF_END
 

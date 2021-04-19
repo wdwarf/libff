@@ -15,7 +15,7 @@
 #include <ff/ff_config.h>
 #include <ff/windows/AdoObject.h>
 
-namespace NS_FF {
+NS_FF_BEG
 
 class LIBFF_API ColumnInfo {
 public:
@@ -315,6 +315,6 @@ private:
 	_ConnectionPtr conn;
 };
 
-} /* namespace NS_FF */
+NS_FF_END
 
 #endif /* WINDOWS_ADOCONNECTION_H_ */

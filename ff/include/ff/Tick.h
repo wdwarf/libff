@@ -11,7 +11,7 @@
 #include <ff/Object.h>
 #include <ff/Exception.h>
 
-namespace NS_FF {
+NS_FF_BEG
 
 EXCEPTION_DEF(TickException);
 typedef long long tick_t;
@@ -30,6 +30,6 @@ private:
 	tick_t m_tick;
 };
 
-} /* namespace NS_FF */
+NS_FF_END
 
 #endif /* FF_TICK_H_ */

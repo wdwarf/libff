@@ -12,7 +12,7 @@
 #include <iostream>
 
 using namespace std;
-using namespace NS_FF;
+USE_NS_FF
 
 TEST(TestStringWrapper, TestStringWrapper){
 	LOGD << SW("this")(" ")("is")(" ")("a text from StringWrapper").toString();

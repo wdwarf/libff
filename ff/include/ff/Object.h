@@ -11,7 +11,7 @@
 #include <ff/ff_config.h>
 #include <string>
 
-namespace NS_FF {
+NS_FF_BEG
 
 class LIBFF_API Object {
 public:
@@ -24,6 +24,6 @@ protected:
 	virtual ~Object();
 };
 
-} /* namespace NS_FF */
+NS_FF_END
 
 #endif /* FF_OBJECT_H_ */

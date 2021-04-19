@@ -11,7 +11,7 @@
 
 using namespace std;
 
-namespace NS_FF {
+NS_FF_BEG
 
 namespace {
 
@@ -197,4 +197,4 @@ std::ostream& operator<<(std::ostream& o, const Uuid& u) {
 	return o;
 }
 
-} /* namespace NS_FF */
+NS_FF_END

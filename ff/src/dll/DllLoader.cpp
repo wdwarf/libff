@@ -17,7 +17,7 @@
 
 using namespace std;
 
-namespace NS_FF {
+NS_FF_BEG
 
 DllLoader::DllLoader() :
 		m_handle(NULL) {
@@ -89,4 +89,4 @@ void* DllLoader::operator()(const std::string &procName) {
 	return this->getProc(procName);
 }
 
-} /* namespace NS_FF */
+NS_FF_END

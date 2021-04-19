@@ -46,7 +46,7 @@ int NumLen(long n){
 
 }
 
-namespace NS_FF {
+NS_FF_BEG
 
 Object::Object() {
 
@@ -88,4 +88,4 @@ unsigned long Object::CppVeraion() {
 	return __cplusplus;
 }
 
-} /* namespace NS_FF */
+NS_FF_END

@@ -10,7 +10,7 @@
 
 #include <ff/Object.h>
 
-namespace NS_FF {
+NS_FF_BEG
 
 /*
  * 这个单例会在第一次调用时初始化
@@ -70,6 +70,6 @@ private:
 template<class T>
 typename Singleton2<T>::object_creator Singleton2<T>::creator_object;
 
-} /* namespace NS_FF */
+NS_FF_END
 
 #endif /* FF_SINGLETON_H_ */

@@ -7,7 +7,7 @@
 
 #include <ff/windows/AdoObject.h>
 
-namespace NS_FF {
+NS_FF_BEG
 
 AdoObject::AdoObject() {
 	::CoInitializeEx(NULL, COINIT_MULTITHREADED);
@@ -24,4 +24,4 @@ StringT AdoObject::BstrToStr(const bstr_t &str) {
 	return _T("");
 }
 
-} /* namespace NS_FF */
+NS_FF_END

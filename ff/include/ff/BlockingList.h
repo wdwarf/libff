@@ -14,7 +14,7 @@
 #include <ff/ff_config.h>
 #include <ff/Noncopyable.h>
 
-namespace NS_FF {
+NS_FF_BEG
 
 template<class T>
 class BlockingList {
@@ -225,6 +225,6 @@ inline bool operator>=(const BlockingList<_Tp>& __x,
 	return !(__x < __y);
 }
 
-} /* namespace NS_FF */
+NS_FF_END
 
 #endif /* FF_BLOCKINGLIST_H_ */

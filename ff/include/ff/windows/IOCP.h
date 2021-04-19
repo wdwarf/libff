@@ -16,7 +16,7 @@
 #include <functional>
 #include <ff/Singleton.h>
 
-namespace NS_FF {
+NS_FF_BEG
 
 	enum class IocpEvent {
 		Recv,

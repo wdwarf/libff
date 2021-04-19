@@ -9,7 +9,7 @@
 
 using namespace std;
 
-namespace NS_FF {
+NS_FF_BEG
 
 StringWrapper::StringWrapper() {
 }
@@ -30,4 +30,4 @@ std::ostream& operator<<(std::ostream& o, const StringWrapper& wp) {
 	return o;
 }
 
-} /* namespace NS_FF */
+NS_FF_END

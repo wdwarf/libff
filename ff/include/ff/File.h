@@ -17,7 +17,7 @@
 #include <ff/DateTime.h>
 #include <ff/Noncopyable.h>
 
-namespace NS_FF {
+NS_FF_BEG
 
 EXCEPTION_DEF(FileException);
 
@@ -82,6 +82,6 @@ private:
 	std::list<std::string> path;
 };
 
-} /* namespace NS_FF */
+NS_FF_END
 
 #endif /* SYSTEM_FILE_H_ */

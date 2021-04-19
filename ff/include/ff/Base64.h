@@ -14,7 +14,7 @@
 using std::string;
 using std::ostream;
 
-namespace NS_FF {
+NS_FF_BEG
 
 class LIBFF_API Base64 {
 public:

@@ -11,7 +11,7 @@
 #include <ff/Buffer.h>
 #include <ff/String.h>
 
-namespace NS_FF {
+NS_FF_BEG
 
 class Buffer::BufferImpl {
 public:
@@ -57,6 +57,6 @@ private:
 	unsigned int readPos;
 };
 
-} /* namespace NS_FF */
+NS_FF_END
 
 #endif /* BUFFER_BUFFERIMPL_H_ */

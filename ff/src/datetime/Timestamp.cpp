@@ -23,7 +23,7 @@ using namespace std;
 
 #define EPOCHFILETIME   (116444736000000000UL)
 
-namespace NS_FF {
+NS_FF_BEG
 
 class Timestamp::TimestampImpl {
 public:
@@ -158,5 +158,5 @@ bool Timestamp::operator>=(const Timestamp &t) const {
 	return this->impl->operator>=(*t.impl);
 }
 
-} /* namespace NS_FF */
+NS_FF_END
 

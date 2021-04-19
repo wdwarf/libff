@@ -12,7 +12,7 @@
 #include <vector>
 
 using namespace std;
-using namespace NS_FF;
+USE_NS_FF
 
 TEST(BufferTest, BufferTest){
 	Buffer buf, buf2;

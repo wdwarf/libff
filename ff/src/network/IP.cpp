@@ -28,7 +28,7 @@
 
 using namespace std;
 
-namespace NS_FF {
+NS_FF_BEG
 
 IP::IP() :
 		version(VersionType::UNKNOWN) {
@@ -436,5 +436,5 @@ std::ostream& operator<<(std::ostream &o, const IP &ip) {
 	return o;
 }
 
-} /* namespace NS_FF */
+NS_FF_END
 

@@ -12,7 +12,7 @@
 
 using namespace std;
 
-namespace NS_FF {
+NS_FF_BEG
 
 std::string LogLevel2Str(LogLevel ll) {
 	switch (ll) {
@@ -142,5 +142,5 @@ std::string LogInfo::toLogString() const {
 	return str.str();
 }
 
-} /* namespace NS_FF */
+NS_FF_END
 

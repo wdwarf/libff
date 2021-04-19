@@ -7,7 +7,7 @@
 
 #include <ff/Endian.h>
 
-namespace NS_FF {
+NS_FF_BEG
 
 Endian Endian::GetHostEndian() {
 	static unsigned short n = 0x1234;
@@ -45,5 +45,5 @@ bool Endian::isDifferenceEndian() const {
 	return (GetHostEndian() != this->endianType);
 }
 
-} /* namespace NS_FF */
+NS_FF_END
 

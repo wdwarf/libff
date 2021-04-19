@@ -3,7 +3,7 @@
 #include <cstring>
 #include <ff/Exception.h>
 
-namespace NS_FF {
+NS_FF_BEG
 
 const int CRijndael::sm_alog[256] = { 1, 3, 5, 15, 17, 51, 85, 255, 26, 46, 114,
 		150, 161, 248, 19, 53, 95, 225, 56, 72, 216, 115, 149, 164, 247, 2, 6,

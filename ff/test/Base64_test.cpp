@@ -15,7 +15,7 @@
 #include <algorithm>
 
 using namespace std;
-using namespace NS_FF;
+USE_NS_FF
 
 TEST(Base64Test, Base64Test){
 	string str = "test string for base64"

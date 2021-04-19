@@ -11,7 +11,7 @@
 
 using namespace std;
 
-namespace NS_FF {
+NS_FF_BEG
 
 StdoutAppender::StdoutAppender() {
 }
@@ -27,4 +27,4 @@ void StdoutAppender::log(const LogInfo &logInfo) {
 	(*o) << logInfo.toLogString() << endl;
 }
 
-} /* namespace NS_FF */
+NS_FF_END

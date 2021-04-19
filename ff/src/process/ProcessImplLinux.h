@@ -19,7 +19,7 @@
 #include <map>
 #include <thread>
 
-namespace NS_FF {
+NS_FF_BEG
 
 class Process::ProcessImpl {
 public:
@@ -65,7 +65,7 @@ private:
 	std::thread readThread;
 };
 
-} /* namespace NS_FF */
+NS_FF_END
 
 #endif /* FF_PROCESSIMPLLINUX_H_ */
 

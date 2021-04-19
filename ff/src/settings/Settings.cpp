@@ -17,7 +17,7 @@
 
 using namespace std;
 
-namespace NS_FF {
+NS_FF_BEG
 
 Settings::Settings() {
 	//
@@ -195,5 +195,5 @@ bool Settings::loadFromFile(const std::string &file) {
 	return true;
 }
 
-} /* namespace NS_FF */
+NS_FF_END
 

@@ -19,7 +19,7 @@ typedef DWORD ErrorNo_t;
 typedef error_t ErrorNo_t;
 #endif
 
-namespace NS_FF {
+NS_FF_BEG
 
 class LIBFF_API ErrNo {
 public:
@@ -37,6 +37,6 @@ private:
 	ErrorNo_t m_errNo;
 };
 
-} /* namespace NS_FF */
+NS_FF_END
 
 #endif /* FF_ERRNO_H_ */

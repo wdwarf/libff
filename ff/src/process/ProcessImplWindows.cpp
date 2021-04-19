@@ -17,7 +17,7 @@
 
 using namespace std;
 
-namespace NS_FF {
+NS_FF_BEG
 
 	namespace {
 
@@ -307,6 +307,6 @@ namespace NS_FF {
 		this->args.clear();
 	}
 
-} /* namespace NS_FF */
+NS_FF_END
 
 #endif

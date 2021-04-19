@@ -8,7 +8,7 @@
 #include <ff/CRC.h>
 #include <ff/Buffer.h>
 
-namespace NS_FF {
+NS_FF_BEG
 
 static uint64_t ReverseBits(uint64_t ul, int valueLength) {
 	uint64_t newValue = 0;

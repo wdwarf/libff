@@ -31,7 +31,7 @@
 
 using namespace std;
 
-namespace NS_FF {
+NS_FF_BEG
 
 SockAddr_t& SockAddr::getAddr() {
 	return m_addr;
@@ -738,4 +738,4 @@ bool Socket::setKeepAlive(bool keepAlive, uint32_t idle, uint32_t interval,
 	return true;
 }
 
-} /* namespace NS_FF */
+NS_FF_END

@@ -12,10 +12,10 @@
 #include <ff/ff_config.h>
 #include <ff/Object.h>
 
-namespace NS_FF {
+NS_FF_BEG
 
 class LogInfo;
-class LIBFF_API IAppender : public ff::Object {
+class LIBFF_API IAppender : public NS_FF::Object {
 public:
 	IAppender() = default;
 	virtual ~IAppender() = default;
@@ -25,6 +25,6 @@ public:
 
 typedef std::shared_ptr<IAppender> AppenderPtr;
 
-} /* namespace NS_FF */
+NS_FF_END
 
 #endif /* FF_IAPPENDER_H_ */

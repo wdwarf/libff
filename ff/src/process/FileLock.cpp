@@ -14,7 +14,7 @@
 #include <sys/file.h>
 #endif
 
-namespace NS_FF {
+NS_FF_BEG
 
 FileLock::FileLock(const std::string& file) {
 #ifdef _WIN32
@@ -62,4 +62,4 @@ void FileLock::unlock() {
 #endif
 }
 
-} /* namespace NS_FF */
+NS_FF_END

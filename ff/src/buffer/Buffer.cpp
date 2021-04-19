@@ -14,7 +14,7 @@
 
 using namespace std;
 
-namespace NS_FF {
+NS_FF_BEG
 
 Buffer::Buffer() :
 		impl(new Buffer::BufferImpl()) {
@@ -221,5 +221,5 @@ ostream& operator<<(ostream& o, const NS_FF::Buffer& buffer) {
 	return o;
 }
 
-} /* namespace NS_FF */
+NS_FF_END
 

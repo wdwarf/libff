@@ -12,7 +12,7 @@
 #include <errno.h>
 
 using namespace std;
-using namespace NS_FF;
+USE_NS_FF
 
 void f() {
 }

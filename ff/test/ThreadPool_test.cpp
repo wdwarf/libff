@@ -12,7 +12,7 @@
 #include "TestDef.h"
 
 using namespace std;
-using namespace NS_FF;
+USE_NS_FF
 
 static void TestF(int n, int i){
 	static mutex m;

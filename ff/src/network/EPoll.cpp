@@ -20,7 +20,7 @@
 
 using namespace std;
 
-namespace NS_FF {
+NS_FF_BEG
 
 EPoll::EPoll() :
 		m_epFd(epoll_create1(0)), m_fdChanged(false) {
@@ -296,5 +296,5 @@ void PollMgr::pollThreadFunc() {
 	}
 }
 
-} /* namespace NS_FF */
+NS_FF_END
 #endif

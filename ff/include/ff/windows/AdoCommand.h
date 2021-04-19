@@ -15,7 +15,7 @@
 #include <vector>
 #include <string>
 
-namespace NS_FF {
+NS_FF_BEG
 
 class LIBFF_API AdoParameter: public AdoObject {
 public:
@@ -129,6 +129,6 @@ private:
 	std::vector<StringT> paranNames;
 };
 
-} /* namespace NS_FF */
+NS_FF_END
 
 #endif /* WINDOWS_ADOCOMMAND_H_ */

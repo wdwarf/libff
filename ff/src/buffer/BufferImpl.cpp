@@ -23,7 +23,7 @@ const float BUF_INC_RATIO = 1.5;
 
 }
 
-namespace NS_FF {
+NS_FF_BEG
 
 Buffer::BufferImpl::BufferImpl() :
 		data(NULL), size(0), capacity(0), readPos(0) {
@@ -301,4 +301,4 @@ void Buffer::BufferImpl::fromHexString(const String& hexStr){
 
 /* end of Buffer::BufferImpl */
 
-} /* namespace NS_FF */
+NS_FF_END

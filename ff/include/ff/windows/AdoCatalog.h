@@ -13,7 +13,7 @@
 #include <ff/ff_config.h>
 #include <ff/windows/AdoObject.h>
 
-namespace NS_FF {
+NS_FF_BEG
 
 ////////#define DEFINE_WADO_OBJ
 #define DEFINE_WADO_OBJ(className, adoInterface, adoClass) \
@@ -99,6 +99,6 @@ public:
 DEFINE_WADO_OBJ(AdoCatalog, _Catalog, Catalog);
 };
 
-} /* namespace NS_FF */
+NS_FF_END
 
 #endif /* WINDOWS_ADOCATALOG_H_ */

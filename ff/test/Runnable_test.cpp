@@ -11,7 +11,7 @@
 #include "TestDef.h"
 
 using namespace std;
-using namespace NS_FF;
+USE_NS_FF
 
 void func1() {
 	LOGD << __func__;

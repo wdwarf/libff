@@ -15,7 +15,7 @@
 #include <sys/time.h>
 #endif
 
-namespace NS_FF {
+NS_FF_BEG
 
 namespace {
 
@@ -97,4 +97,4 @@ void Random::getRandomBytes(void *buf, uint32_t size) {
 #endif
 }
 
-} /* namespace NS_FF */
+NS_FF_END

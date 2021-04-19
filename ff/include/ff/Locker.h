@@ -10,7 +10,7 @@
 
 #include <ff/ff_config.h>
 
-namespace NS_FF {
+NS_FF_BEG
 
 template<class L>
 class Locker {
@@ -27,6 +27,6 @@ private:
 	L& m_lock;
 };
 
-} /* namespace NS_FF */
+NS_FF_END
 
 #endif /* FF_LOCKER_H_ */

@@ -37,7 +37,7 @@
 
 #endif
 
-namespace NS_FF {
+NS_FF_BEG
 
 #ifdef _WIN32
 	typedef SOCKET SocketFd;
@@ -169,6 +169,6 @@ private:
 
 typedef std::shared_ptr<Socket> SocketPtr;
 
-} /* namespace NS_FF */
+NS_FF_END
 
 #endif /* FF_SOCKET_H_ */

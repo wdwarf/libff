@@ -11,7 +11,7 @@
 #include <ff/ff_config.h>
 #include <ff/windows/AdoObject.h>
 
-namespace NS_FF {
+NS_FF_BEG
 
 class LIBFF_API AdoField: public AdoObject {
 public:
@@ -43,6 +43,6 @@ private:
 	FieldPtr field;
 };
 
-} /* namespace NS_FF */
+NS_FF_END
 
 #endif /* WINDOWS_ADOFIELD_H_ */

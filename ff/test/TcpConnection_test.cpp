@@ -19,7 +19,7 @@
 
 using namespace std;
 using namespace std::chrono;
-using namespace NS_FF;
+USE_NS_FF
 
 TEST(TcpConnectionTest, TcpConnectionTest4) {
 	bool stoped = false;

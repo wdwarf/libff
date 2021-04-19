@@ -9,7 +9,7 @@
 
 using namespace std;
 
-namespace NS_FF {
+NS_FF_BEG
 
 Process::Process(const std::string& command) :
 		impl(new ProcessImpl(this, command)) {
@@ -107,5 +107,5 @@ int Process::getProcessId() const {
 	return this->impl->getProcessId();
 }
 
-} /* namespace NS_FF */
+NS_FF_END
 

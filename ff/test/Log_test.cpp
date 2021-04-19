@@ -11,7 +11,7 @@
 #include <ff/StdoutAppender.h>
 
 using namespace std;
-using namespace NS_FF;
+USE_NS_FF
 
 TEST(TestLog, TestLog){
 	auto logger = Log::CreateLogger("test");

@@ -7,6 +7,6 @@
 
 #include <ff/Logger.h>
 
-namespace NS_FF {
+NS_FF_BEG
 
-} /* namespace NS_FF */
+NS_FF_END

@@ -16,7 +16,7 @@
 #include <ff/DateTime.h>
 #include <ff/Timestamp.h>
 
-namespace NS_FF {
+NS_FF_BEG
 
 enum class LogLevel {
 	Verbose, Debug, Info, Warning, Error, Fatal
@@ -66,6 +66,6 @@ private:
 #define MK_LOGINFO(logLevel, logMessage, logModule, logType)\
 		LogInfo(logLevel, logMessage, logModule, logType, time(0), __FILE__, __FUNCTION__, __LINE__)
 
-} /* namespace NS_FF */
+NS_FF_END
 
 #endif /* FF_LOGINFO_H_ */

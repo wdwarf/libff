@@ -10,7 +10,7 @@
 
 using namespace std;
 
-namespace NS_FF {
+NS_FF_BEG
 
 Thread::Thread() :
 		m_runnable(shared_ptr<Thread>(this, [](void *) {})) {
@@ -58,4 +58,4 @@ void (Thread::Yield)() {
 	this_thread::yield();
 }
 
-} /* namespace NS_FF */
+NS_FF_END

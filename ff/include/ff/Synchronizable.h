@@ -12,7 +12,7 @@
 #include <ff/Object.h>
 #include <ff/Locker.h>
 
-namespace NS_FF {
+NS_FF_BEG
 
 class LIBFF_API Synchronizable {
 public:
@@ -27,8 +27,8 @@ private:
 	std::mutex m_mutex;
 };
 
-typedef ff::Locker<Synchronizable> Synchronize;
+typedef NS_FF::Locker<Synchronizable> Synchronize;
 
-} /* namespace NS_FF */
+NS_FF_END
 
 #endif /* FF_SYNCHRONIZABLE_H_ */

@@ -11,7 +11,7 @@
 #include "TestDef.h"
 
 using namespace std;
-using namespace NS_FF;
+USE_NS_FF
 
 TEST(RandomTest, RandomTest){
 	Random ran;

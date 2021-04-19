@@ -9,7 +9,7 @@
 
 using namespace std;
 
-namespace NS_FF {
+NS_FF_BEG
 
 Logger::Logger(const std::string& module, LogLevel logLevel) :
 		m_module(module), m_logLevel(logLevel) {
@@ -45,4 +45,4 @@ void Logger::log(const LogInfo& logInfo){
 	}
 }
 
-} /* namespace NS_FF */
+NS_FF_END

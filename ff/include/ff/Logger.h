@@ -17,7 +17,7 @@
 #include <ff/LogInfo.h>
 #include <ff/Noncopyable.h>
 
-namespace NS_FF {
+NS_FF_BEG
 
 class LIBFF_API Logger: public Noncopyable {
 public:
@@ -40,6 +40,6 @@ private:
 
 typedef std::shared_ptr<Logger> LoggerPtr;
 
-} /* namespace NS_FF */
+NS_FF_END
 
 #endif /* FF_LOGGER_H_ */

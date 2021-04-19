@@ -8,7 +8,7 @@
 #include <ff/Object.h>
 #include <ff/Exception.h>
 
-namespace NS_FF {
+NS_FF_BEG
 
 EXCEPTION_DEF(FactoryException);
 

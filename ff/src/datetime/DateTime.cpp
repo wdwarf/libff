@@ -30,7 +30,7 @@ using namespace std;
 #define __gmtime__(t, tm)	gmtime_r(t, tm)
 #endif
 
-namespace NS_FF {
+NS_FF_BEG
 
 DateTime::DateTime() :
 		t(0) {
@@ -226,5 +226,5 @@ bool DateTime::setSystemTime() {
 #endif
 }
 
-} /* namespace NS_FF */
+NS_FF_END
 

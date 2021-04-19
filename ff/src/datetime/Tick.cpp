@@ -13,7 +13,7 @@
 
 using std::string;
 
-namespace NS_FF {
+NS_FF_BEG
 
 Tick::Tick() :
 		m_tick(Tick::GetTickCount()) {
@@ -46,5 +46,5 @@ tick_t Tick::tock() const {
 	return (Tick::GetTickCount() - this->m_tick);
 }
 
-} /* namespace NS_FF */
+NS_FF_END
 

@@ -20,7 +20,7 @@
 #define DLLHANDLE	void*
 #endif
 
-namespace NS_FF {
+NS_FF_BEG
 
 EXCEPTION_DEF(DllException);
 
@@ -76,6 +76,6 @@ private:
 
 using DllLoaderPtr = std::shared_ptr<DllLoader>;
 
-} /* namespace NS_FF */
+NS_FF_END
 
 #endif /* DLL_DLLLOADER_H_ */

@@ -16,7 +16,7 @@
 
 using namespace std;
 
-namespace NS_FF {
+NS_FF_BEG
 
 #ifdef _WIN32
 
@@ -692,6 +692,6 @@ void Serial::setStopBit(StopBit stopBit) {
 
 #endif
 
-} /* namespace NS_FF */
+NS_FF_END
 
 

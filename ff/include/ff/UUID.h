@@ -12,7 +12,7 @@
 #include <string>
 #include <ostream>
 
-namespace NS_FF {
+NS_FF_BEG
 
 typedef uint8_t uuid_t[16];
 
@@ -31,6 +31,6 @@ private:
 
 std::ostream& operator<<(std::ostream& o, const Uuid& u);
 
-} /* namespace NS_FF */
+NS_FF_END
 
 #endif /* FF_UUID_H_ */

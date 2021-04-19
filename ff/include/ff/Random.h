@@ -14,7 +14,7 @@
 #include <Wincrypt.h>
 #endif
 
-namespace NS_FF {
+NS_FF_BEG
 
 /**
  * EXP:
@@ -54,6 +54,6 @@ private:
 #endif
 };
 
-} /* namespace NS_FF */
+NS_FF_END
 
 #endif /* FF_RANDOM_H_ */

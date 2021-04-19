@@ -21,8 +21,7 @@
 #define RTP_NOTETTIMEOUTMULTIPLIER 25
 #define RTP_DEFAULTSESSIONBANDWIDTH 10000.0
 
-namespace NS_FF
-{
+NS_FF_BEG
 
     uint8_t RtpHeader::getCsrcCount() const
     {
@@ -259,4 +258,4 @@ namespace NS_FF
         return ntohl(*csrcvalNbo);
     }
 
-} // namespace NS_FF
+NS_FF_END

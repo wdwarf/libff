@@ -16,7 +16,7 @@
 #include <map>
 #include <memory>
 
-namespace NS_FF {
+NS_FF_BEG
 
 EXCEPTION_DEF(ProcessException);
 
@@ -61,6 +61,6 @@ private:
 
 typedef std::shared_ptr<Process> ProcessPtr;
 
-} /* namespace NS_FF */
+NS_FF_END
 
 #endif /* FF_PROCESS_H_ */

@@ -11,7 +11,7 @@
 
 using namespace std;
 
-namespace NS_FF {
+NS_FF_BEG
 
 namespace {
 
@@ -68,4 +68,4 @@ ErrNo::operator std::string() const {
 	return this->getErrorStr();
 }
 
-} /* namespace NS_FF */
+NS_FF_END

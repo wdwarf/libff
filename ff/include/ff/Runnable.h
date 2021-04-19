@@ -13,7 +13,7 @@
 #include <functional>
 #include <ff/Exception.h>
 
-namespace NS_FF {
+NS_FF_BEG
 
 EXCEPTION_DEF(RunnableException);
 
@@ -51,6 +51,6 @@ RunnablePtr MakeRunnable(Func func) {
 	return std::make_shared<_FuncRunnable<Func> >(func);
 }
 
-} /* namespace NS_FF */
+NS_FF_END
 
 #endif /* FF_RUNNABLE_H_ */

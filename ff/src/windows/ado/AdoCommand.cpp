@@ -11,7 +11,7 @@
 
 using namespace std;
 
-namespace NS_FF {
+NS_FF_BEG
 
 AdoParameter::AdoParameter(void) {
 	this->param.CreateInstance(__uuidof(Parameter));
@@ -387,4 +387,4 @@ AdoCommand::operator _CommandPtr() {
 	return this->cmd;
 }
 
-} /* namespace NS_FF */
+NS_FF_END

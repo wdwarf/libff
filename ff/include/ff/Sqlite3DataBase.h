@@ -22,7 +22,7 @@
 #include <ff/Buffer.h>
 #include <ff/Noncopyable.h>
 
-namespace NS_FF{
+NS_FF_BEG
 
 EXCEPTION_DEF(Sqlite3Exception);
 
@@ -155,7 +155,7 @@ private:
 
 typedef std::shared_ptr<Sqlite3DataBase> Sqlite3DataBasePtr;
 
-} /* namespace NS_FF */
+NS_FF_END
 
 #endif /* __USE_SQLITE3_DB__ */
 

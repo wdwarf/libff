@@ -21,7 +21,7 @@
 #import "msado15.dll" no_namespace rename("EOF","wADOEOF")
 #endif
 
-namespace NS_FF {
+NS_FF_BEG
 
 class LIBFF_API AdoObject {
 public:
@@ -31,7 +31,7 @@ public:
 	static StringT BstrToStr(const bstr_t &str);
 };
 
-} /* namespace NS_FF */
+NS_FF_END
 
 #endif /* WINDOWS_ADOOBJECT_H_ */
 

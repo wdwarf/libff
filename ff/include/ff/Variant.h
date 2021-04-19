@@ -13,7 +13,7 @@
 #include <ff/Exception.h>
 #include <string>
 
-namespace NS_FF {
+NS_FF_BEG
 
 EXCEPTION_DEF(VariantException);
 
@@ -207,6 +207,6 @@ private:
 	T toValue() const;
 };
 
-} /* namespace NS_FF */
+NS_FF_END
 
 #endif /* FF_VARIANT_H_ */

@@ -17,7 +17,7 @@
 
 using namespace std;
 
-namespace NS_FF {
+NS_FF_BEG
 
 class Process::ProcessImpl {
 public:
@@ -66,7 +66,7 @@ private:
 	std::thread watchThread;
 };
 
-} /* namespace NS_FF */
+NS_FF_END
 
 #endif /* FF_PROCESSIMPLWINDOWS_H_ */
 

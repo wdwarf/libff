@@ -20,7 +20,7 @@ using namespace std;
 #define strcasecmp		_strcmpi
 #endif
 
-namespace NS_FF {
+NS_FF_BEG
 
 inline int _isspace_(int c) {
 	int re = isspace(c);
@@ -397,5 +397,5 @@ std::vector<String> String::split(const IDelimiter &delimiterChecker,
 	return texts;
 }
 
-} /* namespace NS_FF */
+NS_FF_END
 

@@ -9,7 +9,7 @@
 
 using namespace std;
 
-namespace NS_FF {
+NS_FF_BEG
 
 Exception::Exception(const std::string& msg, int errNo, int lineNumber,
 		const std::string& functionName, const std::string& fileName)
@@ -53,5 +53,5 @@ ostream& operator<<(ostream& o, const Exception& e){
 	return o;
 }
 
-} /* namespace NS_FF */
+NS_FF_END
 

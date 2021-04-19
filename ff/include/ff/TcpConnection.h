@@ -25,7 +25,7 @@
 #include <ff/EPoll.h>
 #endif
 
-namespace NS_FF {
+NS_FF_BEG
 
 class TcpConnection;
 typedef std::shared_ptr<TcpConnection> TcpConnectionPtr;
@@ -85,6 +85,6 @@ private:
 
 };
 
-} /* namespace NS_FF */
+NS_FF_END
 
 #endif /* FF_TCPCONNECTION_H_ */

@@ -26,7 +26,7 @@
 
 using namespace std;
 
-namespace NS_FF {
+NS_FF_BEG
 
 #if defined(__MINGW32__) || defined(WIN32)
 static const char* PATH_SEPARATER = "\\";
@@ -567,4 +567,4 @@ std::ostream& operator<<(std::ostream& o, const File& file) {
 	return o;
 }
 
-} /* namespace NS_FF */
+NS_FF_END

@@ -11,8 +11,8 @@
 
 using namespace std;
 
-namespace NS_FF
-{
+NS_FF_BEG
+
 	IocpContext::IocpContext()
 	{
 		memset(this, 0, sizeof(IocpContext));
@@ -152,4 +152,4 @@ namespace NS_FF
 	}
 
 
-} // namespace NS_FF
+NS_FF_END

@@ -20,7 +20,7 @@
 #include <termios.h>
 #endif
 
-namespace NS_FF {
+NS_FF_BEG
 
 EXCEPTION_DEF(SerialException);
 
@@ -81,6 +81,6 @@ private:
 
 using SerialPtr = std::shared_ptr<Serial>;
 
-} /* namespace NS_FF */
+NS_FF_END
 
 #endif /* FF_SERIAL_H_ */

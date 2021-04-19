@@ -17,7 +17,7 @@
 #include <map>
 #include <set>
 
-namespace NS_FF {
+NS_FF_BEG
 
 EXCEPTION_DEF(SettingsException);
 
@@ -46,7 +46,7 @@ private:
 
 using GSettings = Singleton<Settings>;
 
-} /* namespace NS_FF */
+NS_FF_END
 
 #define G_VAL(name, defVal) GSettings::getInstance()->getValue(name, defVal)
 #define S_VAL(name, val) GSettings::getInstance()->setValue(name, val);

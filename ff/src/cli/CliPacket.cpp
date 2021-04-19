@@ -11,7 +11,7 @@
 
 using namespace std;
 
-namespace NS_FF {
+NS_FF_BEG
 
 CliPacket::CliPacket() {
 }
@@ -156,4 +156,4 @@ void CliPacket::reset() {
 	this->m_members.clear();
 }
 
-} /* namespace NS_FF */
+NS_FF_END

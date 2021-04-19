@@ -13,7 +13,7 @@
 #include <initializer_list>
 #include <ff/ff_config.h>
 
-namespace NS_FF {
+NS_FF_BEG
 
 class LIBFF_API StringWrapper: protected std::stringstream {
 public:
@@ -56,6 +56,6 @@ public:
 
 typedef StringWrapper SW;
 
-} /* namespace NS_FF */
+NS_FF_END
 
 #endif /* FF_STRINGWRAPPER_H_ */

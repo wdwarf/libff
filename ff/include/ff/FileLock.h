@@ -12,7 +12,7 @@
 #include <ff/ff_config.h>
 #include <ff/Locker.h>
 
-namespace NS_FF {
+NS_FF_BEG
 
 class FileLock {
 public:
@@ -23,7 +23,7 @@ public:
 	bool trylock();
 	void unlock();
 
-	typedef ff::Locker<FileLock> Locker;
+	typedef NS_FF::Locker<FileLock> Locker;
 private:
 #ifdef _WIN32
 	HANDLE m_fd;
@@ -32,6 +32,6 @@ private:
 #endif
 };
 
-} /* namespace NS_FF */
+NS_FF_END
 
 #endif /* FF_FILELOCK_H_ */

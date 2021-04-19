@@ -13,7 +13,7 @@
 #include <algorithm>
 
 using namespace std;
-using namespace NS_FF;
+USE_NS_FF
 
 TEST(TestString, TestString){
 	String s = "   test string...   ";

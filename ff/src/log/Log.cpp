@@ -11,7 +11,7 @@
 
 using namespace std;
 
-namespace NS_FF {
+NS_FF_BEG
 
 Log::LoggerMap Log::s_loggers;
 std::mutex Log::s_mutex;
@@ -133,5 +133,5 @@ Log& Log::setLineNumber(unsigned int lineNumber) {
 	return *this;
 }
 
-} /* namespace NS_FF */
+NS_FF_END
 
