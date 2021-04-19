@@ -43,7 +43,7 @@ private:
 	std::string msg;
 };
 
-#define EXCEPTION_DEF(exceptionName) class LIBFF_API exceptionName : public ff::Exception{\
+#define EXCEPTION_DEF(exceptionName) class LIBFF_API exceptionName : public NS_FF::Exception{\
 	public:\
 	exceptionName(const std::string& msg, int errNo = 0, int lineNumber = 0, \
 			const std::string& functionName = "", const std::string& fileName = "") _GLIBCXX_USE_NOEXCEPT \
