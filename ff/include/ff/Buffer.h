@@ -32,6 +32,7 @@ public:
 	virtual ~Buffer();
 
 	Buffer& operator=(const Buffer& buffer);
+	Buffer& operator=(Buffer&& buffer);
 	Buffer& operator+=(const Buffer& buffer);
 	Buffer operator+(const Buffer& buffer) const;
 	bool operator==(const Buffer& buffer);

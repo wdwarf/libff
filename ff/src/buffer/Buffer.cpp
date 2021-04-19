@@ -43,6 +43,14 @@ Buffer& Buffer::operator=(const Buffer& buffer) {
 	return *this;
 }
 
+Buffer& Buffer::operator=(Buffer&& buffer) {
+	if (nullptr != this->impl) 
+	  delete this->impl;
+	this->impl = buffer.impl;
+	buffer.impl = nullptr;
+	return *this;
+}
+
 Buffer& Buffer::operator+=(const Buffer& buffer) {
 	this->append(buffer);
 	return *this;
@@ -86,9 +94,8 @@ const unsigned char& Buffer::operator[](unsigned int index) const {
 }
 
 Buffer::~Buffer() {
-	if (nullptr != this->impl) {
-		delete this->impl;
-	}
+	if (nullptr != this->impl) 
+	  delete this->impl;
 }
 
 unsigned char* Buffer::getData() const {
