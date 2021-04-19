@@ -21,7 +21,7 @@ ELSEIF (WIN32)
 	MESSAGE(STATUS "Now is windows")
 	file(GLOB_RECURSE windows_files "src/windows/*.cpp")
 ELSEIF (APPLE)
-	MESSAGE(STATUS "Now is Apple systens.")
+	MESSAGE(STATUS "Now is Apple OS's.")
 ELSEIF (UNIX)
 	MESSAGE(STATUS "Now is UNIX-like OS's.")
 
