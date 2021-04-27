@@ -158,8 +158,18 @@ File::File(const std::string& parent, const std::string& child) {
 	this->setPath(p1 + p2);
 }
 
-File::File(std::list<std::string> path) {
+File::File(const std::list<std::string>& path) {
 	this->path = path;
+}
+
+File::File(std::initializer_list<std::string> path) {
+	for(auto& child : path){
+		this->setPath(File(*this, child));
+	}
+}
+
+File::File(File&& file){
+	this->path = std::move(file.path);
 }
 
 File::~File() {
@@ -392,6 +402,18 @@ bool File::mkdir() const {
 #endif
 }
 
+bool File::empty() const{
+	if(!this->isExists() || !this->isDirectory()) return true;
+
+	auto it = this->iterator();
+	while (it.next())
+	{
+		if(!it.getFile().remove(true)) return false;
+	}
+
+	return true;
+}
+
 bool File::mkdirs() const {
 	if (this->isExists() && !this->isDirectory()) {
 		return false;
@@ -432,7 +454,7 @@ bool File::remove(bool recursive) const {
 			auto file = it.getFile();
 			if (!recursive && file.isDirectory())
 				continue;
-			file.remove(true);
+			if(!file.remove(true)) return false;
 		}
 #ifdef _WIN32
 		return (TRUE == RemoveDirectory(this->getPath().c_str()));
@@ -560,6 +582,13 @@ File::operator std::string() const {
 
 std::string File::getSeparater() const {
 	return PATH_SEPARATER;
+}
+
+std::string File::getSuffix() const{
+	auto name = this->getName();
+	auto pos = name.find_last_of(".");
+	if(string::npos == pos) return "";
+	return name.substr(pos + 1);
 }
 
 std::ostream& operator<<(std::ostream& o, const File& file) {

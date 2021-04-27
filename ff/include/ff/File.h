@@ -11,6 +11,7 @@
 #include <string>
 #include <list>
 #include <ostream>
+#include <initializer_list>
 
 #include <ff/Object.h>
 #include <ff/Exception.h>
@@ -40,12 +41,15 @@ public:
 	File();
 	File(const std::string& path);
 	File(const std::string& parent, const std::string& child);
-	File(std::list<std::string> path);
+	File(const std::list<std::string>& path);
+	File(std::initializer_list<std::string> path);
+	File(File&& file);
 	virtual ~File();
 
 	void setPath(const std::string& path);
 	std::string getPath() const;
 	std::string getName() const;
+	std::string getSuffix() const;
 	File getParent() const;
 
 	bool isDirectory() const;
@@ -56,6 +60,7 @@ public:
 	bool isExecutable() const;
 	bool mkdir() const;
 	bool mkdirs() const;
+	bool empty() const;
 	bool remove(bool recursive = false) const;
 	long long getSize() const;
 	bool rename(const std::string& path) const;
