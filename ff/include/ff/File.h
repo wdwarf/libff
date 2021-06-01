@@ -44,6 +44,7 @@ public:
 	File(const std::list<std::string>& path);
 	File(std::initializer_list<std::string> path);
 	File(File&& file);
+	File(const File& file);
 	virtual ~File();
 
 	void setPath(const std::string& path);

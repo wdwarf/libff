@@ -168,6 +168,10 @@ File::File(std::initializer_list<std::string> path) {
 	}
 }
 
+File::File(const File& file){
+	this->path = file.path;
+}
+
 File::File(File&& file){
 	this->path = std::move(file.path);
 }
