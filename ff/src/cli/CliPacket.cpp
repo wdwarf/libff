@@ -78,8 +78,10 @@ CliPacket::CliPacket() {
 
 CliPacket::CliPacket(const std::string& action, 
 	const std::string& obj, const CliMembers& members) 
-	: m_action(action), m_obj(obj), m_members(members) {
-
+	: m_action(TrimCopy(action)), m_obj(TrimCopy(obj)) {
+		for(auto& p : members){
+			this->m_members.insert(make_pair(TrimCopy(p.first), p.second));
+		}
 }
 
 CliPacket::CliPacket(const CliPacket& pkg){
@@ -112,6 +114,7 @@ const std::string& CliPacket::getObj() const {
 const CliMembers& CliPacket::getMembers() const {
 	return this->m_members;
 }
+#if 0
 
 bool CliPacket::parse(const std::string &cmdLine) {
 	this->reset();
@@ -233,6 +236,135 @@ bool CliPacket::parse(const std::string &cmdLine) {
 	return true;
 }
 
+#else
+
+bool CliPacket::parse(const std::string &cmdLine) {
+	this->reset();
+	string cmdTmp = TrimCopy(cmdLine);
+	if (cmdTmp.empty())
+		return false;
+	if (';' == cmdTmp[cmdTmp.length() - 1]) {
+		cmdTmp = cmdTmp.substr(0, cmdTmp.length() - 1);
+
+		if (cmdTmp.empty())
+			return false;
+	}
+
+	auto isValidChar = [](char c){
+		return isalpha(c) || '_' == c || (c >= '0' && c <= '9');
+	};
+
+	const char* p = cmdTmp.c_str();
+	while(isspace(*p)) ++p;
+	stringstream str;
+	while(!isspace(*p)){
+		if(!isValidChar(*p))
+			return false;
+		str << *p++;
+	}
+
+	this->m_action = str.str();
+	str.clear();
+	str.str("");
+	while(isspace(*p)) ++p;
+
+	bool isObj = true;
+	const char* tmpP = p;
+
+	while(!isspace(*tmpP)){
+		if(!isValidChar(*tmpP)){
+			
+			isObj = false;
+			break;
+		}
+		str << *tmpP++;
+	}
+
+	if(isObj){
+		this->m_obj = str.str();
+		p = tmpP;
+		while(isspace(*p)) ++p;
+	}
+	str.clear();
+	str.str("");
+
+	bool isParsingName = true; /** 是否正在解析名称 */
+	bool isQuoteMode = false; /** 是否是引号模式（即字符串值） */
+	bool isTransMode = false; /** 是否是转义模式(\) */
+	string key;
+	string value;
+	while('\0' != *p){
+		char c = *p++;
+		
+		if(isParsingName){
+			if('=' == c){
+				key = str.str();
+				
+				isParsingName = false;
+				str.clear();
+				str.str("");
+				continue;
+			}
+			if(isspace(c)) continue;
+
+			str << c;
+			continue;
+		}
+
+		if(isQuoteMode){
+			if(isTransMode){
+				str << c;
+				isTransMode = false;
+				continue;
+			}
+
+			if('\\' == c){
+				isTransMode = true;
+				continue;
+			}
+
+			if('"' == c || '\0' == *p){
+				value = str.str();
+				isQuoteMode = false;
+				continue;
+			}
+
+			str << c;
+			
+			continue;
+		}
+
+		if(isspace(c)) continue;
+		if('"' == c){
+			isQuoteMode = true;
+			continue;
+		}
+
+		if(',' == c || '\0' == *p){
+			value = str.str();
+			str.clear();
+			str.str("");
+			
+			this->m_members.insert(make_pair(TrimCopy(key), value));
+
+			key = "";
+			value = "";
+
+			isParsingName = true;
+			continue;
+		}
+
+		str << c;
+	}
+
+	if(!key.empty())
+		this->m_members.insert(make_pair(TrimCopy(key), value));
+
+	return true;
+}
+
+#endif
+
 void CliPacket::reset() {
 	this->m_action = "";
 	this->m_obj = "";
@@ -240,7 +372,9 @@ void CliPacket::reset() {
 }
 
 std::string CliPacket::toString() const{
-	if(this->m_action.empty() || this->m_obj.empty()) return "";
+	if(this->m_action.empty() 
+		//|| this->m_obj.empty()
+		) return "";
 
 	stringstream cmdLine;
 
@@ -263,9 +397,12 @@ std::string CliPacket::toString() const{
 			strType = true;
 		}
 
+		auto val = value.toString();
+		ReplaceAll(val, "\"", "\\\"");
+
 		if(strType)
 			cmdLine << "\"";
-		cmdLine << value.toString();
+		cmdLine << val;
 		if(strType)
 			cmdLine << "\"";
 
