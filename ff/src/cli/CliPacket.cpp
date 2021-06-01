@@ -340,6 +340,7 @@ bool CliPacket::parse(const std::string &cmdLine) {
 		}
 
 		if(',' == c || '\0' == *p){
+			if(',' != c) str << c;
 			value = str.str();
 			str.clear();
 			str.str("");

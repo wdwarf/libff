@@ -16,6 +16,8 @@ USE_NS_FF
 
 TEST(CliTest, CliPacket){
   cout << CliPacket("list config;").toString() << endl;
+  cout << CliPacket("take pictures saveDir=\"d:/testdir\",oneDirPerCamera=false;").toString() << endl;
+  
   CliPacket pkg("get", "id", { {"name", "liyawu"}, { "age", "30" } });
   cout << pkg.toString() << endl;
 
