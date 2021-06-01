@@ -76,6 +76,7 @@ public:
 	DateTime getModifyTime() const;
 	DateTime getCreateTime() const;
 
+	File& operator=(const File& f);
 	bool operator==(const std::string& path) const;
 	bool operator==(const File& f) const;
 

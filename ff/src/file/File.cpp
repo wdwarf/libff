@@ -168,6 +168,11 @@ File::File(std::initializer_list<std::string> path) {
 	}
 }
 
+File& File::operator=(const File& f){
+	this->path = f.path;
+	return *this;
+}
+
 File::File(const File& file){
 	this->path = file.path;
 }
