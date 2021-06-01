@@ -15,7 +15,7 @@ using namespace std;
 USE_NS_FF
 
 TEST(CliTest, CliPacket){
-  
+  cout << CliPacket("list config;").toString() << endl;
   CliPacket pkg("get", "id", { {"name", "liyawu"}, { "age", "30" } });
   cout << pkg.toString() << endl;
 

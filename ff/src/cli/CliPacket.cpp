@@ -271,9 +271,8 @@ bool CliPacket::parse(const std::string &cmdLine) {
 	bool isObj = true;
 	const char* tmpP = p;
 
-	while(!isspace(*tmpP)){
+	while('\0' != *tmpP && !isspace(*tmpP)){
 		if(!isValidChar(*tmpP)){
-			
 			isObj = false;
 			break;
 		}
