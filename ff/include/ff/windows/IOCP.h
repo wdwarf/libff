@@ -64,7 +64,9 @@ NS_FF_BEG
 		std::map<HANDLE, IocpWorkThreadFunc> m_iocpWorkThreadFuncs;
 	};
 
+	using IOCPPtr = std::shared_ptr<IOCP>;
 	using GIocp = Singleton<IOCP>;
-}
+
+NS_FF_END
 
 #endif /* FF_IOCP_H_ */

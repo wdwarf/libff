@@ -37,7 +37,11 @@ class LIBFF_API TcpConnection: public std::enable_shared_from_this<TcpConnection
 public:
 	~TcpConnection();
 
+#ifdef _WIN32
+	static TcpConnectionPtr CreateInstance(IOCPPtr iocp(GIocp::getInstance(), [](void*){}));
+#else
 	static TcpConnectionPtr CreateInstance();
+#endif
 
 	bool listen(uint16_t port, const std::string& ip = "", IpVersion ipVer =
 			IpVersion::V4, int backlog = 1000);
@@ -54,7 +58,13 @@ public:
 	Socket& getSocket();
 private:
 	TcpConnection();
+#ifdef _WIN32
+	TcpConnection(Socket&& socket, IOCPPtr iocp(GIocp::getInstance(), [](void*){}));
+#else
 	TcpConnection(Socket&& socket);
+#endif
+
+	
 	TcpConnection(const TcpConnection&) = delete;
 	TcpConnection& operator=(const TcpConnection&) = delete;
 
@@ -64,6 +74,7 @@ private:
 	void workThreadFunc(LPDWORD lpNumberOfBytesTransferred,
 		PULONG_PTR lpCompletionKey,
 		LPOVERLAPPED* lpOverlapped);
+	IOCPPtr m_iocp;
 #else
 	EPoll* m_ep;
 	

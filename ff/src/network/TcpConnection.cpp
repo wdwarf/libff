@@ -28,12 +28,13 @@ NS_FF_BEG
 		this->m_socket.setUseSelect(false);
 	}
 
-	TcpConnection::TcpConnection(Socket&& socket) :
+	TcpConnection::TcpConnection(Socket&& socket, , IOCPPtr iocp) :
 		m_isServer(false), m_socket(std::move(socket)), m_readBuffer(RD_BUF_SIZE) {
 		this->m_socket.setUseSelect(false);
 		this->m_socket.setBlocking(true);
 
-		GIocp::getInstance()->connect((HANDLE)this->m_socket.getHandle(), (ULONG_PTR)&m_context,
+		this->m_iocp = iocp;
+		this->m_iocp->connect((HANDLE)this->m_socket.getHandle(), (ULONG_PTR)&m_context,
 			Bind(&TcpConnection::workThreadFunc, this));
 	}
 
@@ -204,7 +205,7 @@ NS_FF_BEG
 		}
 
 		/** TODO add to iocp */
-		GIocp::getInstance()->connect((HANDLE)this->m_socket.getHandle(), this->m_socket.getHandle(),
+		this->m_iocp->connect((HANDLE)this->m_socket.getHandle(), this->m_socket.getHandle(),
 			Bind(&TcpConnection::workThreadFunc, this));
 		return true;
 	}
@@ -267,10 +268,10 @@ NS_FF_BEG
 		return *this;
 	}
 
-	TcpConnectionPtr TcpConnection::CreateInstance() {
-		return TcpConnectionPtr(new TcpConnection);
+	TcpConnectionPtr CreateInstance(IOCPPtr iocp){
+		return TcpConnectionPtr(new TcpConnection(iocp));
 	}
-
+	
 #else
 
 	TcpConnection::TcpConnection() :

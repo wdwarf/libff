@@ -90,6 +90,8 @@ private:
 	void pollThreadFunc();
 };
 
+using EPollPtr = std::shared_ptr<EPoll>;
+
 NS_FF_END
 
 #endif
