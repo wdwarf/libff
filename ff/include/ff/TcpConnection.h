@@ -38,7 +38,7 @@ public:
 	~TcpConnection();
 
 #ifdef _WIN32
-	static TcpConnectionPtr CreateInstance(IOCPPtr iocp(GIocp::getInstance(), [](void*){}));
+	static TcpConnectionPtr CreateInstance(IOCPPtr iocp = IOCPPtr(GIocp::getInstance(), [](void*){}));
 #else
 	static TcpConnectionPtr CreateInstance();
 #endif
@@ -59,7 +59,8 @@ public:
 private:
 	TcpConnection();
 #ifdef _WIN32
-	TcpConnection(Socket&& socket, IOCPPtr iocp(GIocp::getInstance(), [](void*){}));
+	TcpConnection(IOCPPtr iocp = IOCPPtr(GIocp::getInstance(), [](void*){}));
+	TcpConnection(Socket&& socket, IOCPPtr iocp = IOCPPtr(GIocp::getInstance(), [](void*){}));
 #else
 	TcpConnection(Socket&& socket);
 #endif
