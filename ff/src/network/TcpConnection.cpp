@@ -47,10 +47,6 @@ NS_FF_BEG
 		return TcpConnectionPtr(new TcpConnection(iocp));
 	}
 
-	TcpConnectionPtr TcpConnection::CreateInstance() {
-		return TcpConnectionPtr(new TcpConnection);
-	}
-
 	TcpConnection::~TcpConnection() {
 		this->m_socket.close();
 		if (this->m_isServer) {
