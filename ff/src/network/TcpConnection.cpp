@@ -28,6 +28,11 @@ NS_FF_BEG
 		this->m_socket.setUseSelect(false);
 	}
 
+	TcpConnection::TcpConnection(IOCPPtr iocp) :
+		m_isServer(false), m_readBuffer(RD_BUF_SIZE), m_iocp(iocp) {
+		this->m_socket.setUseSelect(false);
+	}
+
 	TcpConnection::TcpConnection(Socket&& socket, IOCPPtr iocp) :
 		m_isServer(false), m_socket(std::move(socket)), m_readBuffer(RD_BUF_SIZE) {
 		this->m_socket.setUseSelect(false);
@@ -38,12 +43,12 @@ NS_FF_BEG
 			Bind(&TcpConnection::workThreadFunc, this));
 	}
 
-	TcpConnectionPtr TcpConnection::CreateInstance() {
-		return TcpConnectionPtr(new TcpConnection);
+	TcpConnectionPtr TcpConnection::CreateInstance(IOCPPtr iocp){
+		return TcpConnectionPtr(new TcpConnection(iocp));
 	}
 
-	TcpConnectionPtr CreateInstance(IOCPPtr iocp){
-		return TcpConnectionPtr(new TcpConnection(iocp));
+	TcpConnectionPtr TcpConnection::CreateInstance() {
+		return TcpConnectionPtr(new TcpConnection);
 	}
 
 	TcpConnection::~TcpConnection() {
