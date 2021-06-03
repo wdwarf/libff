@@ -517,17 +517,19 @@ string Socket::getLocalAddress() const {
 	if (this->m_socketFd <= 0)
 		return "";
 	sockaddr_in addr;
+	memset(&addr, 0, sizeof(addr));
 	socklen_t addrLen = sizeof(addr);
-	::getsockname(this->m_socketFd, (sockaddr*) &addr, &addrLen);
+	if(::getsockname(this->m_socketFd, (sockaddr*) &addr, &addrLen) < 0) return "";
 	return inet_ntoa(addr.sin_addr);
 }
 
 int Socket::getLocalPort() const {
 	if (this->m_socketFd <= 0)
-		return 0;
+		return -1;
 	sockaddr_in addr;
+	memset(&addr, 0, sizeof(addr));
 	socklen_t addrLen = sizeof(addr);
-	::getsockname(this->m_socketFd, (sockaddr*) &addr, &addrLen);
+	if(::getsockname(this->m_socketFd, (sockaddr*) &addr, &addrLen) < 0) return -1;
 	return ntohs(addr.sin_port);
 }
 
@@ -535,17 +537,19 @@ string Socket::getRemoteAddress() const {
 	if (this->m_socketFd <= 0)
 		return "";
 	sockaddr_in addr;
+	memset(&addr, 0, sizeof(addr));
 	socklen_t addrLen = sizeof(addr);
-	::getpeername(this->m_socketFd, (sockaddr*) &addr, &addrLen);
+	if(::getpeername(this->m_socketFd, (sockaddr*) &addr, &addrLen) < 0) return "";
 	return inet_ntoa(addr.sin_addr);
 }
 
 int Socket::getRemotePort() const {
 	if (this->m_socketFd <= 0)
-		return 0;
+		return -1;
 	sockaddr_in addr;
+	memset(&addr, 0, sizeof(addr));
 	socklen_t addrLen = sizeof(addr);
-	::getpeername(this->m_socketFd, (sockaddr*) &addr, &addrLen);
+	if(::getpeername(this->m_socketFd, (sockaddr*) &addr, &addrLen) < 0) return -1;
 	return ntohs(addr.sin_port);
 }
 
