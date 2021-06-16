@@ -8,6 +8,8 @@ MESSAGE(STATUS "operation system is ${CMAKE_SYSTEM}")
 include_directories(
   include
   third_party/jsoncpp/include
+	third_party/zlib-1.2.11
+	third_party/zlib-1.2.11/contrib
 )
 
 add_definitions(
@@ -34,9 +36,15 @@ if(BUILDIN_JSONCPP)
 	file(GLOB jsoncpp_src "third_party/jsoncpp/src/lib_json/*.cpp" "third_party/jsoncpp/src/lib_json/*.inl")
 endif()
 
+if(BUILDIN_ZLIB)
+	MESSAGE(STATUS "make with zlib source.")
+	file(GLOB zlib_src "third_party/zlib-1.2.11/*.c" "third_party/zlib-1.2.11/contrib/minizip*.c")
+endif()
+
 add_library(ff
 	${windows_files}
 	${jsoncpp_src}
+	${zlib_src}
 	src/Object.cpp
 	src/app/Application.cpp
 	src/app/ApplicationImpl.cpp
@@ -83,6 +91,8 @@ add_library(ff
 	src/thread/ThreadPool.cpp
 	src/variant/Variant.cpp
 	src/rtp/RtpPacket.cpp
+	src/compress/Zip.cpp
+	src/compress/ZipEntry.cpp
 )
 
 file(GLOB test_files "test/*.cpp")
