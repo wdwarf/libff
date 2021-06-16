@@ -541,6 +541,10 @@ bool File::moveTo(const std::string& path, bool forceReplace) const {
 	if (*this == path)
 		return false;
 
+#ifdef _WIN32
+	return (TRUE == MoveFileExA(this->getPath().c_str(), path.c_str(), forceReplace ? MOVEFILE_REPLACE_EXISTING | MOVEFILE_COPY_ALLOWED : 0));
+#else
+#endif
 	return (this->copyTo(path, forceReplace) && this->remove(true));
 }
 
