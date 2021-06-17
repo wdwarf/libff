@@ -57,11 +57,12 @@ public:
 
 	Socket& getSocket();
 private:
-	TcpConnection();
+	
 #ifdef _WIN32
 	TcpConnection(IOCPPtr iocp = IOCPPtr(GIocp::getInstance(), [](void*){}));
 	TcpConnection(Socket&& socket, IOCPPtr iocp = IOCPPtr(GIocp::getInstance(), [](void*){}));
 #else
+	TcpConnection();
 	TcpConnection(Socket&& socket);
 #endif
 

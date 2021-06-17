@@ -23,10 +23,10 @@ NS_FF_BEG
 
 #ifdef _WIN32
 
-	TcpConnection::TcpConnection() :
-		m_isServer(false), m_readBuffer(RD_BUF_SIZE) {
-		this->m_socket.setUseSelect(false);
-	}
+	// TcpConnection::TcpConnection() :
+	// 	m_isServer(false), m_readBuffer(RD_BUF_SIZE) {
+	// 	this->m_socket.setUseSelect(false);
+	// }
 
 	TcpConnection::TcpConnection(IOCPPtr iocp) :
 		m_isServer(false), m_readBuffer(RD_BUF_SIZE), m_iocp(iocp) {
