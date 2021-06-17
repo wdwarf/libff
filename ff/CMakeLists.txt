@@ -38,13 +38,45 @@ endif()
 
 if(BUILDIN_ZLIB)
 	MESSAGE(STATUS "make with zlib source.")
-	file(GLOB zlib_src "third_party/zlib-1.2.11/*.c" "third_party/zlib-1.2.11/contrib/minizip*.c")
+	set(ZLIB_SRCS
+		third_party/zlib-1.2.11/adler32.c
+		third_party/zlib-1.2.11/compress.c
+		third_party/zlib-1.2.11/crc32.c
+		third_party/zlib-1.2.11/deflate.c
+		third_party/zlib-1.2.11/gzclose.c
+		third_party/zlib-1.2.11/gzlib.c
+		third_party/zlib-1.2.11/gzread.c
+		third_party/zlib-1.2.11/gzwrite.c
+		third_party/zlib-1.2.11/inflate.c
+		third_party/zlib-1.2.11/infback.c
+		third_party/zlib-1.2.11/inftrees.c
+		third_party/zlib-1.2.11/inffast.c
+		third_party/zlib-1.2.11/trees.c
+		third_party/zlib-1.2.11/uncompr.c
+		third_party/zlib-1.2.11/zutil.c
+	)
+
+	set(MINIZIP_SRCS
+		third_party/zlib-1.2.11/contrib/minizip/zip.c
+		third_party/zlib-1.2.11/contrib/minizip/unzip.c
+		third_party/zlib-1.2.11/contrib/minizip/mztools.c
+		third_party/zlib-1.2.11/contrib/minizip/ioapi.c
+	)
+
+	if (WIN32)
+		set(MINIZIP_IOWIN32_SRCS
+			third_party/zlib-1.2.11/contrib/minizip/iowin32.c
+		)
+	endif()
+	
 endif()
 
 add_library(ff
 	${windows_files}
 	${jsoncpp_src}
-	${zlib_src}
+	${ZLIB_SRCS}
+	${MINIZIP_SRCS}
+	${MINIZIP_IOWIN32_SRCS}
 	src/Object.cpp
 	src/app/Application.cpp
 	src/app/ApplicationImpl.cpp
