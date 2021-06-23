@@ -67,6 +67,16 @@ void Service::unlock()
 	::LeaveCriticalSection(&this->cs);
 }
 
+int Service::getArgc() const
+{
+	return this->m_argc;
+}
+
+char **Service::getArgv() const
+{
+	return this->m_argv;
+}
+
 string Service::getServiceName()
 {
 	return this->serviceName;

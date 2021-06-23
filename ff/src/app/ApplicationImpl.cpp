@@ -33,7 +33,6 @@ NS_FF_BEG
 	Application::ApplicationImpl::~ApplicationImpl() {
 	}
 
-	
 	int Application::ApplicationImpl::getArgc() const {
 		return this->m_argc;
 	}

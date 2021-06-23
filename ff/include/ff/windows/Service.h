@@ -17,6 +17,8 @@ public:
 
 	virtual void onRun() = 0;
 
+	int getArgc() const;
+	char** getArgv() const;
 	std::string getServiceName();
 	void setServiceName(const std::string& serviceName);
 	void setDisplayName(const std::string& displayName);
