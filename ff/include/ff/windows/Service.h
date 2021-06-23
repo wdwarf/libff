@@ -15,7 +15,7 @@ public:
 	Service(const std::string& serviceName, const std::string& displayName = "");
 	virtual ~Service(void);
 
-	virtual void execute() = 0;
+	virtual void onRun() = 0;
 
 	std::string getServiceName();
 	void setServiceName(const std::string& serviceName);
@@ -30,6 +30,8 @@ public:
 protected:
 	std::string serviceName;
 	std::string displayName;
+	int m_argc;
+	char** m_argv;
 	DWORD desiredAccess;
 	DWORD serviceType;
 	DWORD startType;
@@ -48,7 +50,7 @@ protected:
 	virtual void beforeUninstall() {};
 	virtual void afterUninstall() {};
 
-	static std::vector<std::string> params;
+	std::vector<std::string> params;
 
 protected:
 	void waitForExecute();

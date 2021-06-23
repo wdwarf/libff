@@ -30,6 +30,8 @@ public:
 	int run();
 	void exit(int code = 0);
 	int getExitCode() const;
+	int getArgc() const;
+	char** getArgv() const;
 
 	virtual void onInitialize(){}
 	virtual void onRun() = 0;
