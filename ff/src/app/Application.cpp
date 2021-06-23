@@ -59,6 +59,14 @@ void Application::exit(int code) {
 	this->impl->exit(code);
 }
 
+int Application::getArgc() const {
+	return this->impl->getArgc();
+}
+
+char** Application::getArgv() const {
+	return this->impl->getArgv();
+}
+
 int Application::getExitCode() const {
 	return this->impl->getExitCode();
 }

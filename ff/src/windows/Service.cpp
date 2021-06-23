@@ -9,7 +9,6 @@ using namespace std;
 NS_FF_BEG
 
 Service* Service::serviceObject = NULL;
-vector<string> Service::params;
 
 static string GetErrorMessage(DWORD errCode)
 {
@@ -141,7 +140,7 @@ void WINAPI Service::ServiceMain(DWORD argc, LPSTR* argv)
 
 	try
 	{
-		obj->execute();
+		obj->onRun();
 	}
 	catch (...)
 	{
@@ -292,14 +291,17 @@ int Service::uninstallService()
 
 int Service::Run(int argc, char* argv[])
 {
-	for (int i = 1; i < argc; ++i)
-	{
-		Service::params.push_back(argv[i]);
-	}
-
 	Service* obj = Service::GetServiceObject();
 	if (nullptr == obj)
 		return -1;
+
+	obj->m_argc = argc;
+	obj->m_argv = argv;
+
+	for (int i = 1; i < argc; ++i)
+	{
+		obj->params.push_back(argv[i]);
+	}
 
 	obj->onInitialize();
 	string serviceName = obj->getServiceName();

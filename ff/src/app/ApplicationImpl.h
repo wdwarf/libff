@@ -31,6 +31,8 @@ public:
 
 	int run();
 	void exit(int code);
+	int getArgc() const;
+	char** getArgv() const;
 	int getExitCode() const;
 	bool isRunning() const;
 	const std::vector<std::string>& getCommandLines() const;
@@ -43,6 +45,8 @@ public:
 
 private:
 	Application* m_app;
+	int m_argc;
+	char** m_argv;
 	std::vector<std::string> m_cmdLines;
 	std::mutex m_mutex;
 	std::condition_variable m_cond;

@@ -24,13 +24,22 @@ NS_FF_BEG
 
 	Application::ApplicationImpl::ApplicationImpl(Application* _app, int argc,
 		char** argv) :
-		m_app(_app), m_exitCode(0), m_running(false) {
+		m_app(_app), m_argc(argc), m_argv(argv), m_exitCode(0), m_running(false) {
 		for (int i = 0; i < argc; ++i) {
 			this->m_cmdLines.push_back(argv[i]);
 		}
 	}
 
 	Application::ApplicationImpl::~ApplicationImpl() {
+	}
+
+	
+	int Application::ApplicationImpl::getArgc() const {
+		return this->m_argc;
+	}
+
+	char** Application::ApplicationImpl::getArgv() const {
+		return this->m_argv;
 	}
 
 	int Application::ApplicationImpl::run() {
