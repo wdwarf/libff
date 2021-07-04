@@ -106,6 +106,7 @@ add_library(ff
 	src/network/IP.cpp
 	src/network/Socket.cpp
 	src/network/TcpConnection.cpp
+	src/network/Curl.cpp
 	src/process/FileLock.cpp
 	src/process/Process.cpp
 	src/process/ProcessImplLinux.cpp
@@ -135,6 +136,7 @@ add_executable(ff_test
 
 target_link_libraries(ff_test
   ff
+	curl
   gtest
   gmock
   pthread
