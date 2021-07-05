@@ -45,10 +45,12 @@ Curl::operator CURL*() { return this->m_curl; }
 
 Curl& Curl::setConnectTimeout(int64_t msTimeout) {
   this->setOption(CURLOPT_CONNECTTIMEOUT_MS, msTimeout);
+  return *this;
 }
 
 Curl& Curl::setReadTimeout(int64_t msTimeout) {
   this->setOption(CURLOPT_TIMEOUT_MS, msTimeout);
+  return *this;
 }
 
 Curl& Curl::setOutputStream(std::ostream* outputStream) {
