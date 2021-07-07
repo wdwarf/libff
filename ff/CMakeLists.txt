@@ -22,6 +22,9 @@ IF (MINGW)
 ELSEIF (WIN32)
 	MESSAGE(STATUS "Now is windows")
 	file(GLOB_RECURSE windows_files "src/windows/*.cpp")
+	
+	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
+
 ELSEIF (APPLE)
 	MESSAGE(STATUS "Now is Apple OS's.")
 ELSEIF (UNIX)

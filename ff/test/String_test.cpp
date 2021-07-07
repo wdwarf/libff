@@ -54,4 +54,22 @@ TEST(TestString, TestString){
 
 	String s1 = "123456";
 	EXPECT_EQ("654321", s1.reverse());
+
+	string str = "中文转换";
+	cout << "src: " << str << endl;
+	cout << "Utf8ToGbk: " << (str = Utf8ToGbk(str)) << endl;
+	cout << "GbkToUtf8: " << (str = GbkToUtf8(str)) << endl;
+	wstring ws = L"abcdef aaa中文 转转换！@#￥！转转转12142留个脚印工";
+	
+	wcout << L"ToWs: " << ws << endl;
+	str = ToMbs(ws);
+	cout << "ToMbs: " << str << endl;
+
+	string mbs = "abcdef aaa中文 转转换！@#￥！转转转12142留个脚印工";
+	cout << "mbs: " << mbs << endl;
+	ws = ToWs(mbs);
+	wcout << L"ToWs: " << ws << endl;
+
+	String ss = ws;
+	cout << ss << endl;
 }
