@@ -14,6 +14,7 @@ include_directories(
 
 add_definitions(
 	-DLIBFF_EXPORTS
+	-DBUILDING_LIBCURL
 )
 
 IF (MINGW)
@@ -22,6 +23,10 @@ IF (MINGW)
 ELSEIF (WIN32)
 	MESSAGE(STATUS "Now is windows")
 	file(GLOB_RECURSE windows_files "src/windows/*.cpp")
+
+	include_directories(
+		third_party/curl-7.77.0/include
+	)
 	
 	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
 

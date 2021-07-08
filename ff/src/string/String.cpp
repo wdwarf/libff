@@ -234,7 +234,7 @@ char IToHexA(unsigned int x) {
 
 #ifdef WIN32
 
-std::string Utf8ToGbk(const std::string& str) {
+std::string Utf8ToGbk(const std::string& srcStr) {
   int len = MultiByteToWideChar(CP_UTF8, 0, srcStr.c_str(), -1, NULL, 0);
   wchar_t* wszGBK = new wchar_t[len + 1];
   memset(wszGBK, 0, len * 2 + 2);
