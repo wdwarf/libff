@@ -64,20 +64,26 @@ if(BUILDIN_ZLIB)
 		third_party/zlib-1.2.11/zutil.c
 	)
 
-	set(MINIZIP_SRCS
-		third_party/zlib-1.2.11/contrib/minizip/zip.c
-		third_party/zlib-1.2.11/contrib/minizip/unzip.c
-		third_party/zlib-1.2.11/contrib/minizip/mztools.c
-		third_party/zlib-1.2.11/contrib/minizip/ioapi.c
-	)
-
 	if (WIN32)
 		set(MINIZIP_IOWIN32_SRCS
 			third_party/zlib-1.2.11/contrib/minizip/iowin32.c
 		)
 	endif()
-	
+else()
+
+	if(UNIX)
+		set(EXTRA_LIBS
+			z
+		)
+	endif()
 endif()
+
+set(MINIZIP_SRCS
+third_party/zlib-1.2.11/contrib/minizip/zip.c
+third_party/zlib-1.2.11/contrib/minizip/unzip.c
+third_party/zlib-1.2.11/contrib/minizip/mztools.c
+third_party/zlib-1.2.11/contrib/minizip/ioapi.c
+)
 
 add_library(ff
 	${windows_files}
@@ -125,6 +131,7 @@ add_library(ff
 	src/settings/Settings.cpp
 	src/string/String.cpp
 	src/string/StringWrapper.cpp
+	src/system/FileSystem.cpp
 	src/thread/Runnable.cpp
 	src/thread/Semaphore.cpp
 	src/thread/Synchronizable.cpp
@@ -145,6 +152,7 @@ add_executable(ff_test
 target_link_libraries(ff_test
   ff
 	curl
+	${EXTRA_LIBS}
   gtest
   gmock
   pthread
