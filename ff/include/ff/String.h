@@ -9,6 +9,7 @@
 #define FF_STRING_H_
 
 #include <ff/Object.h>
+#include <ff/StringEncoding.h>
 
 #include <ostream>
 #include <string>
@@ -53,15 +54,6 @@ LIBFF_API bool EndsWith(const std::string& src, const std::string& find,
 LIBFF_API bool StartsWith(const std::string& src, const std::string& find,
                           bool ignoreCase = false);
 LIBFF_API bool Match(const std::string& str, const std::string& reg);
-
-/** 十六进制字符转数字 */
-LIBFF_API unsigned int HexAToI(char x);
-LIBFF_API char IToHexA(unsigned int x);
-
-LIBFF_API std::string Utf8ToGbk(const std::string& str);
-LIBFF_API std::string GbkToUtf8(const std::string& str);
-LIBFF_API std::wstring ToWs(const std::string& str);
-LIBFF_API std::string ToMbs(const std::wstring& str);
 
 enum StringCompressType { WithEmptyString, RemoveEmptyString };
 

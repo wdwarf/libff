@@ -72,4 +72,7 @@ TEST(TestString, TestString){
 
 	String ss = ws;
 	cout << ss << endl;
+
+	string chs = "abcdef aaa中文 转转换！@#￥！转转转12142留个脚印工";
+	cout << "EncodeOf: " << (uint32_t)EncodeOf(chs) << endl;
 }

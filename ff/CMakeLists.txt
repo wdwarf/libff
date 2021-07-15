@@ -131,6 +131,7 @@ add_library(ff
 	src/settings/Settings.cpp
 	src/string/String.cpp
 	src/string/StringWrapper.cpp
+	src/string/StringEncoding.cpp
 	src/system/FileSystem.cpp
 	src/thread/Runnable.cpp
 	src/thread/Semaphore.cpp

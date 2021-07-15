@@ -15,12 +15,6 @@
 #include <sstream>
 #include <string>
 
-#ifdef _WIN32
-#include <Windows.h>
-#else
-#include <iconv.h>
-#endif
-
 using namespace std;
 
 #if defined(_WIN32) && !defined(__MINGW32__)
@@ -201,108 +195,6 @@ bool StartsWith(const std::string& src, const std::string& find,
 bool Match(const std::string& str, const std::string& reg) {
   return regex_match(str, regex(reg));
 }
-
-unsigned int HexAToI(char x) {
-  if ((x >= 48) && (x <= 57))
-    x -= 48; /* 0-9 */
-  else if ((x >= 97) && (x <= 102))
-    x -= 87; /* a-f */
-  else if ((x >= 65) && (x <= 70))
-    x -= 55; /* A-F */
-  else {
-    stringstream str;
-    str << "Invalid hex character[" << x << "]";
-    THROW_EXCEPTION(Exception, str.str(), x);
-  }
-  return x;
-}
-
-char IToHexA(unsigned int x) {
-  if (x >= 0 && x <= 9) {
-    x += 48;
-  }
-  if (x >= 10 && x <= 15) {
-    x += 55;
-  } else {
-    stringstream str;
-    str << "Invalid hex number[" << x << "]";
-    THROW_EXCEPTION(Exception, str.str(), x);
-  }
-
-  return x;
-}
-
-#ifdef WIN32
-
-std::string Utf8ToGbk(const std::string& srcStr) {
-  int len = MultiByteToWideChar(CP_UTF8, 0, srcStr.c_str(), -1, NULL, 0);
-  wchar_t* wszGBK = new wchar_t[len + 1];
-  memset(wszGBK, 0, len * 2 + 2);
-  MultiByteToWideChar(CP_UTF8, 0, srcStr.c_str(), -1, wszGBK, len);
-  len = WideCharToMultiByte(CP_ACP, 0, wszGBK, -1, NULL, 0, NULL, NULL);
-  char* szGBK = new char[len + 1];
-  memset(szGBK, 0, len + 1);
-  WideCharToMultiByte(CP_ACP, 0, wszGBK, -1, szGBK, len, NULL, NULL);
-  string strTemp(szGBK);
-  if (wszGBK) delete[] wszGBK;
-  if (szGBK) delete[] szGBK;
-  return strTemp;
-}
-
-std::string GbkToUtf8(const std::string& strSrc) {
-  int len = MultiByteToWideChar(CP_ACP, 0, strSrc.c_str(), -1, NULL, 0);
-  wchar_t* wstr = new wchar_t[len + 1];
-  memset(wstr, 0, len + 1);
-  MultiByteToWideChar(CP_ACP, 0, strSrc.c_str(), -1, wstr, len);
-  len = WideCharToMultiByte(CP_UTF8, 0, wstr, -1, NULL, 0, NULL, NULL);
-  char* str = new char[len + 1];
-  memset(str, 0, len + 1);
-  WideCharToMultiByte(CP_UTF8, 0, wstr, -1, str, len, NULL, NULL);
-  string strTemp = str;
-  if (wstr) delete[] wstr;
-  if (str) delete[] str;
-  return strTemp;
-}
-
-#else
-
-string GbkToUtf8(const std::string& srcStr) {
-  iconv_t cd = iconv_open("utf8", "gbk");
-  if (nullptr == cd) return "";
-
-  auto pSrc = srcStr.c_str();
-  size_t srcLen = srcStr.length();
-  char** pin = (char**)&pSrc;
-  size_t bufSize = srcLen * 1.5;
-  vector<char> outBuf(bufSize);
-  memset(&outBuf[0], 0, bufSize);
-  char* pout = &outBuf[0];
-
-  iconv(cd, pin, &srcLen, &pout, &bufSize);
-  iconv_close(cd);
-
-  return string(&outBuf[0]);
-}
-
-string Utf8ToGbk(const std::string& srcStr) {
-  iconv_t cd = iconv_open("gbk", "utf8");
-  if (nullptr == cd) return "";
-
-  auto pSrc = srcStr.c_str();
-  size_t srcLen = srcStr.length();
-  char** pin = (char**)&pSrc;
-  size_t bufSize = srcLen * 1.5;
-  vector<char> outBuf(bufSize);
-  memset(&outBuf[0], 0, bufSize);
-  char* pout = &outBuf[0];
-
-  iconv(cd, pin, &srcLen, &pout, &bufSize);
-  iconv_close(cd);
-
-  return string(&outBuf[0]);
-}
-
-#endif
 
 std::wstring ToWs(const std::string& str) {
   char* oldLocale = setlocale(LC_ALL, "");
