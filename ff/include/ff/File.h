@@ -8,85 +8,89 @@
 #ifndef FF_FILE_H_
 #define FF_FILE_H_
 
-#include <string>
+#include <ff/DateTime.h>
+#include <ff/Exception.h>
+#include <ff/Noncopyable.h>
+#include <ff/Object.h>
+#include <ff/Buffer.h>
+
+#include <initializer_list>
 #include <list>
 #include <ostream>
-#include <initializer_list>
-
-#include <ff/Object.h>
-#include <ff/Exception.h>
-#include <ff/DateTime.h>
-#include <ff/Noncopyable.h>
+#include <string>
 
 NS_FF_BEG
 
 EXCEPTION_DEF(FileException);
 
 class File;
-class LIBFF_API FileIterator : public Noncopyable{
-public:
-	FileIterator(const std::string& path);
-	FileIterator(FileIterator&& it);
-	~FileIterator();
+class LIBFF_API FileIterator : public Noncopyable {
+ public:
+  FileIterator(const std::string& path);
+  FileIterator(FileIterator&& it);
+  ~FileIterator();
 
-	bool next();
-	File getFile();
-private:
-	class FileIteratorImpl;
-	FileIteratorImpl* m_impl;
+  bool next();
+  File getFile();
+
+ private:
+  class FileIteratorImpl;
+  FileIteratorImpl* m_impl;
 };
 
 class LIBFF_API File {
-public:
-	File();
-	File(const std::string& path);
-	File(const std::string& parent, const std::string& child);
-	File(const std::list<std::string>& path);
-	File(std::initializer_list<std::string> path);
-	File(File&& file);
-	File(const File& file);
-	virtual ~File();
+ public:
+  File();
+  File(const std::string& path);
+  File(const std::string& parent, const std::string& child);
+  File(const std::list<std::string>& path);
+  File(std::initializer_list<std::string> path);
+  File(File&& file);
+  File(const File& file);
+  virtual ~File();
 
-	void setPath(const std::string& path);
-	std::string getPath() const;
-	std::string getName() const;
-	std::string getSuffix() const;
-	File getParent() const;
+  void setPath(const std::string& path);
+  std::string getPath() const;
+  std::string getName() const;
+  std::string getSuffix() const;
+  File getParent() const;
 
-	bool isDirectory() const;
-	bool isRegularFile() const;
-	bool isExists() const;
-	bool isReadable() const;
-	bool isWritable() const;
-	bool isExecutable() const;
-	bool mkdir() const;
-	bool mkdirs() const;
-	bool empty() const;
-	bool remove(bool recursive = false) const;
-	long long getSize() const;
-	bool rename(const std::string& path) const;
-	bool copyTo(const std::string& path, bool forceReplace = false) const;
-	bool moveTo(const std::string& path, bool forceReplace = false) const;
+  bool isDirectory() const;
+  bool isRegularFile() const;
+  bool isExists() const;
+  bool isReadable() const;
+  bool isWritable() const;
+  bool isExecutable() const;
+  bool mkdir() const;
+  bool mkdirs() const;
+  bool empty() const;
+  bool remove(bool recursive = false) const;
+  long long getSize() const;
+  bool rename(const std::string& path) const;
+  bool copyTo(const std::string& path, bool forceReplace = false) const;
+  bool moveTo(const std::string& path, bool forceReplace = false) const;
 
-	bool isEmpty() const;
+  bool isEmpty() const;
 
-	FileIterator iterator() const;
+  FileIterator iterator() const;
 
-	File cut(int count = 1) const;
-	DateTime getModifyTime() const;
-	DateTime getCreateTime() const;
+  File cut(int count = 1) const;
+  DateTime getModifyTime() const;
+  DateTime getCreateTime() const;
 
-	File& operator=(const File& f);
-	bool operator==(const std::string& path) const;
-	bool operator==(const File& f) const;
+  File& operator=(const File& f);
+  bool operator==(const std::string& path) const;
+  bool operator==(const File& f) const;
 
-	operator std::string() const;
-	std::string getSeparater() const;
+  operator std::string() const;
+  std::string getSeparater() const;
 
-	friend std::ostream& operator<<(std::ostream& o, const File& file);
+  Buffer readAll() const;
 
-private:
-	std::list<std::string> path;
+  friend std::ostream& operator<<(std::ostream& o, const File& file);
+
+ private:
+  std::list<std::string> path;
 };
 
 NS_FF_END

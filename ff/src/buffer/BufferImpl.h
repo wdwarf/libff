@@ -42,6 +42,7 @@ public:
 	unsigned int getCapacity() const;
 	void zero();
 
+	String toString() const;
 	String toHexString();
 	String toBinaryString();
 	void fromHexString(const String& hexStr);

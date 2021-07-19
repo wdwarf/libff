@@ -55,6 +55,7 @@ public:
 	unsigned int getCapacity() const;
 	void zero();
 
+	String toString() const;
 	String toHexString() const;
 	String toBinaryString() const;
 	void fromHexString(const String& hexStr);

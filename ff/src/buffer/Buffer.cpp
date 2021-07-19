@@ -118,6 +118,10 @@ bool Buffer::isEmpty() const {
 	return this->impl->isEmpty();
 }
 
+String Buffer::toString() const{
+	return this->impl->toString();
+}
+
 String Buffer::toHexString() const {
 	return this->impl->toHexString();
 }

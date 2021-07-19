@@ -260,6 +260,10 @@ bool Buffer::BufferImpl::isEmpty() const {
 	return (NULL == this->data);
 }
 
+String Buffer::BufferImpl::toString() const{
+	return String((const char*)this->getData(), this->getSize());
+}
+
 String Buffer::BufferImpl::toHexString() {
 	return ToHexString(this->getData(), this->getSize());
 }

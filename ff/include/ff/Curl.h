@@ -42,6 +42,8 @@ class Curl {
     return curl_easy_getinfo(m_curl, info, std::forward<Arg>(args)...);
   }
 
+  int getResponseCode();
+
  protected:
   CURL* m_curl;
   curl_slist* m_headers;

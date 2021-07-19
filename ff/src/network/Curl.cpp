@@ -97,6 +97,12 @@ Curl& Curl::setOAuth2Token(const std::string& token) {
   return *this;
 }
 
+int Curl::getResponseCode() {
+  int code = -1;
+  this->getInfo(CURLINFO_RESPONSE_CODE, &code);
+  return code;
+}
+
 // ==================================================
 // ==================================================
 
