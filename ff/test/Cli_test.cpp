@@ -61,4 +61,15 @@ TEST(CliTest, CliPacket){
   cout << result.getCode() << endl;
   cout << result.getData() << endl;
 
+  CliPacket pkg8;
+  cout << pkg8.parse("reboot") << endl;
+  cout << pkg8.toString() << endl;
+  cout << pkg8.parse("reboot reason=\"undefined error.\"") << endl;
+  cout << pkg8.toString() << endl;
+  cout << pkg8.parse("reboot device1 reason=\"device1 failed.\",tick=1234567890;") << endl;
+  cout << pkg8.toString() << endl;
+  for(auto& m : pkg8.getMembers()){
+    cout << m.first << ": " << m.second << endl;
+  }
+
 }

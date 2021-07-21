@@ -257,7 +257,7 @@ bool CliPacket::parse(const std::string &cmdLine) {
 	const char* p = cmdTmp.c_str();
 	while(isspace(*p)) ++p;
 	stringstream str;
-	while(!isspace(*p)){
+	while(!isspace(*p) && '\0' != *p){
 		if(!isValidChar(*p))
 			return false;
 		str << *p++;
