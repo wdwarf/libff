@@ -7,18 +7,100 @@
 
 #include "minizip/zip.h"
 
+#include <fcntl.h>
 #include <ff/Exception.h>
 #include <ff/File.h>
 #include <ff/Zip.h>
 #include <zlib.h>
 
+#include <cstring>
+#include <ctime>
 #include <fstream>
 #include <iostream>
 #include <mutex>
 
+#ifdef _WIN32
+#include <direct.h>
+#include <io.h>
+#else
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <utime.h>
+#endif
+
+#ifdef _WIN32
+#define USEWIN32IOAPI
+#include "iowin32.h"
+#endif
+
 using namespace std;
 
 NS_FF_BEG
+
+#define WRITEBUFFERSIZE (16384)
+#define MAXFILENAME (256)
+
+#ifdef _WIN32
+static uLong GetFileTime(
+    const char *f, /* name of file to get info on */
+    tm_zip *tmzip, /* return value: access, modific. and creation times */
+    uLong *dt /* dostime */) {
+  int ret = 0;
+  {
+    FILETIME ftLocal;
+    HANDLE hFind;
+    WIN32_FIND_DATAA ff32;
+
+    hFind = FindFirstFileA(f, &ff32);
+    if (hFind != INVALID_HANDLE_VALUE) {
+      FileTimeToLocalFileTime(&(ff32.ftLastWriteTime), &ftLocal);
+      FileTimeToDosDateTime(&ftLocal, ((LPWORD)dt) + 1, ((LPWORD)dt) + 0);
+      FindClose(hFind);
+      ret = 1;
+    }
+  }
+  return ret;
+}
+#else
+static uLong GetFileTime(
+    const char *f, /* name of file to get info on */
+    tm_zip *tmzip, /* return value: access, modific. and creation times */
+    uLong *dt      /* dostime */
+) {
+  int ret = 0;
+  struct stat s; /* results of stat() */
+  struct tm *filedate;
+  time_t tm_t = 0;
+
+  if (strcmp(f, "-") != 0) {
+    char name[MAXFILENAME + 1];
+    int len = strlen(f);
+    if (len > MAXFILENAME) len = MAXFILENAME;
+
+    strncpy(name, f, MAXFILENAME - 1);
+    /* strncpy doesnt append the trailing NULL, of the string is too long. */
+    name[MAXFILENAME] = '\0';
+
+    if (name[len - 1] == '/') name[len - 1] = '\0';
+    /* not all systems allow stat'ing a file with / appended */
+    if (stat(name, &s) == 0) {
+      tm_t = s.st_mtime;
+      ret = 1;
+    }
+  }
+  filedate = localtime(&tm_t);
+
+  tmzip->tm_sec = filedate->tm_sec;
+  tmzip->tm_min = filedate->tm_min;
+  tmzip->tm_hour = filedate->tm_hour;
+  tmzip->tm_mday = filedate->tm_mday;
+  tmzip->tm_mon = filedate->tm_mon;
+  tmzip->tm_year = filedate->tm_year;
+
+  return ret;
+}
+#endif
 
 //////////////////////////////////////////////////////////
 // class Zip::ZipImpl
@@ -112,7 +194,7 @@ void Zip::ZipImpl::zip(const std::string &src, const std::string &entry,
   if (srcFile.isDirectory()) {
     string dirName = srcFile.getName();
     File srcEntry(entry, newFileName.empty() ? dirName : newFileName);
-    cout << "srcEntry: " << srcEntry << endl;
+
     auto it = srcFile.iterator();
     while (it.next()) {
       auto file = it.getFile();
@@ -138,7 +220,12 @@ void Zip::ZipImpl::doZipRegFile(const std::string &src,
   string zipFileName = (newFileName.empty() ? srcFile.getName() : newFileName);
   File zipFile(entry, zipFileName);
 
-  if (0 != zipOpenNewFileInZip(this->_zipFile, zipFile.getPath().c_str(), NULL,
+  zip_fileinfo zi;
+  memset(&zi, 0, sizeof(zi));
+
+  GetFileTime(srcFile.getPath().c_str(), &zi.tmz_date, &zi.dosDate);
+
+  if (0 != zipOpenNewFileInZip(this->_zipFile, zipFile.getPath().c_str(), &zi,
                                NULL, 0, NULL, 0, NULL, Z_DEFLATED,
                                Z_DEFAULT_COMPRESSION)) {
     THROW_EXCEPTION(Exception, "file[" + src + "] zip failed.", 0);

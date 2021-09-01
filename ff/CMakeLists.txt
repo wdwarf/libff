@@ -142,6 +142,7 @@ add_library(ff
 	src/rtp/RtpPacket.cpp
 	src/compress/Zip.cpp
 	src/compress/ZipEntry.cpp
+	src/compress/Unzip.cpp
 )
 
 file(GLOB test_files "test/*.cpp")
