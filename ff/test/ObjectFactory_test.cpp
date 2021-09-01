@@ -38,3 +38,31 @@ TEST(TestObjectFactory, TestObjectFactory){
 		LOGD << e.what();
 	}
 }
+
+TEST(TestObjectFactory, TestParamCreate){
+	ObjectFactory o;
+	o.regiesterCreator<string>("str", ObjectType::Singleton, "this is a test string");
+	o.regiesterCreator<string>("str2", ObjectType::New);
+
+	auto s = o.createObject<string>("str");
+	cout << *s << endl;
+	s->assign("lalala~!");
+	cout << *s << endl;
+
+	s = o.createObject<string>("str2", "hahaha~!");
+	cout << *s << endl;
+	s = o.createObject<string>("str2", "hehehe~!");
+	cout << *s << endl;
+
+	s = o.createObject<string>("str", "123");
+	cout << *s << endl;
+	s = o.createObject<string>("str", "456");
+	cout << *s << endl;
+	
+	o.unregiesterCreator("str");
+	try{
+		s = o.createObject<string>("str", "456");
+	}catch(std::exception& e){
+		LOGD << e.what();
+	}
+}
