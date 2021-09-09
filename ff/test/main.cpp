@@ -16,7 +16,25 @@ USE_NS_FF
 
 void init();
 
+static void SigHandler(int sig) {
+#if defined(__linux) || defined(unix)
+  cout << "catch signal: " << sig << endl;
+#endif
+}
+
+static void SigCatch() {
+#if defined(__linux) || defined(unix)
+  int sigs[] = {SIGTERM, SIGPIPE};
+  for (auto sig : sigs) {
+		cout << sig << endl;
+    signal(sig, SigHandler);
+  }
+#endif
+}
+
 int main(int argc, char** argv){
+	SigCatch();
+
 	testing::InitGoogleTest(&argc, argv);
 
 	init();

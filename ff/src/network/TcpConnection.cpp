@@ -312,7 +312,7 @@ NS_FF_BEG
 
 	bool TcpConnection::listen(uint16_t port, const std::string& ip,
 		IpVersion ipVer, int backlog) {
-		this->resetCallbackFunctions();
+		// this->resetCallbackFunctions();
 
 		try {
 			if (!this->m_socket.createTcp(ipVer))
@@ -331,12 +331,14 @@ NS_FF_BEG
 		this->m_isServer = true;
 		this->m_ep->addFd(this->m_socket.getHandle(),
 			Bind(&TcpConnection::onSocketUpdate, this));
+		this->m_ep->addEvents(this->m_socket.getHandle(),
+			POLLIN);
 		return true;
 	}
 
 	bool TcpConnection::connect(uint16_t remotePort, const std::string& remoteHost,
 		uint16_t localPort, const std::string& localIp) {
-		this->resetCallbackFunctions();
+		// this->resetCallbackFunctions();
 
 		this->m_isServer = false;
 		try {
@@ -370,6 +372,8 @@ NS_FF_BEG
 
 		this->m_ep->addFd(this->m_socket.getHandle(),
 			Bind(&TcpConnection::onSocketUpdate, this));
+		this->m_ep->addEvents(this->m_socket.getHandle(),
+			POLLIN);
 		return true;
 	}
 
@@ -496,7 +500,6 @@ NS_FF_BEG
 
 		if (events & POLLHUP) {
 			this->m_ep->delFd(this->m_socket.getHandle());
-			this->m_socket.close();
 
 			OnCloseFunc func;
 			{
@@ -505,6 +508,7 @@ NS_FF_BEG
 			}
 			if (func)
 				func(this->shared_from_this());
+			this->m_socket.close();
 		}
 	}
 

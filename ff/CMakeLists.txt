@@ -10,6 +10,7 @@ include_directories(
   third_party/jsoncpp/include
 	third_party/zlib-1.2.11
 	third_party/zlib-1.2.11/contrib
+	third_party/zlib-1.2.11/contrib/minizip
 )
 
 add_definitions(
@@ -116,6 +117,7 @@ add_library(ff
 	src/log/LogInfo.cpp
 	src/log/StdoutAppender.cpp
 	src/log/FileAppender.cpp
+	src/message_bus/MessageBus.cpp
 	src/network/EPoll.cpp
 	src/network/IP.cpp
 	src/network/Socket.cpp
