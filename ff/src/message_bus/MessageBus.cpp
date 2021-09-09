@@ -297,6 +297,10 @@ MessageBusClient::MessageBusClient(uint32_t clientId)
 
 uint32_t MessageBusClient::clientId() const { return this->m_clientId; }
 
+bool MessageBusClient::isConnected() const{
+  return this->m_conn->getSocket().isConnected();
+}
+
 bool MessageBusClient::start(uint16_t serverPort, const std::string& serverHost,
                              uint16_t localPort, const std::string& localHost) {
   if (!this->m_stoped) return true;

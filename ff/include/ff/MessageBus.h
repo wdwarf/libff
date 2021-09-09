@@ -157,6 +157,7 @@ class MessageBusClient {
   PkgPromisePtr req(uint32_t msgId, uint32_t target = 0,
                     const void* data = nullptr, uint32_t dataSize = 0);
   uint32_t clientId() const;
+  bool isConnected() const;
 
  private:
   uint32_t m_clientId;
