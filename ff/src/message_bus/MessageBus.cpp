@@ -287,9 +287,16 @@ void MessageBusServer::removeClient(const TcpConnectionPtr& client) {
  *
  */
 
+MessageBusClient::MessageBusClient()
+    : m_conn(TcpConnection::CreateInstance()), m_connected(false),
+      m_stoped(true) {
+  this->m_conn->onData(Bind(&MessageBusClient::onData, this))
+      .onClose(Bind(&MessageBusClient::onClose, this));
+}
+
 MessageBusClient::MessageBusClient(uint32_t clientId)
     : m_clientId(clientId),
-      m_conn(TcpConnection::CreateInstance()),
+      m_conn(TcpConnection::CreateInstance()), m_connected(false),
       m_stoped(true) {
   this->m_conn->onData(Bind(&MessageBusClient::onData, this))
       .onClose(Bind(&MessageBusClient::onClose, this));
@@ -297,8 +304,10 @@ MessageBusClient::MessageBusClient(uint32_t clientId)
 
 uint32_t MessageBusClient::clientId() const { return this->m_clientId; }
 
+void MessageBusClient::clientId(uint32_t id) { this->m_clientId = id; }
+
 bool MessageBusClient::isConnected() const{
-  return this->m_conn->getSocket().isConnected();
+  return this->m_connected;
 }
 
 bool MessageBusClient::start(uint16_t serverPort, const std::string& serverHost,
@@ -318,7 +327,7 @@ bool MessageBusClient::start(uint16_t serverPort, const std::string& serverHost,
         this_thread::sleep_for(chrono::milliseconds(300));
         continue;
       }
-
+      this->m_connected = true;
       this->onConnected();
       this->m_cond.wait(lk);
     }
@@ -365,6 +374,7 @@ void MessageBusClient::onData(const uint8_t* data, uint32_t size,
 
 void MessageBusClient::onClose(const TcpConnectionPtr& client) {
   unique_lock<mutex> lk(this->m_mutex);
+  this->m_connected = false;
   this->m_cond.notify_one();
 }
 

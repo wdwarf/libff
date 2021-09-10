@@ -216,6 +216,25 @@ NS_FF_BEG
 		/** TODO add to iocp */
 		this->m_iocp->connect((HANDLE)this->m_socket.getHandle(), this->m_socket.getHandle(),
 			Bind(&TcpConnection::workThreadFunc, this));
+		
+		lock_guard<mutex> lk(this->m_mutex);
+		if(this->m_onDataFunc){
+			DWORD flags = MSG_PARTIAL;
+			DWORD numToRecvd = 0;
+
+			m_context.handle = (HANDLE)this->m_socket.getHandle();
+			m_context.iocpEevent = IocpEvent::Recv;
+			m_context.buffer.buf = (char*)this->m_readBuffer.getData();
+			m_context.buffer.len = this->m_readBuffer.getSize();
+
+			int ret = WSARecv(this->m_socket.getHandle(),
+				&m_context.buffer,
+				1,
+				&numToRecvd,
+				&flags,
+				&m_context,
+				NULL);
+		}
 		return true;
 	}
 
@@ -251,6 +270,8 @@ NS_FF_BEG
 	TcpConnection& TcpConnection::onData(const OnDataFunc& func) {
 		lock_guard<mutex> lk(this->m_mutex);
 		this->m_onDataFunc = func;
+
+		if(!this->m_socket.isConnected()) return *this;
 
 		DWORD flags = MSG_PARTIAL;
 		DWORD numToRecvd = 0;

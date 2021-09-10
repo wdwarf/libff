@@ -16,7 +16,7 @@
 
 NS_FF_BEG
 
-#define MAX_MSGBUS_PKG_SIZE 4096
+#define MAX_MSGBUS_PKG_SIZE 8192
 
 enum MsgOpt {
   Req = 0x00000000,
@@ -145,10 +145,11 @@ using MsgBusReqFunc = std::function<void(const MsgBusPackage& pkg)>;
 
 class MessageBusClient {
  public:
+  MessageBusClient();
   MessageBusClient(uint32_t clientId);
 
   bool start(uint16_t serverPort, const std::string& serverHost,
-             uint16_t localPort, const std::string& localHost = "");
+             uint16_t localPort = 0, const std::string& localHost = "");
   bool stop();
 
   void send(const MsgBusPackage& pkg);
@@ -157,6 +158,7 @@ class MessageBusClient {
   PkgPromisePtr req(uint32_t msgId, uint32_t target = 0,
                     const void* data = nullptr, uint32_t dataSize = 0);
   uint32_t clientId() const;
+  void clientId(uint32_t id);
   bool isConnected() const;
 
  private:
@@ -165,6 +167,7 @@ class MessageBusClient {
   std::condition_variable m_cond;
   MsgBusPackageHelper m_pkgHelper;
   TcpConnectionPtr m_conn;
+  std::atomic_bool m_connected;
   std::atomic_bool m_stoped;
   std::mutex m_mutexMsgId2Func;
   std::map<uint32_t, MsgBusReqFunc> msgId2Func;
