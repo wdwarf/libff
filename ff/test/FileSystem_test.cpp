@@ -21,12 +21,12 @@ TEST(FileSystemTest, FileSystemTest) {
 #ifdef _WIN32
   string path = "C:";
 #else
-  string path = "/";
+  string path = "/mnt/c";
 #endif
   FileSystem fs(path);
   auto si = fs.df();
   cout << "total: " << si.total << endl
-    << "free: " << si.free << endl
+    << "free: " << si.free / 1024.f /1024.f /1024.f << endl
      << "available: " << si.available << endl
       << "used: " << si.used << endl;
 }

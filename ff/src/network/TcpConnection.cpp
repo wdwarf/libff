@@ -369,7 +369,7 @@ NS_FF_BEG
 				ipVer = addr.getVersion();
 			}
 
-			if (this->m_socket.createTcp(ipVer) <= 0)
+			if (!this->m_socket.createTcp(ipVer))
 				THROW_EXCEPTION(Exception, "Create socket failed.", errno);
 
 			if (localPort > 0) {
