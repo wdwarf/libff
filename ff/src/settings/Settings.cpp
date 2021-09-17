@@ -68,7 +68,6 @@ void Settings::setValue(const std::string &key, const Variant &value) {
     if (it != this->m_values.end()) {
       oldValue = it->second;
       it->second = value;
-      return;
     }
   }
 

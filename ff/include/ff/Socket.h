@@ -141,7 +141,7 @@ public:
 	Socket accept(sockaddr_in6& addr);
 	Socket accept(sockaddr* addr, socklen_t* addrSize);
 
-	int send(const void* buf, socklen_t bufLen);
+	int send(const void* buf, socklen_t bufLen, int timeoutMs = 10 * 1000);
 	int read(void* buf, socklen_t readBytes, int timeoutMs = -1);
 
 	int sendTo(const char* buf, socklen_t bufLen, const sockaddr* addr,

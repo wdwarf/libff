@@ -442,15 +442,15 @@ Socket Socket::accept(sockaddr_in6& addr) {
 	return this->accept((sockaddr*) &addr, &size);
 }
 
-int Socket::send(const void* buf, socklen_t bufLen) {
+int Socket::send(const void* buf, socklen_t bufLen, int timeoutMs) {
 	if (this->m_socketFd <= 0)
 		return -1;
 
 	if (this->m_useSelect) {
 		fd_set fs_send;
 		timeval tv;
-		tv.tv_sec = 5;
-		tv.tv_usec = 0;
+		tv.tv_sec = timeoutMs / 1000;
+		tv.tv_usec = (timeoutMs % 1000) * 1000;
 		FD_ZERO(&fs_send);
 		FD_SET(this->m_socketFd, &fs_send);
 		int re = ::select(this->m_socketFd + 1, 0, &fs_send, 0, &tv);
