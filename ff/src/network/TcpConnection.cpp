@@ -78,6 +78,8 @@ NS_FF_BEG
 		{
 			if (0 == *lpNumberOfBytesTransferred)
 			{
+				this->m_iocp->disconnect((HANDLE)this->m_socket.getHandle());
+				
 				auto pThis = this->shared_from_this();
 				OnCloseFunc func;
 				{
@@ -87,7 +89,7 @@ NS_FF_BEG
 				if (func)
 					func(pThis);
 
-				this->m_socket.close();
+				// this->m_socket.close();
 
 				break;
 			}
@@ -113,8 +115,13 @@ NS_FF_BEG
 				NULL);
 			if (SOCKET_ERROR == ret)
 			{
-				if (WSA_IO_PENDING != WSAGetLastError())
+				auto error = WSAGetLastError();
+				if (WSA_IO_PENDING != error)
 				{
+					
+					// cout << "WSAGetLastError: " << error << ", socket: " << this->m_socket.getHandle() << ", " << this->m_socket.getRemoteAddress() << endl;
+					this->m_iocp->disconnect((HANDLE)this->m_socket.getHandle());
+
 					OnCloseFunc func;
 					{
 						lock_guard<mutex> lk(this->m_mutex);
@@ -122,8 +129,7 @@ NS_FF_BEG
 					}
 					if (func)
 						func(this->shared_from_this());
-
-					this->m_socket.close();
+					// this->m_socket.close();
 				}
 			}
 
@@ -161,8 +167,9 @@ NS_FF_BEG
 			while (this->m_socket.getHandle() > 0) {
 				Socket client = this->m_socket.accept(addr);
 				if (client.getHandle() <= 0 || this->m_socket.getHandle() <= 0) break;
+				
 				TcpConnectionPtr tcpSock = TcpConnectionPtr(
-					new TcpConnection(move(client)));
+					new TcpConnection(move(client), this->m_iocp));
 
 				OnAcceptFunc func;
 				{
@@ -239,16 +246,9 @@ NS_FF_BEG
 	}
 
 	void TcpConnection::close() {
+		// this->m_iocp->disconnect((HANDLE)this->m_socket.getHandle());
 		this->m_socket.shutdown();
-
-		OnCloseFunc func;
-		{
-			lock_guard<mutex> lk(this->m_mutex);
-			func = this->m_onCloseFunc;
-		}
-		if (!func) {
-			this->m_socket.close();
-		}
+		// this->m_socket.close();
 	}
 
 	Socket& TcpConnection::getSocket() {

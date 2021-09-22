@@ -40,7 +40,7 @@ TEST(TestThread, TestThread) {
 		t2.start();
 		t2.join();
 
-		sleep(1);
+		this_thread::sleep_for(chrono::seconds(1));
 	}
 //	Thread(MakeRunnable(threadFunc)).start();
 

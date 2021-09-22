@@ -69,27 +69,11 @@ NS_FF_BEG
 
 					if (!this->getQueuedCompletionStatus(&numberOfBytesTransferred,
 						&completionKey, &lpOverlapped, -1)) {
-						/*cout << "GetLastError: " << GetLastError() << endl;*/
-						if (0 != completionKey && nullptr != lpOverlapped) {
-							PIocpContext context = (PIocpContext)lpOverlapped;
-
-							IocpWorkThreadFunc func;
-							{
-								lock_guard<mutex> lk(this->m_mutex);
-								auto it = this->m_iocpWorkThreadFuncs.find(context->handle);
-								if (it != this->m_iocpWorkThreadFuncs.end())
-									func = it->second;
-							}
-							if (func)
-								func(&numberOfBytesTransferred, &completionKey, &lpOverlapped);
-						}
-
 						continue;
 					}
 
 					if ((0 == completionKey && nullptr == lpOverlapped)) break;
 
-					
 					PIocpContext context = (PIocpContext)lpOverlapped;
 
 					IocpWorkThreadFunc func;
@@ -117,7 +101,15 @@ NS_FF_BEG
 			0);
 		if (hCp != this->m_handle) return false;
 		lock_guard<mutex> lk(this->m_mutex);
-		this->m_iocpWorkThreadFuncs[fileHandle] = iocpWorkThreadFunc;
+		// cout << "connect: " << (SOCKET)fileHandle << endl;
+		this->m_iocpWorkThreadFuncs.insert(make_pair(fileHandle, iocpWorkThreadFunc));
+		return true;
+	}
+
+	bool IOCP::disconnect(HANDLE fileHandle){
+		lock_guard<mutex> lk(this->m_mutex);
+		// cout << "disconnect: " << (SOCKET)fileHandle << endl;
+		this->m_iocpWorkThreadFuncs.erase(fileHandle);
 		return true;
 	}
 
@@ -144,7 +136,7 @@ NS_FF_BEG
 		__out LPOVERLAPPED* lpOverlapped,
 		__in DWORD dwMilliseconds)
 	{
-		return (FALSE != ::GetQueuedCompletionStatus(this->m_handle,
+		return (TRUE == ::GetQueuedCompletionStatus(this->m_handle,
 			lpNumberOfBytesTransferred,
 			lpCompletionKey,
 			lpOverlapped,

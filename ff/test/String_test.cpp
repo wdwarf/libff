@@ -59,13 +59,13 @@ TEST(TestString, TestString){
 	cout << "src: " << str << endl;
 	cout << "Utf8ToGbk: " << (str = Utf8ToGbk(str)) << endl;
 	cout << "GbkToUtf8: " << (str = GbkToUtf8(str)) << endl;
-	wstring ws = L"abcdef aaa中文 转转换！@#￥！转转转12142留个脚印工";
+	wstring ws = L"abcdef aaa中文 转转换！@#￥！转转转12142留个脚印工.";
 	
 	wcout << L"ToWs: " << ws << endl;
 	str = ToMbs(ws);
 	cout << "ToMbs: " << str << endl;
 
-	string mbs = "abcdef aaa中文 转转换！@#￥！转转转12142留个脚印工";
+	string mbs = "abcdef aaa中文 转转换！@#￥！转转转12142留个脚印工.";
 	cout << "mbs: " << mbs << endl;
 	ws = ToWs(mbs);
 	wcout << L"ToWs: " << ws << endl;
@@ -73,6 +73,6 @@ TEST(TestString, TestString){
 	String ss = ws;
 	cout << ss << endl;
 
-	string chs = "abcdef aaa中文 转转换！@#￥！转转转12142留个脚印工";
+	string chs = "abcdef aaa中文 转转换！@#￥！转转转12142留个脚印工.";
 	cout << "EncodeOf: " << (uint32_t)EncodeOf(chs) << endl;
 }

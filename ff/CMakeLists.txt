@@ -21,16 +21,31 @@ add_definitions(
 IF (MINGW)
 	MESSAGE(STATUS "Now is MinGW")
 	file(GLOB windows_files "src/windows/*.cpp")
+
 ELSEIF (WIN32)
 	MESSAGE(STATUS "Now is windows")
+	
 	file(GLOB_RECURSE windows_files "src/windows/*.cpp")
+
+	
+	link_directories(
+		${CMAKE_CURRENT_SOURCE_DIR}/third_party/googletest/build/lib/Release
+		${CMAKE_CURRENT_SOURCE_DIR}/third_party/curl-7.77.0/build/lib/Release
+	)
 
 	include_directories(
 		third_party/curl-7.77.0/include
+		third_party/googletest/googletest/include
 	)
 	
 	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
 
+	set(EXTRA_LIBS
+		ws2_32
+		winmm
+		wldap32
+		libcurl
+	)
 ELSEIF (APPLE)
 	MESSAGE(STATUS "Now is Apple OS's.")
 ELSEIF (UNIX)
@@ -75,6 +90,7 @@ else()
 	if(UNIX)
 		set(EXTRA_LIBS
 			z
+			pthread
 		)
 	endif()
 endif()
@@ -155,11 +171,11 @@ add_executable(ff_test
 
 target_link_libraries(ff_test
   ff
-	curl
 	${EXTRA_LIBS}
+	
+	
   gtest
   gmock
-  pthread
 )
 
 

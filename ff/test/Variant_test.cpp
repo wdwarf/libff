@@ -17,7 +17,7 @@ TEST(TestVariant, TestVariant){
 	Variant v = 12;
 	EXPECT_EQ(VariantType::INT, v.getVt());
 	Variant v2 = v;
-	LOGD << (v == v2);
+	// LOGD << (v == v2);
 	EXPECT_EQ(v, v2);
 
 	LOGD << "buf: " << v.toBuffer().toHexString();

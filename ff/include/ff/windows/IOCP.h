@@ -49,6 +49,7 @@ NS_FF_BEG
 		void close();
 		bool create(DWORD numberOfConcurrentThreads);
 		bool connect(HANDLE fileHandle, ULONG_PTR completionKey, IocpWorkThreadFunc iocpWorkThreadFunc);
+		bool disconnect(HANDLE fileHandle);
 		operator HANDLE() const;
 		operator bool() const;
 		bool getQueuedCompletionStatus(
