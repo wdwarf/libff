@@ -61,8 +61,13 @@ enum class SocketType {
 
 typedef int SockType;
 
-enum class IpVersion : char {
+enum class IpVersion : uint8_t {
 	Unknown, V4, V6
+};
+
+enum class SockBlockingType: uint8_t{
+	Blocking,
+	NonBlocking
 };
 
 struct LIBFF_API SockAddr_t {
@@ -112,7 +117,7 @@ public:
 	Socket& shutdown(int type = SHUT_RDWR);
 	Socket& attach(int sockFd);
 	SocketFd dettach();
-	Socket& setBlocking(bool nonBlocking);
+	Socket& setBlocking(SockBlockingType blockingType);
 	bool isNonBlocking() const;
 	bool isUseSelect() const;
 	Socket& setUseSelect(bool useSelect);
@@ -154,7 +159,7 @@ public:
 			int timeoutMs = -1);
 	void enableUdpBroadcast(bool enable = true);
 
-	static bool SetBlocking(SocketFd sockFd, bool isNonBlocking = true);
+	static bool SetBlocking(SocketFd sockFd, SockBlockingType blockingType);
 	static bool IsNonBlocking(SocketFd sockFd);
 
 	static std::string Host2IpStr(const std::string& host);
@@ -165,6 +170,7 @@ private:
 	SocketFd m_socketFd;
 	bool m_useSelect;
 	IpVersion m_ipVer;
+	SockBlockingType m_blockingType;
 };
 
 typedef std::shared_ptr<Socket> SocketPtr;
