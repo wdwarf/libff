@@ -12,6 +12,7 @@
 #include <map>
 #include <memory>
 #include <mutex>
+#include <condition_variable>
 #include <set>
 
 NS_FF_BEG
@@ -82,6 +83,8 @@ class MsgBusPackage : public Buffer {
 
 using MsgBusPackagePtr = std::shared_ptr<MsgBusPackage>;
 using PkgPromiseRemoveFunc = std::function<void(uint32_t msgId)>;
+
+#if __cplusplus > 201103L
 class PkgPromise : public Synchronizable {
  public:
   PkgPromise(uint32_t msgId, PkgPromiseRemoveFunc func);
@@ -96,6 +99,25 @@ class PkgPromise : public Synchronizable {
   std::promise<MsgBusPackagePtr> m_promise;
   std::future<MsgBusPackagePtr> m_future;
 };
+
+#else
+class PkgPromise : public Synchronizable {
+ public:
+  PkgPromise(uint32_t msgId, PkgPromiseRemoveFunc func);
+  ~PkgPromise();
+
+  MsgBusPackagePtr get(uint32_t ms);
+  void set(MsgBusPackagePtr pkg);
+
+ private:
+  uint32_t m_id;
+  PkgPromiseRemoveFunc m_func;
+  MsgBusPackagePtr m_pkg;
+  std::mutex m_mutex;
+  std::condition_variable m_cond;
+};
+
+#endif
 
 using PkgPromisePtr = std::shared_ptr<PkgPromise>;
 

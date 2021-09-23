@@ -24,7 +24,7 @@ IF (MINGW)
 
 ELSEIF (WIN32)
 	MESSAGE(STATUS "Now is windows")
-	
+
 	file(GLOB_RECURSE windows_files "src/windows/*.cpp")
 
 	
@@ -179,3 +179,8 @@ target_link_libraries(ff_test
 )
 
 
+
+if(MSVC)
+target_compile_options(ff PUBLIC "/Zc:__cplusplus")
+target_compile_options(ff_test PUBLIC "/Zc:__cplusplus")
+endif()

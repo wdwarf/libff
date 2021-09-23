@@ -150,6 +150,7 @@ MsgBusPackagePtr MsgBusPackageHelper::getPackage() {
  * class PkgPromise
  *
  */
+#if __cplusplus > 201103L
 
 PkgPromise::PkgPromise(uint32_t id, PkgPromiseRemoveFunc func)
     : m_id(id), m_func(func) {
@@ -175,6 +176,37 @@ void PkgPromise::set(MsgBusPackagePtr pkg) {
   this->m_promise.set_value(pkg);
   this->unlock();
 }
+
+#else
+
+PkgPromise::PkgPromise(uint32_t id, PkgPromiseRemoveFunc func)
+    : m_id(id), m_func(func) {
+}
+
+PkgPromise::~PkgPromise() {
+  this->lock();
+  this->m_func(m_id);
+  this->unlock();
+}
+
+MsgBusPackagePtr PkgPromise::get(uint32_t ms) {
+
+  std::unique_lock<mutex> lk(this->m_mutex);
+  if(this->m_cond.wait_for(lk, chrono::milliseconds(ms), [this](){ return (nullptr != this->m_pkg); })){
+    return this->m_pkg;
+  }
+  return nullptr;
+}
+
+void PkgPromise::set(MsgBusPackagePtr pkg) {
+  this->lock();
+  std::unique_lock<mutex> lk(this->m_mutex);
+  this->m_pkg = pkg;
+  this->m_cond.notify_all();
+  this->unlock();
+}
+
+#endif
 
 /**
  *
