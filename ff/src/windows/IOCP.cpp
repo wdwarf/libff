@@ -6,6 +6,7 @@
  */
 
 #include <ff/windows/IOCP.h>
+
 #include <cstring>
 #include <iostream>
 
@@ -13,135 +14,115 @@ using namespace std;
 
 NS_FF_BEG
 
-	IocpContext::IocpContext()
-	{
-		memset(this, 0, sizeof(IocpContext));
-	}
-	IocpContext::IocpContext(HANDLE handle, IocpEvent event)
-	{
-		memset(this, 0, sizeof(IocpContext));
-		this->handle = handle;
-		this->iocpEevent = event;
-	}
+IocpContext::IocpContext() { memset(this, 0, sizeof(IocpContext)); }
 
-	IOCP::IOCP(DWORD concurrentThreads) : m_handle(NULL)
-	{
-		if (concurrentThreads > 0)
-		{
-			this->create(concurrentThreads);
-		}
-	}
+IocpContext::IocpContext(HANDLE handle, IocpEvent event) {
+  memset(this, 0, sizeof(IocpContext));
+  this->handle = handle;
+  this->iocpEevent = event;
+}
 
-	IOCP::~IOCP()
-	{
-		this->close();
-	}
+IOCP::IOCP(DWORD concurrentThreads) : m_handle(NULL) {
+  if (concurrentThreads > 0) {
+    this->create(concurrentThreads);
+  }
+}
 
-	IOCP::operator HANDLE() const
-	{
-		return this->m_handle;
-	}
+IOCP::~IOCP() { this->close(); }
 
-	IOCP::operator bool() const
-	{
-		return (NULL != this->m_handle);
-	}
+IOCP::operator HANDLE() const { return this->m_handle; }
 
-	bool IOCP::create(DWORD numberOfConcurrentThreads)
-	{
-		if (numberOfConcurrentThreads <= 0)
-			return false;
+IOCP::operator bool() const { return (NULL != this->m_handle); }
 
-		this->close();
+bool IOCP::create(DWORD numberOfConcurrentThreads) {
+  if (numberOfConcurrentThreads <= 0) return false;
 
-		this->m_handle = CreateIoCompletionPort(
-			INVALID_HANDLE_VALUE, NULL, NULL, numberOfConcurrentThreads);
-		if ((NULL == this->m_handle))
-			return false;
+  this->close();
 
-		this->m_workThreads = std::vector<std::thread>(numberOfConcurrentThreads);
-		for (DWORD i = 0; i < numberOfConcurrentThreads; ++i) {
-			this->m_workThreads[i] = thread([this] {
-				while (true) {
-					DWORD numberOfBytesTransferred = 0;
-					ULONG_PTR completionKey = 0;
-					LPOVERLAPPED lpOverlapped = nullptr;
+  this->m_handle = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, NULL,
+                                          numberOfConcurrentThreads);
+  if ((NULL == this->m_handle)) return false;
 
-					if (!this->getQueuedCompletionStatus(&numberOfBytesTransferred,
-						&completionKey, &lpOverlapped, -1)) {
-						continue;
-					}
+  this->m_workThreads = std::vector<std::thread>(numberOfConcurrentThreads);
+  for (DWORD i = 0; i < numberOfConcurrentThreads; ++i) {
+    this->m_workThreads[i] = thread([this] {
+      while (true) {
+        DWORD numberOfBytesTransferred = 0;
+        ULONG_PTR completionKey = 0;
+        LPOVERLAPPED lpOverlapped = nullptr;
 
-					if ((0 == completionKey && nullptr == lpOverlapped)) break;
+        if (!this->getQueuedCompletionStatus(
+                &numberOfBytesTransferred, &completionKey, &lpOverlapped, -1)) {
+          continue;
+        }
 
-					PIocpContext context = (PIocpContext)lpOverlapped;
+        if ((0 == completionKey && nullptr == lpOverlapped)) break;
 
-					IocpWorkThreadFunc func;
-					{
-						lock_guard<mutex> lk(this->m_mutex);
-						auto it = this->m_iocpWorkThreadFuncs.find(context->handle);
-						if (it != this->m_iocpWorkThreadFuncs.end())
-							func = it->second;
-					}
-					if(func)
-						func(&numberOfBytesTransferred, &completionKey, &lpOverlapped);
-				}
-				});
-		}
+        PIocpContext context = (PIocpContext)lpOverlapped;
 
-		return (NULL != this->m_handle);
-	}
+        IocpWorkThreadFunc func;
+        {
+          lock_guard<mutex> lk(this->m_mutex);
+          auto it = this->m_iocpWorkThreadFuncs.find(context->handle);
+          if (it != this->m_iocpWorkThreadFuncs.end()) func = it->second;
+        }
+        if (func)
+          func(&numberOfBytesTransferred, &completionKey, &lpOverlapped);
+      }
+    });
+  }
 
-	bool IOCP::connect(HANDLE fileHandle, ULONG_PTR completionKey, IocpWorkThreadFunc iocpWorkThreadFunc)
-	{
-		HANDLE hCp = CreateIoCompletionPort(
-			fileHandle,
-			this->m_handle,
-			completionKey,
-			0);
-		if (hCp != this->m_handle) return false;
-		lock_guard<mutex> lk(this->m_mutex);
-		// cout << "connect: " << (SOCKET)fileHandle << endl;
-		this->m_iocpWorkThreadFuncs.insert(make_pair(fileHandle, iocpWorkThreadFunc));
-		return true;
-	}
+  return (NULL != this->m_handle);
+}
 
-	bool IOCP::disconnect(HANDLE fileHandle){
-		lock_guard<mutex> lk(this->m_mutex);
-		// cout << "disconnect: " << (SOCKET)fileHandle << endl;
-		this->m_iocpWorkThreadFuncs.erase(fileHandle);
-		return true;
-	}
+bool IOCP::connect(HANDLE fileHandle, ULONG_PTR completionKey,
+                   IocpWorkThreadFunc iocpWorkThreadFunc) {
+  HANDLE hCp =
+      CreateIoCompletionPort(fileHandle, this->m_handle, completionKey, 0);
+  if (hCp != this->m_handle) return false;
+  lock_guard<mutex> lk(this->m_mutex);
+  // cout << "connect: " << (SOCKET)fileHandle << endl;
+  this->m_iocpWorkThreadFuncs.insert(make_pair(fileHandle, iocpWorkThreadFunc));
+  return true;
+}
 
-	void IOCP::close()
-	{
-		if (NULL == this->m_handle)
-			return;
+bool IOCP::disconnect(HANDLE fileHandle) {
+  lock_guard<mutex> lk(this->m_mutex);
+  // cout << "disconnect: " << (SOCKET)fileHandle << endl;
+  this->m_iocpWorkThreadFuncs.erase(fileHandle);
+  return true;
+}
 
-		for (auto& t : this->m_workThreads) {
-			PostQueuedCompletionStatus(this->m_handle, 0, 0, nullptr);
-		};
+void IOCP::close() {
+  if (NULL == this->m_handle) return;
 
-		for (auto& t : this->m_workThreads) {
-			t.join();
-		};
+  for (auto& t : this->m_workThreads) {
+    PostQueuedCompletionStatus(this->m_handle, 0, 0, nullptr);
+  };
 
-		CloseHandle(this->m_handle);
-		this->m_handle = NULL;
-	}
+  for (auto& t : this->m_workThreads) {
+    t.join();
+  };
 
-	bool IOCP::getQueuedCompletionStatus(
-		__out LPDWORD lpNumberOfBytesTransferred,
-		__out PULONG_PTR lpCompletionKey,
-		__out LPOVERLAPPED* lpOverlapped,
-		__in DWORD dwMilliseconds)
-	{
-		return (TRUE == ::GetQueuedCompletionStatus(this->m_handle,
-			lpNumberOfBytesTransferred,
-			lpCompletionKey,
-			lpOverlapped,
-			dwMilliseconds));
-	}
+  CloseHandle(this->m_handle);
+  this->m_handle = NULL;
+}
 
+bool IOCP::getQueuedCompletionStatus(__out LPDWORD lpNumberOfBytesTransferred,
+                                     __out PULONG_PTR lpCompletionKey,
+                                     __out LPOVERLAPPED* lpOverlapped,
+                                     __in DWORD dwMilliseconds) {
+  return (TRUE == ::GetQueuedCompletionStatus(
+                      this->m_handle, lpNumberOfBytesTransferred,
+                      lpCompletionKey, lpOverlapped, dwMilliseconds));
+}
+
+bool IOCP::postQueuedCompletionStatus(DWORD numberOfBytesTransferred,
+                                      ULONG_PTR completionKey,
+                                      LPOVERLAPPED lpOverlapped) {
+  return (TRUE == PostQueuedCompletionStatus(this->m_handle,
+                                             numberOfBytesTransferred,
+                                             completionKey, lpOverlapped));
+}
 
 NS_FF_END

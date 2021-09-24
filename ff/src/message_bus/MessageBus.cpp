@@ -1,5 +1,6 @@
 #include <ff/Bind.h>
 #include <ff/MessageBus.h>
+#include <ff/Tick.h>
 
 #include <atomic>
 #include <cstring>
@@ -180,8 +181,7 @@ void PkgPromise::set(MsgBusPackagePtr pkg) {
 #else
 
 PkgPromise::PkgPromise(uint32_t id, PkgPromiseRemoveFunc func)
-    : m_id(id), m_func(func) {
-}
+    : m_id(id), m_func(func) {}
 
 PkgPromise::~PkgPromise() {
   this->lock();
@@ -190,9 +190,9 @@ PkgPromise::~PkgPromise() {
 }
 
 MsgBusPackagePtr PkgPromise::get(uint32_t ms) {
-
   std::unique_lock<mutex> lk(this->m_mutex);
-  if(this->m_cond.wait_for(lk, chrono::milliseconds(ms), [this](){ return (nullptr != this->m_pkg); })){
+  if (this->m_cond.wait_for(lk, chrono::milliseconds(ms),
+                            [this]() { return (nullptr != this->m_pkg); })) {
     return this->m_pkg;
   }
   return nullptr;
@@ -320,7 +320,8 @@ void MessageBusServer::removeClient(const TcpConnectionPtr& client) {
  */
 
 MessageBusClient::MessageBusClient()
-    : m_conn(TcpConnection::CreateInstance()), m_connected(false),
+    : m_conn(TcpConnection::CreateInstance()),
+      m_connected(false),
       m_stoped(true) {
   this->m_conn->onData(Bind(&MessageBusClient::onData, this))
       .onClose(Bind(&MessageBusClient::onClose, this));
@@ -328,7 +329,8 @@ MessageBusClient::MessageBusClient()
 
 MessageBusClient::MessageBusClient(uint32_t clientId)
     : m_clientId(clientId),
-      m_conn(TcpConnection::CreateInstance()), m_connected(false),
+      m_conn(TcpConnection::CreateInstance()),
+      m_connected(false),
       m_stoped(true) {
   this->m_conn->onData(Bind(&MessageBusClient::onData, this))
       .onClose(Bind(&MessageBusClient::onClose, this));
@@ -338,18 +340,28 @@ uint32_t MessageBusClient::clientId() const { return this->m_clientId; }
 
 void MessageBusClient::clientId(uint32_t id) { this->m_clientId = id; }
 
-bool MessageBusClient::isConnected() const{
-  return this->m_connected;
-}
+bool MessageBusClient::isConnected() const { return this->m_connected; }
 
 bool MessageBusClient::start(uint16_t serverPort, const std::string& serverHost,
                              uint16_t localPort, const std::string& localHost) {
   if (!this->m_stoped) return true;
   this->m_stoped = false;
   thread([this, serverPort, serverHost, localPort, localHost]() {
+    Tick hbTick;
     while (!this->m_stoped) {
       if (this->m_conn->getSocket().isConnected()) {
         this_thread::sleep_for(chrono::milliseconds(1000));
+        if (hbTick.tock() >= 6000) {
+          MsgBusPkgHeader hdr;
+          hdr.code(MsgCode::HeartBeat);
+          hdr.from(this->m_clientId);
+          hdr.options(MsgOpt::Req);
+          MsgBusPackage pkg;
+          pkg.generate(hdr);
+          this->send(pkg);
+
+          hbTick.tick();
+        }
         continue;
       }
 
@@ -361,7 +373,7 @@ bool MessageBusClient::start(uint16_t serverPort, const std::string& serverHost,
       }
       this->m_connected = true;
       this->onConnected();
-      this->m_cond.wait(lk);
+      this->m_cond.wait_for(lk, chrono::milliseconds(10 * 1000));
     }
   }).detach();
 
@@ -380,7 +392,10 @@ void MessageBusClient::send(const MsgBusPackage& pkg) {
   this->m_conn->send(pkg.getData(), pkg.getSize());
 }
 
-void MessageBusClient::onConnected() { this->sendRegisterInfo(); }
+void MessageBusClient::onConnected() {
+  cout << "msg bus connected" << endl;
+  this->sendRegisterInfo();
+}
 
 void MessageBusClient::onData(const uint8_t* data, uint32_t size,
                               const TcpConnectionPtr& client) {
@@ -405,6 +420,7 @@ void MessageBusClient::onData(const uint8_t* data, uint32_t size,
 }
 
 void MessageBusClient::onClose(const TcpConnectionPtr& client) {
+  cout << "msg bus closed" << endl;
   unique_lock<mutex> lk(this->m_mutex);
   this->m_connected = false;
   this->m_cond.notify_one();
@@ -485,7 +501,7 @@ void MessageBusClient::handleRsp(const MsgBusPackage& pkg) {
   lock_guard<mutex> lk(this->m_mutexPkgId2Promise);
   auto it = this->m_pkgId2Promise.find(pkgId);
   if (it == this->m_pkgId2Promise.end()) return;
-  
+
   (*it->second)->set(make_shared<MsgBusPackage>(pkg));
   this->m_pkgId2Promise.erase(pkgId);
 }

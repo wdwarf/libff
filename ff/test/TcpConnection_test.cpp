@@ -7,6 +7,7 @@
 
 #include <ff/Buffer.h>
 #include <ff/String.h>
+#include <ff/Thread.h>
 #include <ff/TcpConnection.h>
 #include <ff/Tick.h>
 #include <gtest/gtest.h>
@@ -80,11 +81,17 @@ TEST(TcpConnectionTest, TcpConnectionTest4) {
                                               const TcpConnectionPtr& conn) {
     dataRecved = true;
     LOGD << "server rsp data: " << Buffer::ToHexString(data, len) << endl;
-    clientPtr->send("exit", 4);
+    // clientPtr->send("exit", 4);
   });
   clientPtr->onClose(
       [](const TcpConnectionPtr& connection) { LOGD << "disconnected."; });
   clientPtr->send("1234", 4);
+  Thread::Sleep(100);
+  clientPtr->send("5678", 4);
+  Thread::Sleep(100);
+  clientPtr->send("90ab", 4);
+  Thread::Sleep(1000);
+  clientPtr->send("exit", 4);
 
   cond.wait_for(lk, seconds(5), [&] { return stoped; });
 

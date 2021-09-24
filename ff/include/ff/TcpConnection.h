@@ -76,6 +76,7 @@ private:
 	void workThreadFunc(LPDWORD lpNumberOfBytesTransferred,
 		PULONG_PTR lpCompletionKey,
 		LPOVERLAPPED* lpOverlapped);
+	bool postCloseEvent();
 	IOCPPtr m_iocp;
 #else
 	EPoll* m_ep;

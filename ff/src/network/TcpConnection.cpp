@@ -76,18 +76,7 @@ void TcpConnection::workThreadFunc(LPDWORD lpNumberOfBytesTransferred,
   switch (context->iocpEevent) {
     case IocpEvent::Recv: {
       if (0 == *lpNumberOfBytesTransferred) {
-        this->m_iocp->disconnect((HANDLE)this->m_socket.getHandle());
-
-        auto pThis = this->shared_from_this();
-        OnCloseFunc func;
-        {
-          lock_guard<mutex> lk(this->m_mutex);
-          func = this->m_onCloseFunc;
-        }
-        if (func) func(pThis);
-
-        // this->m_socket.close();
-
+				this->postCloseEvent();
         break;
       }
 
@@ -108,24 +97,32 @@ void TcpConnection::workThreadFunc(LPDWORD lpNumberOfBytesTransferred,
       if (SOCKET_ERROR == ret) {
         auto error = WSAGetLastError();
         if (WSA_IO_PENDING != error) {
-          // cout << "WSAGetLastError: " << error << ", socket: " <<
-          // this->m_socket.getHandle() << ", " <<
-          // this->m_socket.getRemoteAddress() << endl;
-          this->m_iocp->disconnect((HANDLE)this->m_socket.getHandle());
+          // cout << "WSAGetLastError: " << error
+          //      << ", socket: " << this->m_socket.getHandle() << ", "
+          //      << this->m_socket.getRemoteAddress() << endl;
 
-          OnCloseFunc func;
-          {
-            lock_guard<mutex> lk(this->m_mutex);
-            func = this->m_onCloseFunc;
-          }
-          if (func) func(this->shared_from_this());
-          // this->m_socket.close();
+					this->postCloseEvent();
         }
       }
 
       break;
     }
+
     case IocpEvent::Send:
+      delete context;
+      break;
+
+    case IocpEvent::Close:
+      delete context;
+      this->m_iocp->disconnect((HANDLE)this->m_socket.getHandle());
+
+      OnCloseFunc func;
+      {
+        lock_guard<mutex> lk(this->m_mutex);
+        func = this->m_onCloseFunc;
+      }
+      if (func) func(this->shared_from_this());
+      this->m_socket.close();
       break;
   }
 }
@@ -148,8 +145,6 @@ bool TcpConnection::listen(uint16_t port, const std::string& ip,
   }
 
   this->m_isServer = true;
-
-  // this->m_socket.setBlocking(SockBlockingType::Blocking);
 
   /** TODO start accept thread */
   this->m_acceptThread = thread([this] {
@@ -241,14 +236,42 @@ bool TcpConnection::connect(uint16_t remotePort, const std::string& remoteHost,
 void TcpConnection::close() {
   // this->m_iocp->disconnect((HANDLE)this->m_socket.getHandle());
   this->m_socket.shutdown();
-  if(this->m_isServer) this->m_socket.close();
+  if (this->m_isServer) this->m_socket.close();
 }
 
 Socket& TcpConnection::getSocket() { return this->m_socket; }
 
 void TcpConnection::send(const void* buf, uint32_t bufSize) {
   if (this->m_isServer) return;
-  this->m_socket.send(buf, bufSize);
+  // this->m_socket.send(buf, bufSize);
+  IocpContext* context = new IocpContext();
+  memset(context, 0, sizeof(IocpContext));
+  context->iocpEevent = IocpEvent::Send;
+  context->handle = (HANDLE)this->m_socket.getHandle();
+  context->buffer.buf = new char[bufSize];
+  context->buffer.len = bufSize;
+  memcpy(context->buffer.buf, buf, bufSize);
+  DWORD dwOfBytesSent = 0;
+  int re = WSASend(this->m_socket.getHandle(), &context->buffer, 1,
+                   &dwOfBytesSent, 0, context, NULL);
+  // cout << "send ret:" << re << endl;
+  if (SOCKET_ERROR == re && WSAGetLastError() != WSA_IO_PENDING) {
+    // cout << "send failed" << endl;
+    // this->m_socket.shutdown();
+    // this->m_socket.close();
+		this->postCloseEvent();
+		
+    delete context;
+  }
+}
+
+bool TcpConnection::postCloseEvent(){
+	if (this->m_isServer) return false;
+	IocpContext* context = new IocpContext();
+  memset(context, 0, sizeof(IocpContext));
+  context->iocpEevent = IocpEvent::Close;
+  context->handle = (HANDLE)this->m_socket.getHandle();
+	return this->m_iocp->postQueuedCompletionStatus(0, 0, context);
 }
 
 TcpConnection& TcpConnection::onAccept(const OnAcceptFunc& func) {
