@@ -470,7 +470,7 @@ PkgPromisePtr MessageBusClient::req(uint32_t msgId, uint32_t target,
   auto id = hdr.id();
   PkgPromisePtr promise(make_shared<PkgPromise>(
       id, Bind(&MessageBusClient::removePromise, this)));
-  this->m_pkgId2Promise.insert(make_pair(id, &promise));
+  this->m_pkgId2Promise.insert(make_pair(id, promise.get()));
 
   this->send(pkg);
   return promise;
@@ -502,7 +502,7 @@ void MessageBusClient::handleRsp(const MsgBusPackage& pkg) {
   auto it = this->m_pkgId2Promise.find(pkgId);
   if (it == this->m_pkgId2Promise.end()) return;
 
-  (*it->second)->set(make_shared<MsgBusPackage>(pkg));
+  (it->second)->set(make_shared<MsgBusPackage>(pkg));
   this->m_pkgId2Promise.erase(pkgId);
 }
 NS_FF_END

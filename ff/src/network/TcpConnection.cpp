@@ -17,7 +17,7 @@
 
 using namespace std;
 
-#define RD_BUF_SIZE 4096
+#define RD_BUF_SIZE 8192
 
 NS_FF_BEG
 
@@ -51,6 +51,7 @@ TcpConnectionPtr TcpConnection::CreateInstance(IOCPPtr iocp) {
 }
 
 TcpConnection::~TcpConnection() {
+  this->resetCallbackFunctions();
   this->m_socket.close();
   if (this->m_isServer) {
     this->m_acceptThread.join();
@@ -121,7 +122,8 @@ void TcpConnection::workThreadFunc(LPDWORD lpNumberOfBytesTransferred,
         lock_guard<mutex> lk(this->m_mutex);
         func = this->m_onCloseFunc;
       }
-      if (func) func(this->shared_from_this());
+      auto pThis = this->shared_from_this();
+      if (func) func(pThis);
       this->m_socket.close();
       break;
   }

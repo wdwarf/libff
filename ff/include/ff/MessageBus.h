@@ -193,7 +193,7 @@ class MessageBusClient {
   std::atomic_bool m_stoped;
   std::mutex m_mutexMsgId2Func;
   std::map<uint32_t, MsgBusReqFunc> msgId2Func;
-  std::map<uint32_t, PkgPromisePtr*> m_pkgId2Promise;
+  std::map<uint32_t, PkgPromise*> m_pkgId2Promise;
   std::mutex m_mutexPkgId2Promise;
 
   void removePromise(uint32_t pkgId);

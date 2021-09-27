@@ -38,7 +38,10 @@ ELSEIF (WIN32)
 		third_party/googletest/googletest/include
 	)
 	
+	if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
+	else()
 	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
+	endif()
 
 	set(EXTRA_LIBS
 		ws2_32
