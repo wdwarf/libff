@@ -45,6 +45,10 @@ NS_FF_BEG
 	typedef int SocketFd;
 #endif
 
+#ifndef INVALID_SOCKET
+#define INVALID_SOCKET (-1)
+#endif
+
 #if 0
 enum class SocketType {
 	Stream = SOCK_STREAM,

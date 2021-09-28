@@ -16,46 +16,47 @@ NS_FF_BEG
 class Buffer::BufferImpl {
 public:
 	BufferImpl();
-	BufferImpl(unsigned int initSize);
-	BufferImpl(const void* data, unsigned int size);
+	BufferImpl(uint32_t initSize);
+	BufferImpl(const void* data, uint32_t size);
 	BufferImpl(const BufferImpl& buffer);
 	virtual ~BufferImpl();
 
 	BufferImpl& operator=(const BufferImpl& buffer);
 	BufferImpl operator+(const BufferImpl& buffer) const;
-	unsigned char& at(unsigned int index);
-	const unsigned char& at(unsigned int index) const;
+	unsigned char& at(uint32_t index);
+	const unsigned char& at(uint32_t index) const;
 
-	void attach(void* data, unsigned int size);
+	void attach(void* data, uint32_t size);
 
-	void append(const void* data, unsigned int size);
+	void append(const void* data, uint32_t size);
 	void append(const BufferImpl& buffer);
 
-	void setData(const void* data, unsigned int size);
+	void setData(const void* data, uint32_t size);
 	unsigned char* getData() const;
-	unsigned int getSize() const;
-	void resize(unsigned int size);
+	uint32_t getSize() const;
+	void resize(uint32_t size);
 	void clear();
 	bool isEmpty() const;
 	void reverse();
-	void alloc(unsigned int size);
-	unsigned int getCapacity() const;
+	void alloc(uint32_t size);
+	uint32_t getCapacity() const;
+	void setCapacity(uint32_t capacity);
 	void zero();
 
 	String toString() const;
 	String toHexString();
 	String toBinaryString();
 	void fromHexString(const String& hexStr);
-	int read(void* buf, unsigned int size);
+	int read(void* buf, uint32_t size);
 	void resetReadPos();
 
 	static void ReverseBytes(void* buf, int size);
 	static String ToHexString(const void* buf, int size);
 private:
 	unsigned char* data;
-	unsigned int size;
-	unsigned int capacity;
-	unsigned int readPos;
+	uint32_t size;
+	uint32_t capacity;
+	uint32_t readPos;
 };
 
 NS_FF_END

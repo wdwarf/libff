@@ -74,6 +74,8 @@ void TcpConnection::workThreadFunc(LPDWORD lpNumberOfBytesTransferred,
   PIocpContext context = (PIocpContext)*lpOverlapped;
   if (nullptr == context) return;
 
+  auto pThis = this->shared_from_this();
+
   switch (context->iocpEevent) {
     case IocpEvent::Recv: {
       if (0 == *lpNumberOfBytesTransferred) {
@@ -91,16 +93,16 @@ void TcpConnection::workThreadFunc(LPDWORD lpNumberOfBytesTransferred,
       }
       if (func)
         func((const uint8_t*)context->buffer.buf, *lpNumberOfBytesTransferred,
-             this->shared_from_this());
+             pThis);
 
       int ret = WSARecv(this->m_socket.getHandle(), &m_context.buffer, 1,
                         &numToRecvd, &flags, &m_context, NULL);
       if (SOCKET_ERROR == ret) {
         auto error = WSAGetLastError();
         if (WSA_IO_PENDING != error) {
-          // cout << "WSAGetLastError: " << error
-          //      << ", socket: " << this->m_socket.getHandle() << ", "
-          //      << this->m_socket.getRemoteAddress() << endl;
+           cout << __func__ << " WSAGetLastError: " << error
+                << ", socket: " << this->m_socket.getHandle() << ", "
+                << this->m_socket.getRemoteAddress() << endl;
 
 					this->postCloseEvent();
         }
@@ -122,7 +124,7 @@ void TcpConnection::workThreadFunc(LPDWORD lpNumberOfBytesTransferred,
         lock_guard<mutex> lk(this->m_mutex);
         func = this->m_onCloseFunc;
       }
-      auto pThis = this->shared_from_this();
+
       if (func) func(pThis);
       this->m_socket.close();
       break;
@@ -150,10 +152,11 @@ bool TcpConnection::listen(uint16_t port, const std::string& ip,
 
   /** TODO start accept thread */
   this->m_acceptThread = thread([this] {
+    auto pThis = this->shared_from_this();
     SockAddr addr;
     while (this->m_socket.getHandle() > 0) {
       Socket client = this->m_socket.accept(addr);
-      if (client.getHandle() <= 0 || this->m_socket.getHandle() <= 0) break;
+      if (client.getHandle() <= 0 || INVALID_SOCKET == client.getHandle() || this->m_socket.getHandle() <= 0) break;
       TcpConnectionPtr tcpSock =
           TcpConnectionPtr(new TcpConnection(move(client), this->m_iocp));
 
@@ -165,12 +168,6 @@ bool TcpConnection::listen(uint16_t port, const std::string& ip,
       if (func) func(tcpSock);
     }
 
-    TcpConnectionPtr pThis;
-    try {
-      pThis = this->shared_from_this();
-    } catch (std::exception& e) {
-      cout << e.what() << endl;
-    }
     if (this->m_onCloseFunc) this->m_onCloseFunc(pThis);
   });
 
@@ -298,6 +295,16 @@ TcpConnection& TcpConnection::onData(const OnDataFunc& func) {
 
   int ret = WSARecv(this->m_socket.getHandle(), &m_context.buffer, 1,
                     &numToRecvd, &flags, &m_context, NULL);
+  if (SOCKET_ERROR == ret) {
+      auto error = WSAGetLastError();
+      if (WSA_IO_PENDING != error) {
+           cout << __func__ << " WSAGetLastError: " << error
+                << ", socket: " << this->m_socket.getHandle() << ", "
+                << this->m_socket.getRemoteAddress() << endl;
+
+          this->postCloseEvent();
+      }
+  }
 
   return *this;
 }

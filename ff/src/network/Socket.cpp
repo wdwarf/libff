@@ -177,7 +177,7 @@ in6_addr Socket::Host2IpV6(const std::string& host) {
 }
 
 Socket::Socket()
-    : m_socketFd(0),
+    : m_socketFd(INVALID_SOCKET),
       m_useSelect(true),
       m_ipVer(IpVersion::Unknown),
       m_blockingType(SockBlockingType::Blocking) {
@@ -199,7 +199,7 @@ Socket::Socket(Socket&& sock) {
   this->m_useSelect = sock.m_useSelect;
   this->m_ipVer = sock.m_ipVer;
   this->m_blockingType = sock.m_blockingType;
-  sock.m_socketFd = 0;
+  sock.m_socketFd = INVALID_SOCKET;
 }
 
 Socket::~Socket() { this->close(); }
@@ -209,23 +209,23 @@ Socket& Socket::attach(int m_socketFd) {
   this->m_socketFd = m_socketFd;
   this->m_blockingType = this->isNonBlocking() ? SockBlockingType::NonBlocking
                                                : SockBlockingType::Blocking;
-	this->m_ipVer = this->getIpVersion();
+  this->m_ipVer = this->getIpVersion();
   return *this;
 }
 
 SocketFd Socket::dettach() {
   SocketFd oldSock = this->m_socketFd;
-  this->m_socketFd = 0;
+  this->m_socketFd = INVALID_SOCKET;
   return oldSock;
 }
 
 bool Socket::create(int af, int style, int protocol) {
-  if (this->m_socketFd > 0) {
+  if (INVALID_SOCKET != this->m_socketFd) {
     this->close();
   }
   this->m_socketFd = socket(af, style, protocol);
 
-  if (this->m_socketFd <= 0) {
+  if (INVALID_SOCKET == this->m_socketFd) {
     return false;
   }
 
@@ -238,12 +238,12 @@ bool Socket::create(int af, int style, int protocol) {
   }
 #endif
 
-	Socket::SetBlocking(this->m_socketFd, this->m_blockingType);
+  Socket::SetBlocking(this->m_socketFd, this->m_blockingType);
   return true;
 }
 
 Socket& Socket::setBlocking(SockBlockingType blockingType) {
-  if (this->m_socketFd > 0) {
+  if (INVALID_SOCKET != this->m_socketFd) {
     Socket::SetBlocking(this->m_socketFd, blockingType);
   }
   this->m_blockingType = blockingType;
@@ -251,20 +251,21 @@ Socket& Socket::setBlocking(SockBlockingType blockingType) {
 }
 
 bool Socket::isNonBlocking() const {
-  return (this->m_socketFd > 0 && Socket::IsNonBlocking(this->m_socketFd));
+  return (INVALID_SOCKET != this->m_socketFd &&
+          Socket::IsNonBlocking(this->m_socketFd));
 }
 
 SocketFd Socket::getHandle() const { return this->m_socketFd; }
 
 Socket& Socket::shutdown(int type) {
-  if (this->m_socketFd > 0) {
+  if (INVALID_SOCKET != this->m_socketFd) {
     ::shutdown(this->m_socketFd, type);
   }
   return *this;
 }
 
 bool Socket::close() {
-  if (this->m_socketFd <= 0) return true;
+  if (INVALID_SOCKET == this->m_socketFd) return true;
 
   int re = 0;
   this->shutdown();
@@ -273,7 +274,7 @@ bool Socket::close() {
 #else
   re = ::close(this->m_socketFd);
 #endif
-  this->m_socketFd = 0;
+  this->m_socketFd = INVALID_SOCKET;
 
   return (0 == re);
 }
@@ -291,7 +292,7 @@ bool Socket::createUdp(IpVersion ver) {
 }
 
 bool Socket::connect(const std::string& host, uint16_t port, int msTimeout) {
-  if (this->m_socketFd <= 0) {
+  if (INVALID_SOCKET == this->m_socketFd) {
     return false;
   }
 
@@ -335,7 +336,7 @@ bool Socket::connect(const std::string& host, uint16_t port, int msTimeout) {
 }
 
 bool Socket::bind(uint16_t port, const std::string& ip) {
-  if (this->m_socketFd <= 0) return false;
+  if (INVALID_SOCKET == this->m_socketFd) return false;
 
   const sockaddr* pAddr = nullptr;
   socklen_t addrSize = 0;
@@ -396,7 +397,7 @@ bool Socket::joinMulticastGroup(const std::string& ip) {
 bool Socket::listen(int n) { return (0 == ::listen(this->m_socketFd, n)); }
 
 Socket Socket::accept(sockaddr* addr, socklen_t* addrSize) {
-  if (this->m_socketFd <= 0) return 0;
+  if (INVALID_SOCKET == this->m_socketFd) return 0;
 
   return ::accept(this->m_socketFd, addr, addrSize);
 }
@@ -425,7 +426,7 @@ Socket Socket::accept(sockaddr_in6& addr) {
 }
 
 int Socket::send(const void* buf, socklen_t bufLen, int timeoutMs) {
-  if (this->m_socketFd <= 0) return -1;
+  if (INVALID_SOCKET == this->m_socketFd) return -1;
 
   if (this->m_useSelect) {
     fd_set fs_send;
@@ -443,7 +444,7 @@ int Socket::send(const void* buf, socklen_t bufLen, int timeoutMs) {
 }
 
 int Socket::read(void* buf, socklen_t readBytes, int timeoutMs) {
-  if (this->m_socketFd <= 0) return -1;
+  if (INVALID_SOCKET == this->m_socketFd) return -1;
   int re = -1;
 
   if (this->m_useSelect) {
@@ -471,7 +472,7 @@ int Socket::read(void* buf, socklen_t readBytes, int timeoutMs) {
 
 int Socket::sendTo(const char* buf, socklen_t bufLen, const sockaddr* addr,
                    size_t addrSize) {
-  if (this->m_socketFd <= 0) return -1;
+  if (INVALID_SOCKET == this->m_socketFd) return -1;
 
   if (this->m_useSelect) {
     fd_set fs_send;
@@ -491,7 +492,7 @@ int Socket::sendTo(const char* buf, socklen_t bufLen, const sockaddr* addr,
 bool Socket::isConnected() const { return (this->getRemotePort() > 0); }
 
 string Socket::getLocalAddress() const {
-  if (this->m_socketFd <= 0) return "";
+  if (INVALID_SOCKET == this->m_socketFd) return "";
   sockaddr_in addr;
   memset(&addr, 0, sizeof(addr));
   socklen_t addrLen = sizeof(addr);
@@ -501,7 +502,7 @@ string Socket::getLocalAddress() const {
 }
 
 int Socket::getLocalPort() const {
-  if (this->m_socketFd <= 0) return -1;
+  if (INVALID_SOCKET == this->m_socketFd) return -1;
   sockaddr_in addr;
   memset(&addr, 0, sizeof(addr));
   socklen_t addrLen = sizeof(addr);
@@ -511,7 +512,7 @@ int Socket::getLocalPort() const {
 }
 
 string Socket::getRemoteAddress() const {
-  if (this->m_socketFd <= 0) return "";
+  if (INVALID_SOCKET == this->m_socketFd) return "";
   sockaddr_in addr;
   memset(&addr, 0, sizeof(addr));
   socklen_t addrLen = sizeof(addr);
@@ -521,7 +522,7 @@ string Socket::getRemoteAddress() const {
 }
 
 int Socket::getRemotePort() const {
-  if (this->m_socketFd <= 0) return -1;
+  if (INVALID_SOCKET == this->m_socketFd) return -1;
   sockaddr_in addr;
   memset(&addr, 0, sizeof(addr));
   socklen_t addrLen = sizeof(addr);
@@ -531,7 +532,7 @@ int Socket::getRemotePort() const {
 }
 
 SockType Socket::getSocketType() const {
-  if (this->m_socketFd <= 0) {
+  if (INVALID_SOCKET == this->m_socketFd) {
     return SockType(-1);
   }
 #if defined(WIN32) || defined(__MINGW32__)
@@ -545,7 +546,7 @@ SockType Socket::getSocketType() const {
 }
 
 IpVersion Socket::getIpVersion() const {
-  if (this->m_socketFd <= 0) return IpVersion::Unknown;
+  if (INVALID_SOCKET == this->m_socketFd) return IpVersion::Unknown;
 
   sockaddr_in addr;
   socklen_t addrLen = sizeof(addr);
@@ -583,7 +584,7 @@ int Socket::sendTo(const char* buf, socklen_t bufLen, const string& host,
 
 int Socket::recvFrom(char* buf, socklen_t readBytes, sockaddr_in& addr,
                      int timeoutMs) {
-  if (this->m_socketFd <= 0) return -1;
+  if (INVALID_SOCKET == this->m_socketFd) return -1;
 
   if (this->m_useSelect) {
     fd_set fs_read;

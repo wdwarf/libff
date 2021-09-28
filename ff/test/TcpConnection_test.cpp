@@ -1026,7 +1026,6 @@ const string constText =
     "computer can understand and follow.";
 
 TEST(TcpConnectionTest, TcpConnectionTest) {
-  do {
     TcpConnectionPtr svr = TcpConnection::CreateInstance();
 
     set<TcpConnectionPtr> clients;
@@ -1036,28 +1035,44 @@ TEST(TcpConnectionTest, TcpConnectionTest) {
     atomic_int acceptCnt = 0;
 
     svr->onAccept([&](const TcpConnectionPtr& tcpSock) {
-      lock_guard<mutex> lk(m);
-      ++acceptCnt;
-      clients.insert(tcpSock);
-      BufferPtr buf(new Buffer());
+        if (!tcpSock) return;
+        lock_guard<mutex> lk(m);
+        ++acceptCnt;
+        clients.insert(tcpSock);
+        BufferPtr buf(new Buffer());
+        buf->setCapacity(3 * 1024 * 1024);
+
+#if 1
+        tcpSock->onClose(
+            [&m, &svr, &clients, &buffers, buf](const TcpConnectionPtr& conn) {
+                // LOGD << "tcp client closed";
+                // svr.stop();
+                lock_guard<mutex> lk(m);
+                buffers.push_back(buf);
+                LOGD << "clientsNow: " << clients.size() << ", buffers: " << buffers.size();
+                clients.erase(conn);
+            });
+#endif
+
+#if 1
+        
       // LOGD << "tcp client connected. " <<
       // tcpSock->getSocket().getRemoteAddress()
       //      << ":" << tcpSock->getSocket().getRemotePort();
       // client = tcpSock;
+      
       tcpSock->onData([&svr, buf](const uint8_t* data, uint32_t len,
                                   const TcpConnectionPtr& conn) {
-        buf->append(data, len);
+              try {
+                  buf->append(data, len);
+              }
+              catch (std::exception& e) {
+                  LOGE << "err: " << e.what();
+              }
         // this_thread::sleep_for(chrono::milliseconds(5));
       });
-      tcpSock->onClose(
-          [&m, &svr, &clients, &buffers, buf](const TcpConnectionPtr& conn) {
-            // LOGD << "tcp client closed";
-            // svr.stop();
-            lock_guard<mutex> lk(m);
-            clients.erase(conn);
-            buffers.push_back(buf);
-            LOGD << "clients: " << clients.size() << ", buffers: " << buffers.size();
-          });
+#endif
+
     });
     svr->onClose([&](const TcpConnectionPtr& connection) {
       LOGD << "tcp server stoped";
@@ -1066,10 +1081,14 @@ TEST(TcpConnectionTest, TcpConnectionTest) {
     EXPECT_TRUE(svr->listen(5678, "", IpVersion::V4))
         << "server listen failed.";
 
-    const int cnt = 500;
+ do {
+     buffers.clear();
+     acceptCnt = 0;
+    const int cnt = 50;
     const uint32_t clientCnt = 110;
+    uint32_t currentClientCnt = clientCnt;
     for (int i = 0; i < clientCnt; ++i) {
-      thread([&m, cnt]() {
+      thread([&m, &currentClientCnt, cnt]() {
         Socket sock;
         sock.createTcp();
         sock.setBlocking(SockBlockingType::Blocking);
@@ -1091,13 +1110,14 @@ TEST(TcpConnectionTest, TcpConnectionTest) {
 
         sock.close();
         lock_guard<mutex> lk(m);
-        cout << "client closed" << endl;
+        --currentClientCnt;
+        LOGD << "client closed";
       }).detach();
     }
 
     Tick t;
-    while (buffers.size() != clientCnt && t.tock() < 100000) {
-      // LOGD << "clients: " << clients.size() << ", buffers: " << buffers.size();
+    while (buffers.size() != clientCnt && t.tock() < 300 * 1000) {
+      LOGD << "clients: " << clients.size() << ", buffers: " << buffers.size() << ", acceptCnt: " << acceptCnt.load() << ", currentClientCnt: " << currentClientCnt;
       this_thread::sleep_for(chrono::milliseconds(1000));
     }
 
@@ -1105,7 +1125,7 @@ TEST(TcpConnectionTest, TcpConnectionTest) {
 
     for (auto buf : buffers) {
       if (buf->getSize() != (constText.length() * cnt)) {
-        cout << buf->toString() << endl;
+        LOGE << "invalid size: " << buf->getSize() << ", " << (constText.length() * cnt);
       }
     }
 
@@ -1113,10 +1133,18 @@ TEST(TcpConnectionTest, TcpConnectionTest) {
 
     LOGD << "end....";
 
-    svr->close();
+    if(buffers.size() != clientCnt || !clients.empty()){
+      
+    LOGD << "clientsEnd: " << clients.size() << ", buffers: " << buffers.size();
+
+       break;
+    }
 
     this_thread::sleep_for(chrono::seconds(3));
-  } while (false);
+  } while (true);
+
+  svr->close();
+
 }
 
 TEST(TcpConnectionTest, TcpConnectionTest6) {

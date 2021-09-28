@@ -25,8 +25,8 @@ EXCEPTION_DEF(BufferException);
 class LIBFF_API Buffer {
 public:
 	Buffer();
-	Buffer(unsigned int initSize);
-	Buffer(const void* data, unsigned int size);
+	Buffer(uint32_t initSize);
+	Buffer(const void* data, uint32_t size);
 	Buffer(const Buffer& buffer);
 	Buffer(Buffer&& buffer);
 	virtual ~Buffer();
@@ -36,30 +36,31 @@ public:
 	Buffer& operator+=(const Buffer& buffer);
 	Buffer operator+(const Buffer& buffer) const;
 	bool operator==(const Buffer& buffer);
-	unsigned char& operator[](unsigned int index);
-	const unsigned char& operator[](unsigned int index) const;
+	unsigned char& operator[](uint32_t index);
+	const unsigned char& operator[](uint32_t index) const;
 
-	void attach(void* data, unsigned int size);
+	void attach(void* data, uint32_t size);
 
-	void append(const void* data, unsigned int size);
+	void append(const void* data, uint32_t size);
 	void append(const Buffer& buffer);
 
-	void setData(const void* data, unsigned int size);
+	void setData(const void* data, uint32_t size);
 	unsigned char* getData() const;
-	unsigned int getSize() const;
-	void resize(unsigned int size);
+	uint32_t getSize() const;
+	void resize(uint32_t size);
 	void clear();
 	bool isEmpty() const;
 	Buffer& reverse();
-	void alloc(unsigned int size);
-	unsigned int getCapacity() const;
+	void alloc(uint32_t size);
+	uint32_t getCapacity() const;
+	void setCapacity(uint32_t capacity);
 	void zero();
 
 	String toString() const;
 	String toHexString() const;
 	String toBinaryString() const;
 	void fromHexString(const String& hexStr);
-	int read(void* buf, unsigned int size);
+	int read(void* buf, uint32_t size);
 	void resetReadPos();
 
 	/** append */
@@ -70,7 +71,7 @@ public:
 	BUF_IN_OPERATOR_DEF(char);
 	BUF_IN_OPERATOR_DEF(unsigned long long);
 	BUF_IN_OPERATOR_DEF(unsigned long);
-	BUF_IN_OPERATOR_DEF(unsigned int);
+	BUF_IN_OPERATOR_DEF(uint32_t);
 	BUF_IN_OPERATOR_DEF(unsigned short);
 	BUF_IN_OPERATOR_DEF(unsigned char);
 	BUF_IN_OPERATOR_DEF(float);
@@ -84,7 +85,7 @@ public:
 	BUF_OUT_OPERATOR_DEF(char);
 	BUF_OUT_OPERATOR_DEF(unsigned long long);
 	BUF_OUT_OPERATOR_DEF(unsigned long);
-	BUF_OUT_OPERATOR_DEF(unsigned int);
+	BUF_OUT_OPERATOR_DEF(uint32_t);
 	BUF_OUT_OPERATOR_DEF(unsigned short);
 	BUF_OUT_OPERATOR_DEF(unsigned char);
 	BUF_OUT_OPERATOR_DEF(float);

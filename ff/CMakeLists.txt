@@ -29,8 +29,8 @@ ELSEIF (WIN32)
 
 	
 	link_directories(
-		${CMAKE_CURRENT_SOURCE_DIR}/third_party/googletest/build/lib/Release
-		${CMAKE_CURRENT_SOURCE_DIR}/third_party/curl-7.77.0/build/lib/Release
+		${CMAKE_CURRENT_SOURCE_DIR}/third_party/googletest/build/lib/${CMAKE_BUILD_TYPE}
+		${CMAKE_CURRENT_SOURCE_DIR}/third_party/curl-7.77.0/build/lib/${CMAKE_BUILD_TYPE}
 	)
 
 	include_directories(
@@ -38,17 +38,39 @@ ELSEIF (WIN32)
 		third_party/googletest/googletest/include
 	)
 	
-	if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
-	else()
-	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
-	endif()
-
 	set(EXTRA_LIBS
 		ws2_32
 		winmm
 		wldap32
-		libcurl
 	)
+
+	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
+	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd")
+	
+	MESSAGE(STATUS "CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}")
+	
+	if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
+
+	MESSAGE(STATUS "building ${CMAKE_BUILD_TYPE}")
+	
+	set(EXTRA_LIBS
+	${EXTRA_LIBS}
+		libcurl-d
+		gtestd
+  	gmockd
+	)
+
+	else()
+	
+	set(EXTRA_LIBS
+	${EXTRA_LIBS}
+		libcurl
+		gtest
+  	gmock
+	)
+
+	endif()
+
 ELSEIF (APPLE)
 	MESSAGE(STATUS "Now is Apple OS's.")
 ELSEIF (UNIX)
@@ -94,6 +116,9 @@ else()
 		set(EXTRA_LIBS
 			z
 			pthread
+			libcurl
+			gtest
+			gmock
 		)
 	endif()
 endif()
@@ -105,8 +130,8 @@ third_party/zlib-1.2.11/contrib/minizip/mztools.c
 third_party/zlib-1.2.11/contrib/minizip/ioapi.c
 )
 
-add_library(ff
-	${windows_files}
+set(lib_srcs
+${windows_files}
 	${jsoncpp_src}
 	${ZLIB_SRCS}
 	${MINIZIP_SRCS}
@@ -166,19 +191,19 @@ add_library(ff
 	src/compress/Unzip.cpp
 )
 
+add_library(ff
+	${lib_srcs}
+)
+
 file(GLOB test_files "test/*.cpp")
 
 add_executable(ff_test
+	${lib_srcs}
 	${test_files}
 )
 
 target_link_libraries(ff_test
-  ff
 	${EXTRA_LIBS}
-	
-	
-  gtest
-  gmock
 )
 
 
