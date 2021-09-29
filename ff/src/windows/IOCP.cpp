@@ -14,14 +14,6 @@ using namespace std;
 
 NS_FF_BEG
 
-IocpContext::IocpContext() { memset(this, 0, sizeof(IocpContext)); }
-
-IocpContext::IocpContext(HANDLE handle, IocpEvent event) {
-  memset(this, 0, sizeof(IocpContext));
-  this->handle = handle;
-  this->iocpEevent = event;
-}
-
 IOCP::IOCP(DWORD concurrentThreads) : m_handle(NULL) {
   if (concurrentThreads > 0) {
     this->create(concurrentThreads);
@@ -58,16 +50,13 @@ bool IOCP::create(DWORD numberOfConcurrentThreads) {
 
         if ((0 == completionKey && nullptr == lpOverlapped)) break;
 
-        PIocpContext context = (PIocpContext)lpOverlapped;
-
-        IocpWorkThreadFunc func;
-        {
-          lock_guard<mutex> lk(this->m_mutex);
-          auto it = this->m_iocpWorkThreadFuncs.find(context->handle);
-          if (it != this->m_iocpWorkThreadFuncs.end()) func = it->second;
+        PIocpContext context = (PIocpContext)completionKey;
+        if (!context->eventFunc) {
+          continue;
         }
-        if (func)
-          func(&numberOfBytesTransferred, &completionKey, &lpOverlapped);
+
+        context->eventFunc(numberOfBytesTransferred, completionKey,
+                           lpOverlapped);
       }
     });
   }
@@ -75,22 +64,10 @@ bool IOCP::create(DWORD numberOfConcurrentThreads) {
   return (NULL != this->m_handle);
 }
 
-bool IOCP::connect(HANDLE fileHandle, ULONG_PTR completionKey,
-                   IocpWorkThreadFunc iocpWorkThreadFunc) {
-  HANDLE hCp =
-      CreateIoCompletionPort(fileHandle, this->m_handle, completionKey, 0);
-  if (hCp != this->m_handle) return false;
-  lock_guard<mutex> lk(this->m_mutex);
-  // cout << "connect: " << (SOCKET)fileHandle << endl;
-  this->m_iocpWorkThreadFuncs.insert(make_pair(fileHandle, iocpWorkThreadFunc));
-  return true;
-}
-
-bool IOCP::disconnect(HANDLE fileHandle) {
-  lock_guard<mutex> lk(this->m_mutex);
-  // cout << "disconnect: " << (SOCKET)fileHandle << endl;
-  this->m_iocpWorkThreadFuncs.erase(fileHandle);
-  return true;
+bool IOCP::connect(PIocpContext context) {
+  return (this->m_handle == CreateIoCompletionPort(context->handle,
+                                                   this->m_handle,
+                                                   (ULONG_PTR)context, 0));
 }
 
 void IOCP::close() {

@@ -19,23 +19,14 @@
 
 NS_FF_BEG
 
-enum class IocpEvent { Accept, Recv, Send, Close };
-
-class IocpContext : public OVERLAPPED {
- public:
-  IocpContext();
-  IocpContext(HANDLE handle, IocpEvent event);
-
-  HANDLE handle;
-  IocpEvent iocpEevent;
-  WSABUF buffer;
+using IocpEventFunc = std::function<void (DWORD numberOfBytesTransferred,
+                       ULONG_PTR completionKey, LPOVERLAPPED lpOverlapped)>;
+struct IocpContext : public OVERLAPPED {
+    HANDLE handle;
+    IocpEventFunc eventFunc;
 };
 
 using PIocpContext = IocpContext*;
-
-using IocpWorkThreadFunc =
-    std::function<void(LPDWORD lpNumberOfBytesTransferred,
-                       PULONG_PTR lpCompletionKey, LPOVERLAPPED* lpOverlapped)>;
 
 class IOCP {
  public:
@@ -44,9 +35,7 @@ class IOCP {
 
   void close();
   bool create(DWORD numberOfConcurrentThreads);
-  bool connect(HANDLE fileHandle, ULONG_PTR completionKey,
-               IocpWorkThreadFunc iocpWorkThreadFunc);
-  bool disconnect(HANDLE fileHandle);
+  bool connect(PIocpContext context);
   operator HANDLE() const;
   operator bool() const;
   bool getQueuedCompletionStatus(LPDWORD lpNumberOfBytesTransferred,
@@ -62,7 +51,6 @@ class IOCP {
   HANDLE m_handle;
   std::mutex m_mutex;
   std::vector<std::thread> m_workThreads;
-  std::map<HANDLE, IocpWorkThreadFunc> m_iocpWorkThreadFuncs;
 };
 
 using IOCPPtr = std::shared_ptr<IOCP>;
