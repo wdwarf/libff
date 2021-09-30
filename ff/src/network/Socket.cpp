@@ -187,9 +187,9 @@ Socket::Socket()
 #endif
 }
 
-Socket::Socket(int m_socketFd)
+Socket::Socket(int socketFd)
     : m_useSelect(true), m_blockingType(SockBlockingType::Blocking) {
-  this->m_socketFd = m_socketFd;
+  this->m_socketFd = socketFd;
   this->m_ipVer = this->getIpVersion();
 }
 

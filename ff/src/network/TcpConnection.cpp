@@ -287,7 +287,7 @@ void TcpConnection::send(const void* buf, uint32_t bufSize) {
 
   uint32_t sendCnt = bufSize / MAX_BUF_SIZE;
   if (0 != (bufSize % MAX_BUF_SIZE)) ++sendCnt;
-  
+
   const char* p = (const char*)buf;
   for (uint32_t i = 0; i < sendCnt; ++i) {
     uint32_t bytes2Send = ((bufSize - MAX_BUF_SIZE * i) > MAX_BUF_SIZE)
@@ -350,10 +350,8 @@ TcpConnection::TcpConnection() : m_isServer(false), m_readBuffer(MAX_BUF_SIZE) {
   this->m_ep = &PollMgr::instance().getEPoll();
 }
 
-TcpConnection::TcpConnection(Socket&& socket)
-    : m_isServer(false),
-      m_socket(std::move(socket)),
-      m_readBuffer(MAX_BUF_SIZE) {
+TcpConnection::TcpConnection(int sock)
+    : m_isServer(false), m_socket(sock), m_readBuffer(MAX_BUF_SIZE) {
   this->m_socket.setUseSelect(false);
   this->m_ep = &PollMgr::instance().getEPoll();
   this->m_ep->addFd(this->m_socket.getHandle(),
@@ -491,7 +489,10 @@ void TcpConnection::onSvrSocketUpdate(int fd, int events) {
   if (events & POLLIN) {
     SockAddr addr;
     auto sock = this->m_socket.accept(addr);
-    TcpConnectionPtr tcpSock = TcpConnectionPtr(new TcpConnection(move(sock)));
+    if (sock.getHandle() <= 0) return;
+    TcpConnectionPtr tcpSock =
+        TcpConnectionPtr(new TcpConnection(sock.getHandle()));
+    sock.dettach();
 
     OnAcceptFunc func;
     {
@@ -515,6 +516,19 @@ void TcpConnection::onSvrSocketUpdate(int fd, int events) {
 }
 
 void TcpConnection::onClientSocketUpdate(int fd, int events) {
+  if (events & POLLHUP) {
+    this->m_ep->delFd(this->m_socket.getHandle());
+
+    OnCloseFunc func;
+    {
+      lock_guard<mutex> lk(this->m_mutex);
+      func = m_onCloseFunc;
+    }
+    if (func) func(this->shared_from_this());
+    // this->m_socket.close();
+    return;
+  }
+
   if (events & POLLIN) {
     int readBytes =
         this->m_socket.read(m_readBuffer.getData(), m_readBuffer.getSize());
@@ -547,18 +561,6 @@ void TcpConnection::onClientSocketUpdate(int fd, int events) {
     if (buffer) {
       this->m_socket.send(buffer->getData(), buffer->getSize());
     }
-  }
-
-  if (events & POLLHUP) {
-    this->m_ep->delFd(this->m_socket.getHandle());
-
-    OnCloseFunc func;
-    {
-      lock_guard<mutex> lk(this->m_mutex);
-      func = m_onCloseFunc;
-    }
-    if (func) func(this->shared_from_this());
-    this->m_socket.close();
   }
 }
 

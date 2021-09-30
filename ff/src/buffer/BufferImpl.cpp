@@ -94,7 +94,7 @@ void Buffer::BufferImpl::append(const void* data, uint32_t size) {
     return;
   }
 
-  auto cap = (this->size + size) * BUF_INC_RATIO;
+  uint32_t cap = (this->size + size) * BUF_INC_RATIO;
   auto newData = new unsigned char[cap];
   if (nullptr == newData) {
     throw MK_EXCEPTION(BufferException, "Alloc buffer failed", size);
@@ -159,7 +159,7 @@ void Buffer::BufferImpl::alloc(uint32_t size) {
 
   this->clear();
 
-  auto cap = size * BUF_INC_RATIO;
+  uint32_t cap = size * BUF_INC_RATIO;
   auto newData = new unsigned char[cap];
   if (nullptr == newData) {
     throw MK_EXCEPTION(BufferException, "Alloc buffer failed", size);
@@ -211,7 +211,7 @@ const unsigned char& Buffer::BufferImpl::at(uint32_t index) const {
 void Buffer::BufferImpl::setData(const void* data, uint32_t size) {
   auto oldData = this->data;
   if ((nullptr != data) && (size > 0)) {
-    auto cap = size * BUF_INC_RATIO;
+    uint32_t cap = size * BUF_INC_RATIO;
     auto newData = new unsigned char[cap];
     if (nullptr == newData) {
       throw MK_EXCEPTION(BufferException, "Alloc buffer failed", size);
@@ -247,7 +247,7 @@ void Buffer::BufferImpl::resize(uint32_t size) {
     return;
   }
 
-  auto cap = size * BUF_INC_RATIO;
+  uint32_t cap = size * BUF_INC_RATIO;
   auto newData = new unsigned char[cap];
   if (nullptr == newData) {
     throw MK_EXCEPTION(BufferException, "Alloc buffer failed", size);

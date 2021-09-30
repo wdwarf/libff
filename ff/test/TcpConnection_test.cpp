@@ -7,8 +7,8 @@
 
 #include <ff/Buffer.h>
 #include <ff/String.h>
-#include <ff/Thread.h>
 #include <ff/TcpConnection.h>
+#include <ff/Thread.h>
 #include <ff/Tick.h>
 #include <gtest/gtest.h>
 
@@ -1026,98 +1026,100 @@ const string constText =
     "computer can understand and follow.";
 
 TEST(TcpConnectionTest, TcpConnectionTest) {
-    TcpConnectionPtr svr = TcpConnection::CreateInstance();
+  TcpConnectionPtr svr = TcpConnection::CreateInstance();
 
-    set<TcpConnectionPtr> clients;
-    mutex m;
+  set<TcpConnectionPtr> clients;
+  mutex m;
 
-    list<BufferPtr> buffers;
-    atomic_int acceptCnt = 0;
+  list<BufferPtr> buffers;
+  atomic_int acceptCnt(0);
 
-    svr->onAccept([&](const TcpConnectionPtr& tcpSock) {
-        if (!tcpSock) return;
-        lock_guard<mutex> lk(m);
-        ++acceptCnt;
-        clients.insert(tcpSock);
-        BufferPtr buf(new Buffer());
-        buf->setCapacity(3 * 1024 * 1024);
+  svr->onAccept([&](const TcpConnectionPtr& tcpSock) {
+    if (!tcpSock) return;
+    lock_guard<mutex> lk(m);
+    ++acceptCnt;
+    clients.insert(tcpSock);
+    BufferPtr buf(new Buffer());
+    buf->setCapacity(3 * 1024 * 1024);
 
 #if 1
-        tcpSock->onClose(
-            [&m, &svr, &clients, &buffers, buf](const TcpConnectionPtr& conn) {
-                // LOGD << "tcp client closed";
-                // svr.stop();
-                lock_guard<mutex> lk(m);
-                buffers.push_back(buf);
-                LOGD << "clientsNow: " << clients.size() << ", buffers: " << buffers.size();
-                clients.erase(conn);
-            });
+    tcpSock->onClose(
+        [&m, &svr, &clients, &buffers, buf](const TcpConnectionPtr& conn) {
+          // LOGD << "tcp client closed";
+          // svr.stop();
+          lock_guard<mutex> lk(m);
+          buffers.push_back(buf);
+          LOGD << "clientsNow: " << clients.size()
+               << ", buffers: " << buffers.size();
+          clients.erase(conn);
+        });
 #endif
 
 #if 1
-        
-      // LOGD << "tcp client connected. " <<
-      // tcpSock->getSocket().getRemoteAddress()
-      //      << ":" << tcpSock->getSocket().getRemotePort();
-      // client = tcpSock;
-      
-      tcpSock->onData([&svr, buf](const uint8_t* data, uint32_t len,
-                                  const TcpConnectionPtr& conn) {
-              try {
-                  buf->append(data, len);
-              }
-              catch (std::exception& e) {
-                  LOGE << "err: " << e.what();
-              }
-        // this_thread::sleep_for(chrono::milliseconds(5));
-      });
+
+    // LOGD << "tcp client connected. " <<
+    // tcpSock->getSocket().getRemoteAddress()
+    //      << ":" << tcpSock->getSocket().getRemotePort();
+    // client = tcpSock;
+
+    tcpSock->onData([&svr, buf](const uint8_t* data, uint32_t len,
+                                const TcpConnectionPtr& conn) {
+      try {
+        buf->append(data, len);
+      } catch (std::exception& e) {
+        LOGE << "err: " << e.what();
+      }
+      // this_thread::sleep_for(chrono::milliseconds(5));
+    });
 #endif
+  });
+  svr->onClose(
+      [&](const TcpConnectionPtr& connection) { LOGD << "tcp server stoped"; });
 
-    });
-    svr->onClose([&](const TcpConnectionPtr& connection) {
-      LOGD << "tcp server stoped";
-    });
+  EXPECT_TRUE(svr->listen(5678, "", IpVersion::V4)) << "server listen failed.";
 
-    EXPECT_TRUE(svr->listen(5678, "", IpVersion::V4))
-        << "server listen failed.";
-
- do {
-     buffers.clear();
-     acceptCnt = 0;
+  do {
+    buffers.clear();
+    acceptCnt = 0;
     const int cnt = 50;
     const uint32_t clientCnt = 110;
     uint32_t currentClientCnt = clientCnt;
     for (int i = 0; i < clientCnt; ++i) {
       thread([&m, &currentClientCnt, cnt]() {
-        Socket sock;
-        sock.createTcp();
-        sock.setBlocking(SockBlockingType::Blocking);
-        sock.setUseSelect(false);
+        do {
+          Socket sock;
+          sock.createTcp();
+          sock.setBlocking(SockBlockingType::Blocking);
+          sock.setUseSelect(false);
 
-        if (!sock.connect("192.168.2.53", 5678)) {
-          LOGE << "connect to server failed" << endl;
-          return;
-        }
+          if (!sock.connect("192.168.2.53", 5678, 10000)) {
+            LOGE << "connect to server failed" << endl;
+            continue;
+          }
 
-        Tick t;
-        int sendBytes = 0;
+          Tick t;
+          int sendBytes = 0;
 
-        for (int i = 0; i < cnt; ++i) {
-          sendBytes += sock.send(constText.c_str(), constText.length());
-        }
-        LOGD << "tick: " << t.tock() << ", sendBytes: " << sendBytes
-             << ", total: " << (constText.length() * cnt);
+          for (int i = 0; i < cnt; ++i) {
+            sendBytes += sock.send(constText.c_str(), constText.length());
+          }
+          LOGD << "tick: " << t.tock() << ", sendBytes: " << sendBytes
+               << ", total: " << (constText.length() * cnt);
 
-        sock.close();
-        lock_guard<mutex> lk(m);
-        --currentClientCnt;
-        LOGD << "client closed";
+          sock.close();
+          lock_guard<mutex> lk(m);
+          --currentClientCnt;
+          LOGD << "client closed";
+          break;
+        } while (true);
       }).detach();
     }
 
     Tick t;
     while (buffers.size() != clientCnt && t.tock() < 300 * 1000) {
-      LOGD << "clients: " << clients.size() << ", buffers: " << buffers.size() << ", acceptCnt: " << acceptCnt.load() << ", currentClientCnt: " << currentClientCnt;
+      LOGD << "clients: " << clients.size() << ", buffers: " << buffers.size()
+           << ", acceptCnt: " << acceptCnt.load()
+           << ", currentClientCnt: " << currentClientCnt;
       this_thread::sleep_for(chrono::milliseconds(1000));
     }
 
@@ -1125,7 +1127,8 @@ TEST(TcpConnectionTest, TcpConnectionTest) {
 
     for (auto buf : buffers) {
       if (buf->getSize() != (constText.length() * cnt)) {
-        LOGE << "invalid size: " << buf->getSize() << ", " << (constText.length() * cnt);
+        LOGE << "invalid size: " << buf->getSize() << ", "
+             << (constText.length() * cnt);
       }
     }
 
@@ -1133,18 +1136,17 @@ TEST(TcpConnectionTest, TcpConnectionTest) {
 
     LOGD << "end....";
 
-    if(buffers.size() != clientCnt || !clients.empty()){
-      
-    LOGD << "clientsEnd: " << clients.size() << ", buffers: " << buffers.size();
+    if (buffers.size() != clientCnt || !clients.empty()) {
+      LOGD << "clientsEnd: " << clients.size()
+           << ", buffers: " << buffers.size();
 
-       break;
+      break;
     }
 
     this_thread::sleep_for(chrono::seconds(3));
   } while (true);
 
   svr->close();
-
 }
 
 TEST(TcpConnectionTest, TcpConnectionTest6) {

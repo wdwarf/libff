@@ -66,7 +66,7 @@ private:
 	TcpConnection(Socket&& socket, IOCPPtr iocp = IOCPPtr(GIocp::getInstance(), [](void*){}));
 #else
 	TcpConnection();
-	TcpConnection(Socket&& socket);
+	TcpConnection(int sock);
 #endif
 
 	

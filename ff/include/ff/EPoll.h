@@ -18,6 +18,7 @@
 #include <thread>
 #include <poll.h>
 #include <ff/ff_config.h>
+#include <sys/epoll.h>
 
 NS_FF_BEG
 
@@ -25,7 +26,7 @@ typedef std::function<void(int, int)> FdUpdateFunc;
 
 class EPoll {
 public:
-	EPoll();
+	EPoll(uint32_t maxEpollEvents = 1000);
 	virtual ~EPoll();
 
 	bool addFd(int fd, const FdUpdateFunc& updateFunc);
@@ -38,7 +39,8 @@ public:
 protected:
 	int m_epFd;
 	int m_signalPipe[2];
-	bool m_fdChanged;
+	std::vector<epoll_event> epollEvents;
+	// bool m_fdChanged;
 	struct FdInfo {
 		FdUpdateFunc updateFunc;
 		int fd;
@@ -46,12 +48,9 @@ protected:
 	};
 	typedef std::map<int, FdInfo> FdInfos;
 	FdInfos m_fdInfos;
-	std::list<int> m_justDeletedFds;
-	std::vector<pollfd> m_pollfds;
 
 	std::mutex m_fdInfosMutex;
 	std::mutex m_signalMutex;
-	std::mutex m_justDeletedMutex;
 
 	bool initSignalPipe();
 	void uninitSignalPipe();
@@ -60,10 +59,8 @@ protected:
 	bool delFdFromPoll(int fd);
 	bool setEvent2Fd(int fd, int events);
 
-	void createNativePolls();
 	void onPipeEvents(int fd, int events);
-	bool doPoll(std::vector<pollfd>& ofds, int epFd, pollfd *fds, nfds_t nfds,
-			int timeout);
+	bool doPoll(std::vector<pollfd>& ofds, int timeout);
 };
 
 class PollMgr {
