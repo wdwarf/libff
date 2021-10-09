@@ -120,7 +120,7 @@ void TcpConnection::workThreadFunc(DWORD numberOfBytesTransferred,
                << this->m_socket.getRemoteAddress() << endl;
 
           delete ioCtx;
-          this->postCloseEvent();
+          this->close();
         }
       }
       break;
@@ -129,7 +129,7 @@ void TcpConnection::workThreadFunc(DWORD numberOfBytesTransferred,
     case IocpEvent::Recv: {
       if (0 == numberOfBytesTransferred) {
         delete ioCtx;
-        this->postCloseEvent();
+        this->close();
         break;
       }
 
@@ -156,7 +156,7 @@ void TcpConnection::workThreadFunc(DWORD numberOfBytesTransferred,
                << this->m_socket.getRemoteAddress() << endl;
 
           delete ioCtx;
-          this->postCloseEvent();
+          this->close();
         }
       }
 
@@ -272,11 +272,7 @@ bool TcpConnection::connect(uint16_t remotePort, const std::string& remoteHost,
   return true;
 }
 
-void TcpConnection::close() {
-  // this->m_iocp->disconnect((HANDLE)this->m_socket.getHandle());
-  this->m_socket.shutdown();
-  if (this->m_isServer) this->m_socket.close();
-}
+void TcpConnection::close() { this->postCloseEvent(); }
 
 Socket& TcpConnection::getSocket() { return this->m_socket; }
 
@@ -290,7 +286,7 @@ void TcpConnection::send(const void* buf, uint32_t bufSize) {
 
   const char* p = (const char*)buf;
   for (uint32_t i = 0; i < sendCnt; ++i) {
-    uint32_t bytes2Send = ((bufSize - MAX_BUF_SIZE * i) > MAX_BUF_SIZE)
+    uint32_t bytes2Send = ((bufSize - MAX_BUF_SIZE * i) >= MAX_BUF_SIZE)
                               ? MAX_BUF_SIZE
                               : (bufSize % MAX_BUF_SIZE);
 
@@ -305,11 +301,12 @@ void TcpConnection::send(const void* buf, uint32_t bufSize) {
     int re = WSASend(this->m_socket.getHandle(), &context->buffer, 1,
                      &dwOfBytesSent, 0, context, NULL);
     // cout << "send ret:" << re << endl;
-    if (SOCKET_ERROR == re && WSAGetLastError() != WSA_IO_PENDING) {
-      // cout << "send failed" << endl;
+    auto err = WSAGetLastError();
+    if (SOCKET_ERROR == re && err != WSA_IO_PENDING) {
+      cout << "send failed, errno: " << err << endl;
       // this->m_socket.shutdown();
       // this->m_socket.close();
-      this->postCloseEvent();
+      this->close();
 
       delete context;
     }
@@ -320,8 +317,12 @@ bool TcpConnection::postCloseEvent() {
   if (this->m_isServer) return false;
   IoContext* context = new IoContext();
   context->iocpEevent = IocpEvent::Close;
-  return this->m_iocp->postQueuedCompletionStatus(
-      0, (ULONG_PTR) & this->m_iocpCtx, context);
+  if (!this->m_iocp->postQueuedCompletionStatus(
+          0, (ULONG_PTR) & this->m_iocpCtx, context)) {
+    delete context;
+    return false;
+  }
+  return true;
 }
 
 TcpConnection& TcpConnection::onAccept(const OnAcceptFunc& func) {
