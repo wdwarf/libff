@@ -61,6 +61,7 @@ private:
 	
 #ifdef _WIN32
 	IocpContext m_iocpCtx;
+	TcpConnectionPtr m_pThis;
 	void active();
 	TcpConnection(IOCPPtr iocp = IOCPPtr(GIocp::getInstance(), [](void*){}));
 	TcpConnection(Socket&& socket, IOCPPtr iocp = IOCPPtr(GIocp::getInstance(), [](void*){}));

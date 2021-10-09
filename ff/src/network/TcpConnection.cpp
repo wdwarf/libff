@@ -102,7 +102,14 @@ void TcpConnection::workThreadFunc(DWORD numberOfBytesTransferred,
 
   IoContext* ioCtx = (IoContext*)lpOverlapped;
 
-  auto pThis = this->shared_from_this();
+  TcpConnectionPtr pThis;
+  
+  try{
+    pThis = this->shared_from_this();
+  }catch(...){
+    delete ioCtx;
+    return;
+  }
 
   switch (ioCtx->iocpEevent) {
     case IocpEvent::Connected: {
@@ -169,6 +176,7 @@ void TcpConnection::workThreadFunc(DWORD numberOfBytesTransferred,
 
     case IocpEvent::Close: {
       delete ioCtx;
+      if(!this->m_pThis) break;
 
       OnCloseFunc func;
       {
@@ -178,6 +186,7 @@ void TcpConnection::workThreadFunc(DWORD numberOfBytesTransferred,
 
       if (func) func(pThis);
       this->m_socket.close();
+      this->m_pThis = nullptr;
       break;
     }
   }
@@ -213,6 +222,7 @@ bool TcpConnection::listen(uint16_t port, const std::string& ip,
         break;
       TcpConnectionPtr tcpSock =
           TcpConnectionPtr(new TcpConnection(move(client), this->m_iocp));
+      tcpSock->m_pThis = tcpSock;
 
       OnAcceptFunc func;
       {
