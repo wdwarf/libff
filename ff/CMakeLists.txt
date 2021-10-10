@@ -1,5 +1,5 @@
 
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 2.8.2)
 project(ff)
 add_compile_options(-std=c++11 -g)
 
@@ -27,10 +27,12 @@ ELSEIF (WIN32)
 
 	file(GLOB_RECURSE windows_files "src/windows/*.cpp")
 
-	
 	link_directories(
-		${CMAKE_CURRENT_SOURCE_DIR}/third_party/googletest/build/lib/${CMAKE_BUILD_TYPE}
-		${CMAKE_CURRENT_SOURCE_DIR}/third_party/curl-7.77.0/build/lib/${CMAKE_BUILD_TYPE}
+		# ${CMAKE_CURRENT_SOURCE_DIR}/third_party/googletest/build/lib/${CMAKE_BUILD_TYPE}
+		# ${CMAKE_CURRENT_SOURCE_DIR}/third_party/curl-7.77.0/build/lib/${CMAKE_BUILD_TYPE}
+		
+		${CMAKE_SOURCE_DIR}/build/lib/${CMAKE_BUILD_TYPE}
+		# ${CMAKE_CURRENT_SOURCE_DIR}/../output/ff/third_party/zlib-1.2.11/${CMAKE_BUILD_TYPE}
 	)
 
 	include_directories(
@@ -44,9 +46,6 @@ ELSEIF (WIN32)
 		wldap32
 	)
 
-	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
-	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd")
-	
 	MESSAGE(STATUS "CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}")
 	
 	if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
@@ -56,6 +55,7 @@ ELSEIF (WIN32)
 	set(EXTRA_LIBS
 	${EXTRA_LIBS}
 		libcurl-d
+		zlibd
 		gtestd
   	gmockd
 	)
@@ -64,7 +64,9 @@ ELSEIF (WIN32)
 	
 	set(EXTRA_LIBS
 	${EXTRA_LIBS}
+	libvcruntime
 		libcurl
+		zlib
 		gtest
   	gmock
 	)
@@ -195,14 +197,20 @@ add_library(ff
 	${lib_srcs}
 )
 
+target_link_libraries(ff
+	# STATIC
+	${EXTRA_LIBS}
+)
+
 file(GLOB test_files "test/*.cpp")
 
 add_executable(ff_test
-	${lib_srcs}
+	# ${lib_srcs}
 	${test_files}
 )
 
 target_link_libraries(ff_test
+	ff
 	${EXTRA_LIBS}
 )
 

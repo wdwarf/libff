@@ -17,7 +17,7 @@
 
 NS_FF_BEG
 
-struct ZipFileInfo {
+struct LIBFF_API ZipFileInfo {
   std::string name;
   uint64_t uncompressedSize;
   uint64_t compressedSize;
@@ -34,7 +34,7 @@ struct ZipFileInfo {
   } date;
 };
 
-class Unzip {
+class LIBFF_API Unzip {
  public:
   Unzip(const std::string& filePath);
   ~Unzip();

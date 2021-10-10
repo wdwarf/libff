@@ -132,7 +132,7 @@ private:
 	CrcParamInfos m_crcParamInfos;
 };
 
-class CrcCalculator {
+class LIBFF_API CrcCalculator {
 public:
 	CrcCalculator(CrcAlgorithms crcAlgorithms);
 	CrcCalculator(const CrcParamInfo* crcParamInfo);

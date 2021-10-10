@@ -5,7 +5,7 @@
 
 NS_FF_BEG
 
-struct SpaceInfo {
+struct LIBFF_API SpaceInfo {
   uint64_t total;
   uint64_t free;
   uint64_t available;
@@ -14,7 +14,7 @@ struct SpaceInfo {
   SpaceInfo();
 };
 
-class FileSystem {
+class LIBFF_API FileSystem {
  public:
   FileSystem(const std::string& path);
   ~FileSystem();

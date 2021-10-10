@@ -21,14 +21,14 @@ NS_FF_BEG
 
 using IocpEventFunc = std::function<void (DWORD numberOfBytesTransferred,
                        ULONG_PTR completionKey, LPOVERLAPPED lpOverlapped)>;
-struct IocpContext : public OVERLAPPED {
+struct LIBFF_API IocpContext : public OVERLAPPED {
     HANDLE handle;
     IocpEventFunc eventFunc;
 };
 
 using PIocpContext = IocpContext*;
 
-class IOCP {
+class LIBFF_API IOCP {
  public:
   IOCP(DWORD concurrentThreads = 8);
   ~IOCP();

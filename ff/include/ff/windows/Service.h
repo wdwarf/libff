@@ -8,7 +8,7 @@
 
 NS_FF_BEG
 
-class Service
+class LIBFF_API Service
 {
 public:
 	Service(void);

@@ -12,7 +12,7 @@
 
 NS_FF_BEG
 
-    struct RtpHeader
+    struct LIBFF_API RtpHeader
     {
     public:
         uint8_t getCsrcCount() const;
@@ -48,7 +48,7 @@ private:
         uint32_t ssrc;
     };
 
-    struct RtpExtensionHeader
+    struct LIBFF_API RtpExtensionHeader
     {
     public:
         uint16_t getExtid() const;
