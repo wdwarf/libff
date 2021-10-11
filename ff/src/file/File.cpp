@@ -568,7 +568,7 @@ Buffer File::readAll() const {
   return out;
 }
 
-std::ostream& operator<<(std::ostream& o, const File& file) {
+LIBFF_API std::ostream& operator<<(std::ostream& o, const File& file) {
   o << file.getPath();
   return o;
 }

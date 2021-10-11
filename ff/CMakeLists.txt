@@ -1,10 +1,12 @@
 
-cmake_minimum_required(VERSION 2.6)
-project(ff)
+cmake_minimum_required(VERSION 2.8.2)
+project(ff LANGUAGES CXX)
 add_compile_options(-std=c++11 -g)
 
 MESSAGE(STATUS "operation system is ${CMAKE_SYSTEM}")
 
+MESSAGE(STATUS "CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}")
+	
 include_directories(
   include
   third_party/jsoncpp/include
@@ -18,6 +20,10 @@ add_definitions(
 	-DBUILDING_LIBCURL
 )
 
+link_directories(
+	${CMAKE_SOURCE_DIR}/build/lib/${CMAKE_BUILD_TYPE}
+)
+
 IF (MINGW)
 	MESSAGE(STATUS "Now is MinGW")
 	file(GLOB windows_files "src/windows/*.cpp")
@@ -26,12 +32,6 @@ ELSEIF (WIN32)
 	MESSAGE(STATUS "Now is windows")
 
 	file(GLOB_RECURSE windows_files "src/windows/*.cpp")
-
-	
-	link_directories(
-		${CMAKE_CURRENT_SOURCE_DIR}/third_party/googletest/build/lib/${CMAKE_BUILD_TYPE}
-		${CMAKE_CURRENT_SOURCE_DIR}/third_party/curl-7.77.0/build/lib/${CMAKE_BUILD_TYPE}
-	)
 
 	include_directories(
 		third_party/curl-7.77.0/include
@@ -44,11 +44,6 @@ ELSEIF (WIN32)
 		wldap32
 	)
 
-	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
-	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd")
-	
-	MESSAGE(STATUS "CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}")
-	
 	if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
 
 	MESSAGE(STATUS "building ${CMAKE_BUILD_TYPE}")
@@ -56,6 +51,7 @@ ELSEIF (WIN32)
 	set(EXTRA_LIBS
 	${EXTRA_LIBS}
 		libcurl-d
+		zlibd
 		gtestd
   	gmockd
 	)
@@ -64,7 +60,9 @@ ELSEIF (WIN32)
 	
 	set(EXTRA_LIBS
 	${EXTRA_LIBS}
+	libvcruntime
 		libcurl
+		zlib
 		gtest
   	gmock
 	)
@@ -114,9 +112,10 @@ else()
 
 	if(UNIX)
 		set(EXTRA_LIBS
-			z
 			pthread
+			z
 			libcurl
+			jsoncpp
 			gtest
 			gmock
 		)
@@ -191,22 +190,26 @@ ${windows_files}
 	src/compress/Unzip.cpp
 )
 
-add_library(ff
+add_library(ff 
 	${lib_srcs}
+)
+
+target_link_libraries(ff
+	# STATIC
+	${EXTRA_LIBS}
 )
 
 file(GLOB test_files "test/*.cpp")
 
-add_executable(ff_test
-	${lib_srcs}
+add_executable(ff_test 
+	# ${lib_srcs}
 	${test_files}
 )
 
-target_link_libraries(ff_test
+target_link_libraries(ff_test 
+	ff
 	${EXTRA_LIBS}
 )
-
-
 
 if(MSVC)
 target_compile_options(ff PUBLIC "/Zc:__cplusplus")

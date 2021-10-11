@@ -39,7 +39,7 @@ enum MsgCode {
  * 4、消息响应
  */
 
-class MsgBusPkgHeader {
+class LIBFF_API MsgBusPkgHeader {
   uint32_t m_length;
   uint32_t m_id;
   uint32_t m_from;
@@ -67,7 +67,7 @@ class MsgBusPkgHeader {
   MsgBusPkgHeader& options(uint32_t options);
 };
 
-class MsgBusPackage : public Buffer {
+class LIBFF_API MsgBusPackage : public Buffer {
  public:
   bool parse(const void* data, uint32_t len);
   bool generate(const MsgBusPkgHeader& header, const void* data = nullptr,
@@ -85,7 +85,7 @@ using MsgBusPackagePtr = std::shared_ptr<MsgBusPackage>;
 using PkgPromiseRemoveFunc = std::function<void(uint32_t msgId)>;
 
 #if __cplusplus > 201103L
-class PkgPromise : public Synchronizable {
+class LIBFF_API PkgPromise : public Synchronizable {
  public:
   PkgPromise(uint32_t msgId, PkgPromiseRemoveFunc func);
   ~PkgPromise();
@@ -101,7 +101,7 @@ class PkgPromise : public Synchronizable {
 };
 
 #else
-class PkgPromise : public Synchronizable {
+class LIBFF_API PkgPromise : public Synchronizable {
  public:
   PkgPromise(uint32_t msgId, PkgPromiseRemoveFunc func);
   ~PkgPromise();
@@ -121,7 +121,7 @@ class PkgPromise : public Synchronizable {
 
 using PkgPromisePtr = std::shared_ptr<PkgPromise>;
 
-class MsgBusPackageHelper {
+class LIBFF_API MsgBusPackageHelper {
  public:
   MsgBusPackageHelper& append(const void* data, uint32_t len);
   MsgBusPackagePtr getPackage();
@@ -139,7 +139,7 @@ struct ClientSession {
 
 using ClientSessionPtr = std::shared_ptr<ClientSession>;
 
-class MessageBusServer {
+class LIBFF_API MessageBusServer {
  public:
   MessageBusServer();
 
@@ -165,7 +165,7 @@ class MessageBusServer {
 
 using MsgBusReqFunc = std::function<void(const MsgBusPackage& pkg)>;
 
-class MessageBusClient {
+class LIBFF_API MessageBusClient {
  public:
   MessageBusClient();
   MessageBusClient(uint32_t clientId);

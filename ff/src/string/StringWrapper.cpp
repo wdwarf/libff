@@ -25,7 +25,7 @@ StringWrapper::operator std::string() const {
 	return this->str();
 }
 
-std::ostream& operator<<(std::ostream& o, const StringWrapper& wp) {
+LIBFF_API std::ostream& operator<<(std::ostream& o, const StringWrapper& wp) {
 	o << wp.toString();
 	return o;
 }

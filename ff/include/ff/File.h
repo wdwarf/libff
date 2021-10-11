@@ -87,7 +87,7 @@ class LIBFF_API File {
 
   Buffer readAll() const;
 
-  friend std::ostream& operator<<(std::ostream& o, const File& file);
+  friend LIBFF_API std::ostream& operator<<(std::ostream& o, const File& file);
 
  private:
   std::list<std::string> path;

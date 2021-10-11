@@ -16,7 +16,7 @@ using std::stringstream;
 
 NS_FF_BEG
 
-struct MD5Result {
+struct LIBFF_API MD5Result {
 	unsigned char result[16];
 
 	MD5Result();

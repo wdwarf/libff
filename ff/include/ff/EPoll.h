@@ -24,7 +24,7 @@ NS_FF_BEG
 
 typedef std::function<void(int, int)> FdUpdateFunc;
 
-class EPoll {
+class LIBFF_API EPoll {
 public:
 	EPoll(uint32_t maxEpollEvents = 1000);
 	virtual ~EPoll();
@@ -63,7 +63,7 @@ protected:
 	bool doPoll(std::vector<pollfd>& ofds, int timeout);
 };
 
-class PollMgr {
+class LIBFF_API PollMgr {
 public:
 	PollMgr();
 	~PollMgr();

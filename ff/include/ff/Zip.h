@@ -16,7 +16,7 @@
 
 NS_FF_BEG
 
-class Zip {
+class LIBFF_API Zip {
  public:
   Zip(const std::string &filePath);
   virtual ~Zip();

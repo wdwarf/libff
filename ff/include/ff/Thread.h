@@ -24,7 +24,7 @@ class LIBFF_API Thread: public Runnable, public Noncopyable {
 public:
 	Thread();
 	Thread(RunnablePtr runnable);
-	template<class Func> Thread(Func func) : Thread(MakeRunnable(func)){}
+	Thread(RunnableFunc func);
 	virtual ~Thread();
 
 	void start();

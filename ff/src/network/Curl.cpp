@@ -1,4 +1,6 @@
 #include <ff/Curl.h>
+#include <curl/curl.h>
+
 using namespace std;
 
 NS_FF_BEG
@@ -165,7 +167,7 @@ CURLcode HttpPut::perform() {
 // ==================================================
 // ==================================================
 
-CURLcode httpDelete::perform() {
+CURLcode HttpDelete::perform() {
   this->setOption(CURLOPT_CUSTOMREQUEST, "DELETE");
   return Curl::perform();
 }

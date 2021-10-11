@@ -51,7 +51,7 @@ public:
 	std::string toString() const;
 	operator std::string() const;
 
-	friend std::ostream& operator<<(std::ostream& o, const StringWrapper& wp);
+	friend LIBFF_API std::ostream& operator<<(std::ostream& o, const StringWrapper& wp);
 };
 
 typedef StringWrapper SW;
