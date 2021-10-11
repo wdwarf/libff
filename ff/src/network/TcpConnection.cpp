@@ -65,7 +65,7 @@ void TcpConnection::active() {
     /** FIXME how to do with this ?? */
     return;
   }
-
+  this->m_pThis = this->shared_from_this();
   IoContext* ioCtx = new IoContext;
   ioCtx->iocpEevent = IocpEvent::Connected;
   this->m_iocp->postQueuedCompletionStatus(0, (ULONG_PTR) & this->m_iocpCtx,
@@ -176,7 +176,9 @@ void TcpConnection::workThreadFunc(DWORD numberOfBytesTransferred,
 
     case IocpEvent::Close: {
       delete ioCtx;
-      if(!this->m_pThis) break;
+      if(!this->m_pThis) {
+        break;
+      }
 
       OnCloseFunc func;
       {
