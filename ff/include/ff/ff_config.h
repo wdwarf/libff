@@ -74,7 +74,7 @@ using SStreamT = std::stringstream;
  * @brief 结构体定义宏
  * 
  */
-#define STRUCT_DEF_BEGIN(structName) class structName{\
+#define STRUCT_DEF_BEGIN(structName) class LIBFF_API structName{\
   public:\
   structName(){memset(this, 0, sizeof(structName));}
 

@@ -5,6 +5,8 @@
  *      Author: root
  */
 
+#ifdef _WIN32
+
 #include <ff/windows/Registry.h>
 #include <gtest/gtest.h>
 
@@ -15,9 +17,8 @@
 #include "TestDef.h"
 
 using namespace std;
-USE_NS_FF
 
-#ifdef _WIN32
+USE_NS_FF
 
 TEST(RegistryTest, RegistryTest) {
   Registry reg;

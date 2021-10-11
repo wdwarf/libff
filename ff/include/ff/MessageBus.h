@@ -12,7 +12,6 @@
 #include <map>
 #include <memory>
 #include <mutex>
-#include <condition_variable>
 #include <set>
 
 NS_FF_BEG
@@ -39,33 +38,19 @@ enum MsgCode {
  * 4、消息响应
  */
 
-class LIBFF_API MsgBusPkgHeader {
-  uint32_t m_length;
-  uint32_t m_id;
-  uint32_t m_from;
-  uint32_t m_target;
-  uint32_t m_code;
-  uint32_t m_msgId;
-  uint32_t m_options;
+STRUCT_DEF_BEGIN(MsgBusPkgHeader)
+MEMBER_DEF_U32(length);
+MEMBER_DEF_U32(id);
+MEMBER_DEF_U32(from);
+MEMBER_DEF_U32(target);
+MEMBER_DEF_U32(code);
+MEMBER_DEF_U32(msgId);
+MEMBER_DEF_U32(options);
+MEMBER_DEF_U32(checksum);
 
- public:
-  MsgBusPkgHeader();
-
-  uint32_t length() const;
-  MsgBusPkgHeader& length(uint32_t len);
-  uint32_t id() const;
-  MsgBusPkgHeader& id(uint32_t id);
-  uint32_t from() const;
-  MsgBusPkgHeader& from(uint32_t from);
-  uint32_t target() const;
-  MsgBusPkgHeader& target(uint32_t target);
-  uint32_t code() const;
-  MsgBusPkgHeader& code(uint32_t code);
-  uint32_t msgId() const;
-  MsgBusPkgHeader& msgId(uint32_t msgId);
-  uint32_t options() const;
-  MsgBusPkgHeader& options(uint32_t options);
-};
+public:
+uint32_t generateChecksum() const;
+STRUCT_DEF_END
 
 class LIBFF_API MsgBusPackage : public Buffer {
  public:
@@ -179,6 +164,8 @@ class LIBFF_API MessageBusClient {
   MessageBusClient& on(uint32_t msgId, MsgBusReqFunc func);
   PkgPromisePtr req(uint32_t msgId, uint32_t target = 0,
                     const void* data = nullptr, uint32_t dataSize = 0);
+  PkgPromisePtr req(const MsgBusPackage& pkg);
+
   uint32_t clientId() const;
   void clientId(uint32_t id);
   bool isConnected() const;
@@ -203,7 +190,7 @@ class LIBFF_API MessageBusClient {
               const TcpConnectionPtr& client);
   void onClose(const TcpConnectionPtr& client);
 
-  void sendRegisterInfo();
+  bool sendRegisterInfo();
 
   void handleReq(const MsgBusPackage& pkg);
   void handleRsp(const MsgBusPackage& pkg);

@@ -14,52 +14,15 @@ NS_FF_BEG
  * class MsgBusPkgHeader
  *
  */
-static atomic_uint32_t g_pkg_id(0);
-MsgBusPkgHeader::MsgBusPkgHeader() {
-  memset(this, 0, sizeof(MsgBusPkgHeader));
-  this->id(g_pkg_id++);
-}
 
-uint32_t MsgBusPkgHeader::length() const { return ::ntohl(this->m_length); }
-MsgBusPkgHeader& MsgBusPkgHeader::length(uint32_t len) {
-  this->m_length = ::htonl(len);
-  return *this;
-}
-
-uint32_t MsgBusPkgHeader::id() const { return ::ntohl(this->m_id); }
-MsgBusPkgHeader& MsgBusPkgHeader::id(uint32_t id) {
-  this->m_id = ::htonl(id);
-  return *this;
-}
-
-uint32_t MsgBusPkgHeader::from() const { return ::ntohl(this->m_from); }
-MsgBusPkgHeader& MsgBusPkgHeader::from(uint32_t from) {
-  this->m_from = ::htonl(from);
-  return *this;
-}
-
-uint32_t MsgBusPkgHeader::target() const { return ::ntohl(this->m_target); }
-MsgBusPkgHeader& MsgBusPkgHeader::target(uint32_t target) {
-  this->m_target = ::htonl(target);
-  return *this;
-}
-
-uint32_t MsgBusPkgHeader::code() const { return ::ntohl(this->m_code); }
-MsgBusPkgHeader& MsgBusPkgHeader::code(uint32_t code) {
-  this->m_code = ::htonl(code);
-  return *this;
-}
-
-uint32_t MsgBusPkgHeader::msgId() const { return ::ntohl(this->m_msgId); }
-MsgBusPkgHeader& MsgBusPkgHeader::msgId(uint32_t msgId) {
-  this->m_msgId = ::htonl(msgId);
-  return *this;
-}
-
-uint32_t MsgBusPkgHeader::options() const { return ::ntohl(this->m_options); }
-MsgBusPkgHeader& MsgBusPkgHeader::options(uint32_t options) {
-  this->m_options = ::htonl(options);
-  return *this;
+uint32_t MsgBusPkgHeader::generateChecksum() const {
+  uint32_t code = 0;
+  const uint8_t* p = (const uint8_t*)this;
+  uint32_t len = sizeof(MsgBusPkgHeader) - sizeof(this->m_checksum);
+  for (uint32_t i = 0; i < len; ++i) {
+    code += p[i];
+  }
+  return code;
 }
 
 /**
@@ -100,6 +63,7 @@ bool MsgBusPackage::generate(const MsgBusPkgHeader& header, const void* data,
   if (0 == pHdr->id()) {
     pHdr->id(++MsgBusPackage::g_id);
   }
+  pHdr->checksum(pHdr->generateChecksum());
   return true;
 }
 void* MsgBusPackage::data() const {
@@ -132,7 +96,8 @@ MsgBusPackagePtr MsgBusPackageHelper::getPackage() {
 
   const MsgBusPkgHeader* hdr = (const MsgBusPkgHeader*)this->m_buffer.getData();
   auto length = hdr->length();
-  if (length > MAX_MSGBUS_PKG_SIZE) {
+  if (length > MAX_MSGBUS_PKG_SIZE ||
+      hdr->checksum() != hdr->generateChecksum()) {
     this->m_buffer.clear();
     return nullptr;
   }
@@ -256,6 +221,14 @@ void MessageBusServer::onClientData(const uint8_t* data, uint32_t size,
         session->m_clientId = hdr->from();
         this->m_msgId2Clients[data[i]].insert(session);
       }
+
+      MsgBusPkgHeader rspHdr = *hdr;
+      rspHdr.target(hdr->from());
+      rspHdr.from(0);
+      rspHdr.options(MsgOpt::Rsp);
+      MsgBusPackage rspPkg;
+      rspPkg.generate(rspHdr);
+      client->send(rspPkg.getData(), rspPkg.getSize());
     }
 
     if (MsgCode::MsgTrans == code) {
@@ -371,6 +344,10 @@ bool MessageBusClient::start(uint16_t serverPort, const std::string& serverHost,
         this_thread::sleep_for(chrono::milliseconds(300));
         continue;
       }
+      if (!this->sendRegisterInfo()) {
+        this->m_conn->close();
+        continue;
+      }
       this->m_connected = true;
       this->onConnected();
       this->m_cond.wait_for(lk, chrono::milliseconds(10 * 1000));
@@ -392,10 +369,7 @@ void MessageBusClient::send(const MsgBusPackage& pkg) {
   this->m_conn->send(pkg.getData(), pkg.getSize());
 }
 
-void MessageBusClient::onConnected() {
-  cout << "msg bus connected" << endl;
-  this->sendRegisterInfo();
-}
+void MessageBusClient::onConnected() { cout << "msg bus connected" << endl; }
 
 void MessageBusClient::onData(const uint8_t* data, uint32_t size,
                               const TcpConnectionPtr& client) {
@@ -407,15 +381,16 @@ void MessageBusClient::onData(const uint8_t* data, uint32_t size,
     auto code = hdr->code();
     auto options = hdr->options();
 
-    if (MsgCode::MsgTrans == code) {
-      auto reqType = MSGOPT_REQ_TYPE(options);
-      if (MsgOpt::Req == reqType) {
-        this->handleReq(*pkg);
-      }
-      if (MsgOpt::Rsp == reqType) {
-        this->handleRsp(*pkg);
-      }
+    // if (MsgCode::MsgTrans == code) {
+    auto reqType = MSGOPT_REQ_TYPE(options);
+    if (MsgOpt::Req == reqType) {
+      this->handleReq(*pkg);
     }
+
+    if (MsgOpt::Rsp == reqType) {
+      this->handleRsp(*pkg);
+    }
+    // }
   }
 }
 
@@ -426,13 +401,22 @@ void MessageBusClient::onClose(const TcpConnectionPtr& client) {
   this->m_cond.notify_one();
 }
 
-void MessageBusClient::sendRegisterInfo() {
+bool MessageBusClient::sendRegisterInfo() {
   unique_lock<mutex> lk(this->m_mutexMsgId2Func);
   vector<uint32_t> codes;
   for (auto& p : this->msgId2Func) {
     codes.push_back(p.first);
   }
 
+  // if (this->m_conn->getSocket().isConnected()) {
+  //   MsgBusPkgHeader hdr;
+  //   hdr.code(MsgCode::Register);
+  //   hdr.from(this->m_clientId);
+  //   hdr.options(MsgOpt::Req);
+  //   MsgBusPackage pkg;
+  //   pkg.generate(hdr, &codes[0], codes.size() * sizeof(uint32_t));
+  //   this->send(pkg);
+  // }
   if (this->m_conn->getSocket().isConnected()) {
     MsgBusPkgHeader hdr;
     hdr.code(MsgCode::Register);
@@ -440,8 +424,12 @@ void MessageBusClient::sendRegisterInfo() {
     hdr.options(MsgOpt::Req);
     MsgBusPackage pkg;
     pkg.generate(hdr, &codes[0], codes.size() * sizeof(uint32_t));
-    this->send(pkg);
+    auto promise = this->req(pkg);
+    auto rspPkg = promise->get(5 * 1000);
+    return (nullptr != rspPkg.get());
   }
+
+  return false;
 }
 
 MessageBusClient& MessageBusClient::on(uint32_t msgId, MsgBusReqFunc func) {
@@ -456,8 +444,6 @@ MessageBusClient& MessageBusClient::on(uint32_t msgId, MsgBusReqFunc func) {
 
 PkgPromisePtr MessageBusClient::req(uint32_t msgId, uint32_t target,
                                     const void* data, uint32_t dataSize) {
-  lock_guard<mutex> lk(this->m_mutexPkgId2Promise);
-
   MsgBusPkgHeader hdr;
   hdr.code(MsgCode::MsgTrans);
   hdr.from(this->m_clientId);
@@ -467,7 +453,12 @@ PkgPromisePtr MessageBusClient::req(uint32_t msgId, uint32_t target,
   MsgBusPackage pkg;
   pkg.generate(hdr, data, dataSize);
 
-  auto id = hdr.id();
+  return this->req(pkg);
+}
+
+PkgPromisePtr MessageBusClient::req(const MsgBusPackage& pkg) {
+  lock_guard<mutex> lk(this->m_mutexPkgId2Promise);
+  auto id = pkg.header()->id();
   PkgPromisePtr promise(make_shared<PkgPromise>(
       id, Bind(&MessageBusClient::removePromise, this)));
   this->m_pkgId2Promise.insert(make_pair(id, promise.get()));

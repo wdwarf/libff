@@ -103,10 +103,10 @@ void TcpConnection::workThreadFunc(DWORD numberOfBytesTransferred,
   IoContext* ioCtx = (IoContext*)lpOverlapped;
 
   TcpConnectionPtr pThis;
-  
-  try{
+
+  try {
     pThis = this->shared_from_this();
-  }catch(...){
+  } catch (...) {
     delete ioCtx;
     return;
   }
@@ -176,7 +176,7 @@ void TcpConnection::workThreadFunc(DWORD numberOfBytesTransferred,
 
     case IocpEvent::Close: {
       delete ioCtx;
-      if(!this->m_pThis) {
+      if (!this->m_pThis) {
         break;
       }
 
@@ -217,10 +217,10 @@ bool TcpConnection::listen(uint16_t port, const std::string& ip,
   this->m_acceptThread = thread([this] {
     auto pThis = this->shared_from_this();
     SockAddr addr;
-    while (this->m_socket.getHandle() > 0) {
+    while (INVALID_SOCKET != this->m_socket.getHandle()) {
       Socket client = this->m_socket.accept(addr);
       if (client.getHandle() <= 0 || INVALID_SOCKET == client.getHandle() ||
-          this->m_socket.getHandle() <= 0)
+          INVALID_SOCKET == this->m_socket.getHandle())
         break;
       TcpConnectionPtr tcpSock =
           TcpConnectionPtr(new TcpConnection(move(client), this->m_iocp));
