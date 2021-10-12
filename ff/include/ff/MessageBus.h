@@ -153,6 +153,7 @@ class LIBFF_API MessageBusServer {
 
 using MsbBusOnConnectedFunc = std::function<void()>;
 using MsbBusOnDisonnectedFunc = std::function<void()>;
+using MsbBusOnHeartbeatLossFunc = std::function<void()>;
 using MsgBusReqFunc = std::function<void(const MsgBusPackage& pkg)>;
 
 class LIBFF_API MessageBusClient {
@@ -176,11 +177,13 @@ class LIBFF_API MessageBusClient {
   bool isConnected() const;
   void onConnected(MsbBusOnConnectedFunc func);
   void onDisconnected(MsbBusOnDisonnectedFunc func);
+  void onHeartbeatLoss(MsbBusOnDisonnectedFunc func);
 
  private:
   uint32_t m_clientId;
   std::mutex m_mutex;
   std::condition_variable m_cond;
+  std::atomic_uint m_heartbeatLossCnt;
   MsgBusPackageHelper m_pkgHelper;
   TcpConnectionPtr m_conn;
   std::atomic_bool m_connected;
@@ -191,6 +194,7 @@ class LIBFF_API MessageBusClient {
   std::mutex m_mutexPkgId2Promise;
   MsbBusOnConnectedFunc m_onConnectedFunc;
   MsbBusOnDisonnectedFunc m_onDisconnectedFunc;
+  MsbBusOnHeartbeatLossFunc m_onHbLossFunc;
 
   void removePromise(uint32_t pkgId);
 

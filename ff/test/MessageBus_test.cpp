@@ -95,7 +95,7 @@ TEST(MessageBusTest, MessageBusTest) {
   }).join();
 
   // while (true) {
-    this_thread::sleep_for(chrono::seconds(5));
+    this_thread::sleep_for(chrono::seconds(50));
   // }
 	client1.stop();
 	client2.stop();

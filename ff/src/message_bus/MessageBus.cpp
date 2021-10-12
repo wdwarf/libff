@@ -262,6 +262,16 @@ void MessageBusServer::onClientData(const uint8_t* data, uint32_t size,
         }
       }
     }
+
+    if (MsgCode::HeartBeat == code) {
+      MsgBusPkgHeader rspHdr = *hdr;
+      rspHdr.target(hdr->from());
+      rspHdr.from(0);
+      rspHdr.options(MsgOpt::Rsp);
+      MsgBusPackage rspPkg;
+      rspPkg.generate(rspHdr);
+      client->send(rspPkg.getData(), rspPkg.getSize());
+    }
   }
 }
 
@@ -311,6 +321,7 @@ void MessageBusServer::removeClient(const TcpConnectionPtr& client) {
 
 MessageBusClient::MessageBusClient()
     : m_conn(TcpConnection::CreateInstance()),
+      m_heartbeatLossCnt(0),
       m_connected(false),
       m_stoped(true) {
   this->m_conn->onData(Bind(&MessageBusClient::onData, this))
@@ -319,6 +330,7 @@ MessageBusClient::MessageBusClient()
 
 MessageBusClient::MessageBusClient(uint32_t clientId)
     : m_clientId(clientId),
+      m_heartbeatLossCnt(0),
       m_conn(TcpConnection::CreateInstance()),
       m_connected(false),
       m_stoped(true) {
@@ -338,24 +350,35 @@ bool MessageBusClient::start(uint16_t serverPort, const std::string& serverHost,
   this->m_stoped = false;
   thread([this, serverPort, serverHost, localPort, localHost]() {
     Tick hbTick;
+    uint32_t hbLoseCnt = 0;
     while (!this->m_stoped) {
-      if (this->m_conn->getSocket().isConnected()) {
+      if (this->m_conn->getSocket().isConnected() && this->m_connected) {
         this_thread::sleep_for(chrono::milliseconds(1000));
-        if (hbTick.tock() >= 6000) {
+        if (hbTick.tock() >= 5000) {
           MsgBusPkgHeader hdr;
           hdr.code(MsgCode::HeartBeat);
           hdr.from(this->m_clientId);
           hdr.options(MsgOpt::Req);
           MsgBusPackage pkg;
           pkg.generate(hdr);
-          this->send(pkg);
+
+          auto promise = this->req(pkg);
+          auto rspPkg = promise->get(5000);
+          if (!rspPkg) {
+            ++this->m_heartbeatLossCnt;
+            if (this->m_heartbeatLossCnt >= 3) {
+              lock_guard<mutex> lk(this->m_mutex);
+              if(this->m_onHbLossFunc) this->m_onHbLossFunc();
+              this->m_conn->close();
+              this->m_heartbeatLossCnt = 0;
+            }
+          }
 
           hbTick.tick();
         }
         continue;
       }
 
-      unique_lock<mutex> lk(this->m_mutex);
       if (!this->m_conn->connect(serverPort, serverHost, localPort,
                                  localHost)) {
         this_thread::sleep_for(chrono::milliseconds(300));
@@ -363,12 +386,15 @@ bool MessageBusClient::start(uint16_t serverPort, const std::string& serverHost,
       }
       if (!this->sendRegisterInfo()) {
         this->m_conn->close();
+        while(this->m_conn->getSocket().isConnected()){this_thread::sleep_for(chrono::milliseconds(100));}
         continue;
       }
 
+      unique_lock<mutex> lk(this->m_mutex);
       this->m_connected = true;
+      this->m_heartbeatLossCnt = 0;
       if (this->m_onConnectedFunc) this->m_onConnectedFunc();
-      this->m_cond.wait_for(lk, chrono::milliseconds(10 * 1000));
+      // this->m_cond.wait_for(lk, chrono::milliseconds(10 * 1000));
     }
   }).detach();
 
@@ -389,6 +415,7 @@ void MessageBusClient::send(const MsgBusPackage& pkg) {
 
 void MessageBusClient::onData(const uint8_t* data, uint32_t size,
                               const TcpConnectionPtr& client) {
+  this->m_heartbeatLossCnt = 0;
   this->m_pkgHelper.append(data, size);
 
   MsgBusPackagePtr pkg;
@@ -525,6 +552,11 @@ void MessageBusClient::onConnected(MsbBusOnConnectedFunc func) {
 void MessageBusClient::onDisconnected(MsbBusOnDisonnectedFunc func) {
   lock_guard<mutex> lk(this->m_mutex);
   this->m_onDisconnectedFunc = func;
+}
+
+void MessageBusClient::onHeartbeatLoss(MsbBusOnDisonnectedFunc func) {
+  lock_guard<mutex> lk(this->m_mutex);
+  this->m_onHbLossFunc = func;
 }
 
 NS_FF_END
