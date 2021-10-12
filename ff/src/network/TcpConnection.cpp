@@ -315,7 +315,7 @@ void TcpConnection::send(const void* buf, uint32_t bufSize) {
     // cout << "send ret:" << re << endl;
     auto err = WSAGetLastError();
     if (SOCKET_ERROR == re && err != WSA_IO_PENDING) {
-      cout << "send failed, errno: " << err << endl;
+      cout << "send failed, errno: " << err << ", buf: " << Buffer(context->buffer.buf, bytes2Send).toHexString() << endl;
       // this->m_socket.shutdown();
       // this->m_socket.close();
       this->close();

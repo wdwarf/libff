@@ -26,7 +26,7 @@ TEST(MessageBusTest, MessageBusTest) {
 		auto remoteHdr = pkg.header();
     MsgBusPkgHeader hdr = *remoteHdr;
 
-		cout << "client1 got msg 101" << endl;
+		LOGD << "client1 got msg 101";
 
     // hdr.code(MsgCode::MsgTrans);
     hdr.from(client1.clientId());
@@ -37,6 +37,12 @@ TEST(MessageBusTest, MessageBusTest) {
     rspPkg.generate(hdr);
     client1.send(rspPkg);
   });
+  client1.onConnected([]{
+    LOGD << "client 1 connected";
+  });
+  client1.onDisconnected([]{
+    LOGD << "client 1 disconnected";
+  });
   client1.start(6600, "127.0.0.1", 0);
 
   MessageBusClient client2(2);
@@ -44,7 +50,7 @@ TEST(MessageBusTest, MessageBusTest) {
 		auto remoteHdr = pkg.header();
     MsgBusPkgHeader hdr = *remoteHdr;
 
-		cout << "client2 got msg 101" << endl;
+		LOGD << "client2 got msg 101";
 
     // hdr.code(MsgCode::MsgTrans);
     hdr.from(client2.clientId());
@@ -63,25 +69,27 @@ TEST(MessageBusTest, MessageBusTest) {
   client3.start(6600, "127.0.0.1", 0);
   client3.on(2000, [](const MsgBusPackage& pkg) {});
 
+  this_thread::sleep_for(chrono::seconds(1));
+
   thread([&client3, &client2, &client1]() {
     do {
       this_thread::sleep_for(chrono::milliseconds(100));
-      cout << "start req" << endl;
+      LOGD << "start req";
 
       auto promise = client3.req(101, 1);
       auto pkg = promise->get(5 * 1000);
       if (pkg.get()) {
-        cout << "responsed: " << pkg->header()->msgId() << endl;
+        LOGD << "responsed: " << pkg->header()->msgId();
       } else {
-        cout << "response timeout" << endl;
+        LOGD << "response timeout";
       }
 
       promise = client3.req(101, 0);
       pkg = promise->get(5 * 1000);
       if (pkg.get()) {
-        cout << "responsed: " << pkg->header()->msgId() << endl;
+        LOGD << "responsed: " << pkg->header()->msgId();
       } else {
-        cout << "response timeout" << endl;
+        LOGD << "response timeout";
       }
     } while (false);
   }).join();

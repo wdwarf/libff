@@ -113,6 +113,15 @@ MsgBusPackagePtr MsgBusPackageHelper::getPackage() {
 
 /**
  *
+ * class ClientSession
+ *
+ */
+ClientSession::ClientSession() : m_clientId(0) {}
+
+ClientSession::~ClientSession() { cout << __func__ << endl; }
+
+/**
+ *
  * class PkgPromise
  *
  */
@@ -199,7 +208,9 @@ void MessageBusServer::onClientData(const uint8_t* data, uint32_t size,
   ClientSessionPtr session;
   {
     lock_guard<mutex> lk(this->m_clientsMutex);
-    session = this->m_clients[client];
+    auto it = this->m_clients.find(client);
+    if (it == this->m_clients.end()) return;
+    session = it->second;
   }
 
   session->m_pkgHelper.append(data, size);
@@ -216,9 +227,10 @@ void MessageBusServer::onClientData(const uint8_t* data, uint32_t size,
     if (MsgCode::Register == code) {
       uint32_t* data = (uint32_t*)pkg->data();
       uint32_t size = pkg->dataSize() / sizeof(uint32_t);
+
+      session->m_clientId = hdr->from();
+
       for (uint32_t i = 0; i < size; ++i) {
-        auto session = this->m_clients[client];
-        session->m_clientId = hdr->from();
         this->m_msgId2Clients[data[i]].insert(session);
       }
 
@@ -254,17 +266,15 @@ void MessageBusServer::onClientData(const uint8_t* data, uint32_t size,
 }
 
 void MessageBusServer::onAccept(const TcpConnectionPtr& client) {
-  cout << client->getSocket().getRemoteAddress() << ":"
+  cout << "msg bus client " << client->getSocket().getRemoteAddress() << ":"
        << client->getSocket().getRemotePort() << " connected" << endl;
-
+  this->addClient(client);
   client->onClose([this](const TcpConnectionPtr& client) {
-    cout << client->getSocket().getRemoteAddress() << ":"
+    cout << "msg bus client " << client->getSocket().getRemoteAddress() << ":"
          << client->getSocket().getRemotePort() << " disconnected" << endl;
     this->removeClient(client);
   });
   client->onData(Bind(&MessageBusServer::onClientData, this));
-
-  this->addClient(client);
 }
 
 void MessageBusServer::onClose(const TcpConnectionPtr& client) {
@@ -283,7 +293,14 @@ void MessageBusServer::addClient(const TcpConnectionPtr& client) {
 
 void MessageBusServer::removeClient(const TcpConnectionPtr& client) {
   lock_guard<mutex> lk(this->m_clientsMutex);
-  this->m_clients.erase(client);
+  auto it = this->m_clients.find(client);
+  if (it == this->m_clients.end()) return;
+
+  for (auto& p : this->m_msgId2Clients) {
+    p.second.erase(it->second);
+  }
+
+  this->m_clients.erase(it);
 }
 
 /**
@@ -348,8 +365,9 @@ bool MessageBusClient::start(uint16_t serverPort, const std::string& serverHost,
         this->m_conn->close();
         continue;
       }
+
       this->m_connected = true;
-      this->onConnected();
+      if (this->m_onConnectedFunc) this->m_onConnectedFunc();
       this->m_cond.wait_for(lk, chrono::milliseconds(10 * 1000));
     }
   }).detach();
@@ -368,8 +386,6 @@ bool MessageBusClient::stop() {
 void MessageBusClient::send(const MsgBusPackage& pkg) {
   this->m_conn->send(pkg.getData(), pkg.getSize());
 }
-
-void MessageBusClient::onConnected() { cout << "msg bus connected" << endl; }
 
 void MessageBusClient::onData(const uint8_t* data, uint32_t size,
                               const TcpConnectionPtr& client) {
@@ -397,6 +413,9 @@ void MessageBusClient::onData(const uint8_t* data, uint32_t size,
 void MessageBusClient::onClose(const TcpConnectionPtr& client) {
   cout << "msg bus closed" << endl;
   unique_lock<mutex> lk(this->m_mutex);
+  if (this->m_connected && this->m_onDisconnectedFunc) {
+    this->m_onDisconnectedFunc();
+  }
   this->m_connected = false;
   this->m_cond.notify_one();
 }
@@ -496,4 +515,16 @@ void MessageBusClient::handleRsp(const MsgBusPackage& pkg) {
   (it->second)->set(make_shared<MsgBusPackage>(pkg));
   this->m_pkgId2Promise.erase(pkgId);
 }
+
+void MessageBusClient::onConnected(MsbBusOnConnectedFunc func) {
+  lock_guard<mutex> lk(this->m_mutex);
+  this->m_onConnectedFunc = func;
+  if (this->m_connected && this->m_onConnectedFunc) this->m_onConnectedFunc();
+}
+
+void MessageBusClient::onDisconnected(MsbBusOnDisonnectedFunc func) {
+  lock_guard<mutex> lk(this->m_mutex);
+  this->m_onDisconnectedFunc = func;
+}
+
 NS_FF_END

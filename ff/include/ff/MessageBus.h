@@ -116,10 +116,13 @@ class LIBFF_API MsgBusPackageHelper {
   std::mutex m_mutex;
 };
 
-struct ClientSession {
+struct LIBFF_API ClientSession {
   uint32_t m_clientId;
   TcpConnectionPtr m_connection;
   MsgBusPackageHelper m_pkgHelper;
+
+  ClientSession();
+  ~ClientSession();
 };
 
 using ClientSessionPtr = std::shared_ptr<ClientSession>;
@@ -148,6 +151,8 @@ class LIBFF_API MessageBusServer {
   void removeClient(const TcpConnectionPtr& client);
 };
 
+using MsbBusOnConnectedFunc = std::function<void()>;
+using MsbBusOnDisonnectedFunc = std::function<void()>;
 using MsgBusReqFunc = std::function<void(const MsgBusPackage& pkg)>;
 
 class LIBFF_API MessageBusClient {
@@ -169,6 +174,8 @@ class LIBFF_API MessageBusClient {
   uint32_t clientId() const;
   void clientId(uint32_t id);
   bool isConnected() const;
+  void onConnected(MsbBusOnConnectedFunc func);
+  void onDisconnected(MsbBusOnDisonnectedFunc func);
 
  private:
   uint32_t m_clientId;
@@ -182,10 +189,11 @@ class LIBFF_API MessageBusClient {
   std::map<uint32_t, MsgBusReqFunc> msgId2Func;
   std::map<uint32_t, PkgPromise*> m_pkgId2Promise;
   std::mutex m_mutexPkgId2Promise;
+  MsbBusOnConnectedFunc m_onConnectedFunc;
+  MsbBusOnDisonnectedFunc m_onDisconnectedFunc;
 
   void removePromise(uint32_t pkgId);
 
-  void onConnected();
   void onData(const uint8_t* data, uint32_t size,
               const TcpConnectionPtr& client);
   void onClose(const TcpConnectionPtr& client);
