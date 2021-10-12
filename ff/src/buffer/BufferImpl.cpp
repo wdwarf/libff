@@ -45,7 +45,7 @@ Buffer::BufferImpl::BufferImpl(const Buffer::BufferImpl& buffer)
 }
 
 int Buffer::BufferImpl::read(void* buf, uint32_t size) {
-  long avaliableSize = this->getSize() - this->readPos;
+  uint32_t avaliableSize = this->getSize() - this->readPos;
   if (avaliableSize <= 0) return 0;
 
   uint32_t readSzie = avaliableSize > size ? size : avaliableSize;

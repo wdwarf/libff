@@ -471,7 +471,7 @@ int Socket::read(void* buf, socklen_t readBytes, int timeoutMs) {
 }
 
 int Socket::sendTo(const char* buf, socklen_t bufLen, const sockaddr* addr,
-                   size_t addrSize) {
+                   int addrSize) {
   if (INVALID_SOCKET == this->m_socketFd) return -1;
 
   if (this->m_useSelect) {

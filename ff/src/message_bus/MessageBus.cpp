@@ -118,7 +118,7 @@ MsgBusPackagePtr MsgBusPackageHelper::getPackage() {
  */
 ClientSession::ClientSession() : m_clientId(0) {}
 
-ClientSession::~ClientSession() { cout << __func__ << endl; }
+ClientSession::~ClientSession() {}
 
 /**
  *
@@ -368,7 +368,7 @@ bool MessageBusClient::start(uint16_t serverPort, const std::string& serverHost,
             ++this->m_heartbeatLossCnt;
             if (this->m_heartbeatLossCnt >= 3) {
               lock_guard<mutex> lk(this->m_mutex);
-              if(this->m_onHbLossFunc) this->m_onHbLossFunc();
+              if (this->m_onHbLossFunc) this->m_onHbLossFunc();
               this->m_conn->close();
               this->m_heartbeatLossCnt = 0;
             }
@@ -386,7 +386,9 @@ bool MessageBusClient::start(uint16_t serverPort, const std::string& serverHost,
       }
       if (!this->sendRegisterInfo()) {
         this->m_conn->close();
-        while(this->m_conn->getSocket().isConnected()){this_thread::sleep_for(chrono::milliseconds(100));}
+        while (this->m_conn->getSocket().isConnected()) {
+          this_thread::sleep_for(chrono::milliseconds(100));
+        }
         continue;
       }
 
@@ -438,7 +440,6 @@ void MessageBusClient::onData(const uint8_t* data, uint32_t size,
 }
 
 void MessageBusClient::onClose(const TcpConnectionPtr& client) {
-  cout << "msg bus closed" << endl;
   unique_lock<mutex> lk(this->m_mutex);
   if (this->m_connected && this->m_onDisconnectedFunc) {
     this->m_onDisconnectedFunc();

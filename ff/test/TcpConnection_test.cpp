@@ -52,7 +52,7 @@ TEST(TcpConnectionTest, TcpConnectionTest4) {
     // client = tcpSock;
     tcpSock->onData([&exitFlag, &svr](const uint8_t* data, uint32_t len,
                                       const TcpConnectionPtr& conn) {
-      LOGD << "data: " << Buffer::ToHexString(data, len) << endl;
+      LOGD << "data: " << Buffer::ToHexString(data, len);
       if ("exit" == String((const char*)data, len).trim()) {
         conn->close();
         exitFlag = true;
@@ -64,7 +64,7 @@ TEST(TcpConnectionTest, TcpConnectionTest4) {
       LOGD << "tcp client closed";
       // svr.stop();
       clients.erase(conn);
-      cout << clients.size() << endl;
+      LOGD << clients.size();
       if (exitFlag && clients.empty()) svr->close();
       // cout << "tcpSock.use_count(): " << tcpSock.use_count() << endl;
     });
@@ -80,7 +80,7 @@ TEST(TcpConnectionTest, TcpConnectionTest4) {
   clientPtr->onData([&clientPtr, &dataRecved](const uint8_t* data, uint32_t len,
                                               const TcpConnectionPtr& conn) {
     dataRecved = true;
-    LOGD << "server rsp data: " << Buffer::ToHexString(data, len) << endl;
+    LOGD << "server rsp data: " << Buffer::ToHexString(data, len);
     // clientPtr->send("exit", 4);
   });
   clientPtr->onClose(
@@ -1093,7 +1093,7 @@ TEST(TcpConnectionTest, TcpConnectionTest) {
           sock.setUseSelect(false);
 
           if (!sock.connect("192.168.2.53", 5678, 10000)) {
-            LOGE << "connect to server failed" << endl;
+            LOGE << "connect to server failed";
             continue;
           }
 
@@ -1171,7 +1171,7 @@ TEST(TcpConnectionTest, TcpConnectionTest6) {
     // client = tcpSock;
     tcpSock->onData([&exitFlag, &svr](const uint8_t* data, uint32_t len,
                                       const TcpConnectionPtr& conn) {
-      LOGD << "data: " << Buffer::ToHexString(data, len) << endl;
+      LOGD << "data: " << Buffer::ToHexString(data, len);
       if ("exit" == String((const char*)data, len).trim()) {
         conn->close();
         exitFlag = true;
@@ -1196,7 +1196,7 @@ TEST(TcpConnectionTest, TcpConnectionTest6) {
                      "fe80::aced:719b:c05d:5f5%ens33");
   clientPtr->onData([&clientPtr](const uint8_t* data, uint32_t len,
                                  const TcpConnectionPtr& conn) {
-    LOGD << "server rsp data: " << Buffer::ToHexString(data, len) << endl;
+    LOGD << "server rsp data: " << Buffer::ToHexString(data, len);
     clientPtr->send("exit", 4);
   });
   clientPtr->onClose(

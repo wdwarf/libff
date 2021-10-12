@@ -154,7 +154,7 @@ public:
 	int read(void* buf, socklen_t readBytes, int timeoutMs = -1);
 
 	int sendTo(const char* buf, socklen_t bufLen, const sockaddr* addr,
-			size_t addrSize);
+			int addrSize);
 	int sendTo(const char* buf, socklen_t bufLen, const std::string& host,
 			int port);
 	int recvFrom(char* buf, socklen_t readBytes, sockaddr_in& addr,

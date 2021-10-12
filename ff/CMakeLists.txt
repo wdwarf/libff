@@ -1,7 +1,11 @@
 
-cmake_minimum_required(VERSION 2.8.2)
+cmake_minimum_required(VERSION 2.8.12)
 project(ff LANGUAGES CXX)
-add_compile_options(-std=c++11 -g)
+
+set(PROJECT_VERSION "1")
+set(PROJECT_VERSION_MAJOR "1")
+set(PROJECT_VERSION_MINOR "0")
+set(PROJECT_VERSION_PATCH "0")
 
 MESSAGE(STATUS "operation system is ${CMAKE_SYSTEM}")
 
@@ -54,6 +58,7 @@ ELSEIF (WIN32)
 		zlibd
 		gtestd
   	gmockd
+		jsoncppd
 	)
 
 	else()
@@ -65,6 +70,7 @@ ELSEIF (WIN32)
 		zlib
 		gtest
   	gmock
+		jsoncpp
 	)
 
 	endif()
@@ -111,6 +117,8 @@ if(BUILDIN_ZLIB)
 else()
 
 	if(UNIX)
+		add_compile_options(-std=c++11 -g)
+	
 		set(EXTRA_LIBS
 			pthread
 			z

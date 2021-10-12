@@ -110,7 +110,7 @@ std::string RegistryValue::asString() {
       } break;
       case REG_BINARY: {
         stringstream str;
-        for (int i = 0; i < this->_data.getSize(); ++i) {
+        for (uint32_t i = 0; i < this->_data.getSize(); ++i) {
           unsigned short n = 0;
           memcpy(&n, this->_data.getData() + i, 1);
           str.width(2);

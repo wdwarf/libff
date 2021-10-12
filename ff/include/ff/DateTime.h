@@ -62,7 +62,7 @@ public:
 	bool operator<=(const DateTime& t) const;
 	bool operator>(const DateTime& t) const;
 	bool operator>=(const DateTime& t) const;
-	long operator-(const DateTime& t) const;
+	time_t operator-(const DateTime& t) const;
 
 	bool setSystemTime();
 

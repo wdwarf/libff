@@ -1,4 +1,4 @@
-/*
+﻿/*
  * ff_config.h
  *
  *  Created on: Aug 2, 2019
@@ -22,6 +22,11 @@
 #ifdef _WIN32
 #include <WinSock2.h>
 #include <Windows.h>
+
+#pragma warning(disable : 4251)
+#pragma warning(disable : 4275)
+#pragma warning(disable : 4819)
+
 #endif
 
 #ifndef LIBFF_API

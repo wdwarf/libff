@@ -197,7 +197,7 @@ bool DateTime::operator>=(const DateTime& t) const {
 	return (t.t >= this->t);
 }
 
-long DateTime::operator-(const DateTime& t) const {
+time_t DateTime::operator-(const DateTime& t) const {
 	return (this->t - t.t);
 }
 
