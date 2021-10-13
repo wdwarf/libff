@@ -34,6 +34,21 @@ using namespace std;
 
 NS_FF_BEG
 
+namespace {
+
+class __Init__ {
+ public:
+  __Init__() {
+#ifdef WIN32
+    WSADATA wsaData;
+    WSAStartup(MAKEWORD(2, 0), &wsaData);
+#endif
+  }
+};
+static __Init__ __init__;
+
+}  // namespace
+
 SockAddr_t& SockAddr::getAddr() { return m_addr; }
 
 const SockAddr_t& SockAddr::getAddr() const { return m_addr; }
@@ -180,12 +195,7 @@ Socket::Socket()
     : m_socketFd(INVALID_SOCKET),
       m_useSelect(true),
       m_ipVer(IpVersion::Unknown),
-      m_blockingType(SockBlockingType::Blocking) {
-#ifdef WIN32
-  WSADATA wsaData;
-  WSAStartup(MAKEWORD(2, 0), &wsaData);
-#endif
-}
+      m_blockingType(SockBlockingType::Blocking) {}
 
 Socket::Socket(int socketFd)
     : m_useSelect(true), m_blockingType(SockBlockingType::Blocking) {

@@ -23,6 +23,10 @@
 #include <WinSock2.h>
 #include <Windows.h>
 
+#pragma comment(lib, "ws2_32.lib")
+#pragma comment(lib, "winmm.lib")
+#pragma comment(lib, "wldap32.lib")
+
 #pragma warning(disable : 4251)
 #pragma warning(disable : 4275)
 #pragma warning(disable : 4819)
