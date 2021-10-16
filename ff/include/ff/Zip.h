@@ -26,18 +26,14 @@ class LIBFF_API Zip {
   void close();
   bool isOpened() const;
 
-  // 设定当前entry
   Zip &operator<<(const ZipEntry &entry) _throws(Exception);
-  /**
-   * 添加一个文件file到压缩包
-   * 文件会按原名称加入到当前entry，同zip(file);
-   */
   Zip &operator<<(const std::string &file) _throws(Exception);
+  Zip &write(const void* data, uint32_t size) _throws(Exception);
 
   /**
-   * 将源文件/目录src以名称newFileName加入到entry里去
+   * 将源文件/目录src以名称newFileName加入到parentEntry里去
    */
-  Zip &zip(const std::string &src, const std::string &entry = "",
+  Zip &zip(const std::string &src, const std::string &parentEntry = "",
            const std::string &newFileName = "") _throws(Exception);
 
   const std::string &getFilePath() const;

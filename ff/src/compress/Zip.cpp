@@ -49,10 +49,9 @@ static uLong GetFileTime(
   int ret = 0;
   {
     FILETIME ftLocal;
-    HANDLE hFind;
     WIN32_FIND_DATAA ff32;
 
-    hFind = FindFirstFileA(f, &ff32);
+    HANDLE hFind = FindFirstFileA(f, &ff32);
     if (hFind != INVALID_HANDLE_VALUE) {
       FileTimeToLocalFileTime(&(ff32.ftLastWriteTime), &ftLocal);
       FileTimeToDosDateTime(&ftLocal, ((LPWORD)dt) + 1, ((LPWORD)dt) + 0);
@@ -119,13 +118,14 @@ class Zip::ZipImpl {
 
   void setCurrentEntry(const ZipEntry &entry);
   void zipFileToCurrEntry(const std::string &file);
+  void writeToCurrEntry(istream &in);
+  void writeToCurrEntry(const void *data, uint32_t size);
 
   void zip(const std::string &src, const std::string &entry = "",
            const std::string &newFileName = "");
 
  private:
   std::string _filePath;
-  std::string _currentEntry;
   void *_zipFile;
   mutable std::recursive_mutex mutex;
 
@@ -173,12 +173,51 @@ const std::string &Zip::ZipImpl::getFilePath() const { return _filePath; }
 
 void Zip::ZipImpl::zipFileToCurrEntry(const std::string &file) {
   lock_guard<recursive_mutex> lk(this->mutex);
-  this->zip(file, this->_currentEntry);
+  fstream f(file, ios::in | ios::binary);
+  this->writeToCurrEntry(f);
+}
+
+void Zip::ZipImpl::writeToCurrEntry(istream &in) {
+  const int bufSize = 20480;
+  char buf[bufSize];
+  while (!in.eof()) {
+    in.read(buf, bufSize);
+    uint32_t readBytes = static_cast<uint32_t>(in.gcount());
+
+    if (readBytes <= 0) {
+      break;
+    }
+
+    if (0 != zipWriteInFileInZip(this->_zipFile, buf, readBytes)) {
+      THROW_EXCEPTION(Exception, "istream zip failed.", 0);
+    }
+  }
+}
+
+void Zip::ZipImpl::writeToCurrEntry(const void *data, uint32_t size) {
+  if (nullptr == data || 0 == size) return;
+
+  lock_guard<recursive_mutex> lk(this->mutex);
+  if (0 != zipWriteInFileInZip(this->_zipFile, data, size)) {
+    THROW_EXCEPTION(Exception, "buffer zip failed.", 0);
+  }
 }
 
 void Zip::ZipImpl::setCurrentEntry(const ZipEntry &entry) {
   lock_guard<recursive_mutex> lk(this->mutex);
-  this->_currentEntry = entry.getEntry();
+  zipCloseFileInZip(this->_zipFile);
+
+  zip_fileinfo zi;
+  memset(&zi, 0, sizeof(zi));
+
+  // GetFileTime(srcFile.getPath().c_str(), &zi.tmz_date, &zi.dosDate);
+
+  if (0 != zipOpenNewFileInZip(this->_zipFile, entry.getEntry().c_str(), &zi,
+                               NULL, 0, NULL, 0, NULL, Z_DEFLATED,
+                               Z_DEFAULT_COMPRESSION)) {
+    THROW_EXCEPTION(Exception, "open entry[" + entry.getEntry() + "] failed.",
+                    0);
+  }
 }
 
 void Zip::ZipImpl::zip(const std::string &src, const std::string &entry,
@@ -225,6 +264,7 @@ void Zip::ZipImpl::doZipRegFile(const std::string &src,
 
   GetFileTime(srcFile.getPath().c_str(), &zi.tmz_date, &zi.dosDate);
 
+  zipCloseFileInZip(this->_zipFile);
   if (0 != zipOpenNewFileInZip(this->_zipFile, zipFile.getPath().c_str(), &zi,
                                NULL, 0, NULL, 0, NULL, Z_DEFLATED,
                                Z_DEFAULT_COMPRESSION)) {
@@ -233,20 +273,7 @@ void Zip::ZipImpl::doZipRegFile(const std::string &src,
 
   fstream f;
   f.open(srcFile.getPath().c_str(), ios::in | ios::binary);
-  const int bufSize = 20480;
-  char buf[bufSize];
-  while (!f.eof()) {
-    f.read(buf, bufSize);
-    size_t readBytes = f.gcount();
-
-    if (readBytes <= 0) {
-      break;
-    }
-
-    if (0 != zipWriteInFileInZip(this->_zipFile, buf, readBytes)) {
-      THROW_EXCEPTION(Exception, "file[" + src + "] zip failed.", 0);
-    }
-  }
+  this->writeToCurrEntry(f);
 
   if (0 != zipCloseFileInZip(this->_zipFile)) {
     THROW_EXCEPTION(Exception, "file[" + src + "] zip failed.", 0);
@@ -280,6 +307,11 @@ Zip &Zip::operator<<(const ZipEntry &entry) {
 
 Zip &Zip::operator<<(const std::string &file) {
   this->impl->zipFileToCurrEntry(file);
+  return *this;
+}
+
+Zip &Zip::write(const void *data, uint32_t size) {
+  this->impl->writeToCurrEntry(data, size);
   return *this;
 }
 
