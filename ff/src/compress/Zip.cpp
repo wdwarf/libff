@@ -281,6 +281,17 @@ void Zip::ZipImpl::doZipRegFile(const std::string &src,
 }
 
 //////////////////////////////////////////////////////////
+// class ZipBuffer
+//////////////////////////////////////////////////////////
+
+ZipBuffer::ZipBuffer(const void *data, uint32_t size)
+    : m_data(data), m_size(size) {}
+
+const void *ZipBuffer::data() const { return this->m_data; }
+
+uint32_t ZipBuffer::size() const { return this->m_size; }
+
+//////////////////////////////////////////////////////////
 // class Zip
 //////////////////////////////////////////////////////////
 
@@ -305,8 +316,18 @@ Zip &Zip::operator<<(const ZipEntry &entry) {
   return *this;
 }
 
-Zip &Zip::operator<<(const std::string &file) {
-  this->impl->zipFileToCurrEntry(file);
+Zip &Zip::operator<<(const File &file) {
+  this->impl->zipFileToCurrEntry(file.getPath());
+  return *this;
+}
+
+Zip &Zip::operator<<(istream &stream) {
+  this->impl->writeToCurrEntry(stream);
+  return *this;
+}
+
+Zip &Zip::operator<<(const ZipBuffer &buffer) {
+  this->write(buffer.data(), buffer.size());
   return *this;
 }
 

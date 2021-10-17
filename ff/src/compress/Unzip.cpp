@@ -323,8 +323,9 @@ bool Unzip::unzipTo(const std::vector<std::string>& files,
 
     for (auto& file : files) {
       int err = UNZ_OK;
-      if (unzLocateFile(uf, file.c_str(), 0) != UNZ_OK) {
+      if (unzLocateFile(uf, File(file).getPath().c_str(), 0) != UNZ_OK) {
         THROW_EXCEPTION(Exception, "File[" + file + "] not found.", -1);
+        continue;
       }
 
       DoExtractFile(uf, overwrite, dir, password);

@@ -42,13 +42,18 @@ TEST(CompressTest, CompressTest) {
   Zip zip("compress_test.zip");
   zip.createNew();
   zip.zip("compress_test");
+  zip.zip("compress_test/sub_dir/hello.txt");
+  zip.zip("compress_test/sub_dir/hello2.txt");
   zip << ZipEntry("test/bb.txt");
-  zip << "compress_test/sub_dir/hello2.txt";
-  zip << ZipEntry("lala.txt");
-  zip << "compress_test/sub_dir/hello2.txt";
+  zip << File("compress_test/sub_dir/hello2.txt");
+  zip << ZipEntry("lala.txt") << File("compress_test/sub_dir/hello2.txt");
   zip.write("1234567890", 10);
-  zip << ZipEntry("bb2.txt");
-  zip << "compress_test/sub_dir/hello2.txt";
+  zip << ZipEntry("bb2.txt") << ZipBuffer("bb2.txt:", 8)
+      << File("compress_test/sub_dir/hello2.txt");
+  zip << ZipEntry("aa.jpg") << File("Z:\\Pictures\\2016-02-08\\_DSC1810.JPG");
+  fstream f(File("Z:\\Pictures\\2016-02-08\\_DSC1810.JPG"),
+            ios::in | ios::binary);
+  zip << ZipEntry("bb.jpg") << f;
   zip.close();
 
   Unzip unzip("compress_test.zip");
@@ -62,7 +67,11 @@ TEST(CompressTest, CompressTest) {
   }
 
   File("compress_test").remove(true);
-  unzip.unzipTo({"compress_test/hello1.txt", "compress_test/sub_dir/hello.txt"},
-                "test_dir", true);
+  unzip.unzipTo("test_dir", true);
+  unzip.unzipTo(
+      {"bb2.txt", "compress_test/not_exists.txt", "compress_test/hello1.txt"},
+      "test_dir1", true);
+  File("test_dir1").remove(true);
+  File("test_dir").remove(true);
   File("compress_test.zip").remove();
 }
