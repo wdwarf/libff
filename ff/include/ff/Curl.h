@@ -13,6 +13,18 @@ NS_FF_BEG
 using CurlHeaders = std::map<std::string, std::string>;
 using CurlParams = std::map<std::string, std::string>;
 
+enum class HttpMethod : uint8_t {
+  Get,
+  Post,
+  Put,
+  Delete,
+  Head,
+  Options,
+  Patch,
+  Trace,
+  Connect
+};
+
 class LIBFF_API Curl {
  public:
   Curl();
@@ -23,6 +35,9 @@ class LIBFF_API Curl {
 
   Curl& setUrl(const std::string& url);
   Curl& setHeaders(const CurlHeaders& headers);
+  Curl& setMethod(HttpMethod method);
+  Curl& setContentType(const std::string& contentType);
+  Curl& setBody(const std::string& body);
   Curl& setOAuth2Token(const std::string& token);
   Curl& setConnectTimeout(int64_t msTimeout);
   Curl& setReadTimeout(int64_t msTimeout);
@@ -54,8 +69,6 @@ class LIBFF_API Curl {
                               void* stream);
 };
 
-using HttpGet = Curl;
-
 class LIBFF_API HttpPost : public Curl {
  public:
   HttpPost();
@@ -71,21 +84,6 @@ class LIBFF_API HttpPost : public Curl {
  protected:
   curl_httppost* m_httppost;
   curl_httppost* m_httppostLast;
-};
-
-class LIBFF_API HttpPut : public Curl {
- public:
-  HttpPut& setContentType(const std::string& contentType);
-  HttpPut& setBody(const std::string& body);
-  CURLcode perform() override;
-
- private:
-  std::string m_body;
-};
-
-class LIBFF_API HttpDelete : public Curl {
- public:
-  CURLcode perform() override;
 };
 
 NS_FF_END

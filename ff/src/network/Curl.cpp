@@ -1,5 +1,5 @@
-#include <ff/Curl.h>
 #include <curl/curl.h>
+#include <ff/Curl.h>
 
 using namespace std;
 
@@ -91,6 +91,50 @@ Curl& Curl::setHeaders(const CurlHeaders& headers) {
   return *this;
 }
 
+Curl& Curl::setContentType(const std::string& contentType) {
+  this->setHeaders({{"Content-Type", contentType}});
+  return *this;
+}
+
+Curl& Curl::setBody(const std::string& body) {
+  this->setOption(CURLOPT_POSTFIELDS, body.c_str());
+  return *this;
+}
+
+Curl& Curl::setMethod(HttpMethod method) {
+  switch (method) {
+    case HttpMethod::Get:
+      this->setOption(CURLOPT_CUSTOMREQUEST, "GET");
+      break;
+    case HttpMethod::Post:
+      this->setOption(CURLOPT_CUSTOMREQUEST, "POST");
+      break;
+    case HttpMethod::Put:
+      this->setOption(CURLOPT_CUSTOMREQUEST, "PUT");
+      break;
+    case HttpMethod::Delete:
+      this->setOption(CURLOPT_CUSTOMREQUEST, "DELETE");
+      break;
+    case HttpMethod::Head:
+      this->setOption(CURLOPT_CUSTOMREQUEST, "HEAD");
+      break;
+    case HttpMethod::Options:
+      this->setOption(CURLOPT_CUSTOMREQUEST, "OPTIONS");
+      break;
+    case HttpMethod::Patch:
+      this->setOption(CURLOPT_CUSTOMREQUEST, "PATCH");
+      break;
+    case HttpMethod::Trace:
+      this->setOption(CURLOPT_CUSTOMREQUEST, "TRACE");
+      break;
+    case HttpMethod::Connect:
+      this->setOption(CURLOPT_CUSTOMREQUEST, "CONNECT");
+      break;
+  }
+
+  return *this;
+}
+
 std::stringstream& Curl::getOutputStream() { return this->m_outputStream; }
 
 Curl& Curl::setOAuth2Token(const std::string& token) {
@@ -142,33 +186,6 @@ HttpPost& HttpPost::setFormFile(const std::string& fieldName,
 
 CURLcode HttpPost::perform() {
   curl_easy_setopt(this->m_curl, CURLOPT_HTTPPOST, this->m_httppost);
-  return Curl::perform();
-}
-
-// ==================================================
-// ==================================================
-
-HttpPut& HttpPut::setContentType(const std::string& contentType) {
-  this->setHeaders({{"Content-Type", contentType}});
-  return *this;
-}
-
-HttpPut& HttpPut::setBody(const std::string& body) {
-  this->m_body = body;
-  this->setOption(CURLOPT_POSTFIELDS, m_body.c_str());
-  return *this;
-}
-
-CURLcode HttpPut::perform() {
-  this->setOption(CURLOPT_CUSTOMREQUEST, "PUT");
-  return Curl::perform();
-}
-
-// ==================================================
-// ==================================================
-
-CURLcode HttpDelete::perform() {
-  this->setOption(CURLOPT_CUSTOMREQUEST, "DELETE");
   return Curl::perform();
 }
 
