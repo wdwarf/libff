@@ -48,10 +48,12 @@ NS_FF_BEG
 
 //---------------------------------------------------------------------------
 
-unsigned char MD5::PADDING[] = { 0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-		0 };
+unsigned char MD5::PADDING[] = { 
+	0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+	0x00, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+	0x00, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+	0x00, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
+};
 
 //---------------------------------------------------------------------------
 
@@ -86,7 +88,7 @@ bool operator==(const std::string& md5Str, const MD5Result& md5Result){
 }
 
 MD5Result MD5::Generate(const void* encrypt, unsigned int length) {
-	MD5_CTX md5;
+	MD5Context md5;
 	MD5Result result;
 	memset(result.result, 0, 16);
 	MD5Init(&md5);
@@ -104,7 +106,7 @@ MD5Result MD5::Generate(string input) {
 //---------------------------------------------------------------------------
 
 MD5Result MD5::FileMD5CheckSum(const string& filePath) {
-	MD5_CTX md5;
+	MD5Context md5;
 	MD5Result result;
 	memset(result.result, 0, 16);
 	fstream f;
@@ -125,7 +127,7 @@ MD5Result MD5::FileMD5CheckSum(const string& filePath) {
 
 //---------------------------------------------------------------------------
 
-void MD5::MD5Init(MD5_CTX *context) {
+void MD5::MD5Init(MD5Context *context) {
 	context->count[0] = 0;
 	context->count[1] = 0;
 	context->state[0] = 0x67452301;
@@ -136,7 +138,7 @@ void MD5::MD5Init(MD5_CTX *context) {
 
 //---------------------------------------------------------------------------
 
-void MD5::MD5Update(MD5_CTX *context, const unsigned char *input,
+void MD5::MD5Update(MD5Context *context, const unsigned char *input,
 		unsigned int inputlen) {
 	unsigned int i = 0, index = 0, partlen = 0;
 	index = (context->count[0] >> 3) & 0x3F;
@@ -160,7 +162,7 @@ void MD5::MD5Update(MD5_CTX *context, const unsigned char *input,
 
 //---------------------------------------------------------------------------
 
-void MD5::MD5Final(MD5_CTX *context, unsigned char digest[16]) {
+void MD5::MD5Final(MD5Context *context, unsigned char digest[16]) {
 	unsigned int index = 0, padlen = 0;
 	unsigned char bits[8];
 	index = (context->count[0] >> 3) & 0x3F;
@@ -286,8 +288,42 @@ void MD5::MD5Transform(unsigned int state[4], const unsigned char block[64]) {
 
 //---------------------------------------------------------------------------
 
+MD5::MD5Context::MD5Context(){
+	memset(this, 0, sizeof(MD5::MD5Context));
+}
+
+//---------------------------------------------------------------------------
+
 MD5::MD5() {
-	//do nothing...
+	MD5Init(&this->m_ctx);
+}
+
+//---------------------------------------------------------------------------
+
+MD5::MD5(const void* buf, uint32_t len){
+	MD5Init(&this->m_ctx);
+	this->update(buf, len);
+}
+
+//---------------------------------------------------------------------------
+
+void MD5::update(const void* buf, uint32_t len){
+	MD5Update(&this->m_ctx, (const uint8_t*)buf, len);
+}
+
+//---------------------------------------------------------------------------
+
+MD5::operator MD5Result() const{
+	return this->result();
+}
+
+//---------------------------------------------------------------------------
+
+MD5Result MD5::result() const{
+	MD5Result re;
+	MD5Context ctx = this->m_ctx;
+	MD5Final(&ctx, re.result);
+	return re;
 }
 
 //---------------------------------------------------------------------------
