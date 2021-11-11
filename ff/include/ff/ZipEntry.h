@@ -13,7 +13,7 @@
 
 NS_FF_BEG
 
-class ZipEntry {
+class LIBFF_API ZipEntry {
 public:
 	explicit ZipEntry(const std::string& entry);
 	const std::string& getEntry() const;

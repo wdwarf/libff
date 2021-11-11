@@ -31,6 +31,7 @@ class TcpConnection;
 typedef std::shared_ptr<TcpConnection> TcpConnectionPtr;
 typedef std::function<void(const uint8_t*, uint32_t, const TcpConnectionPtr&)> OnDataFunc;
 typedef std::function<void(const TcpConnectionPtr&)> OnAcceptFunc;
+typedef std::function<void(const TcpConnectionPtr&)> OnConnectedFunc;
 typedef std::function<void(const TcpConnectionPtr&)> OnCloseFunc;
 
 class LIBFF_API TcpConnection: public std::enable_shared_from_this<TcpConnection> {
@@ -59,11 +60,14 @@ public:
 private:
 	
 #ifdef _WIN32
+	IocpContext m_iocpCtx;
+	TcpConnectionPtr m_pThis;
+	void active();
 	TcpConnection(IOCPPtr iocp = IOCPPtr(GIocp::getInstance(), [](void*){}));
 	TcpConnection(Socket&& socket, IOCPPtr iocp = IOCPPtr(GIocp::getInstance(), [](void*){}));
 #else
 	TcpConnection();
-	TcpConnection(Socket&& socket);
+	TcpConnection(int sock);
 #endif
 
 	
@@ -71,11 +75,10 @@ private:
 	TcpConnection& operator=(const TcpConnection&) = delete;
 
 #ifdef _WIN32
-	IocpContext m_context;
 	std::thread m_acceptThread;
-	void workThreadFunc(LPDWORD lpNumberOfBytesTransferred,
-		PULONG_PTR lpCompletionKey,
-		LPOVERLAPPED* lpOverlapped);
+	void workThreadFunc(DWORD numberOfBytesTransferred,
+                       ULONG_PTR completionKey, LPOVERLAPPED lpOverlapped);
+	bool postCloseEvent();
 	IOCPPtr m_iocp;
 #else
 	EPoll* m_ep;

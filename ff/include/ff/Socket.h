@@ -45,6 +45,10 @@ NS_FF_BEG
 	typedef int SocketFd;
 #endif
 
+#ifndef INVALID_SOCKET
+#define INVALID_SOCKET (-1)
+#endif
+
 #if 0
 enum class SocketType {
 	Stream = SOCK_STREAM,
@@ -61,8 +65,13 @@ enum class SocketType {
 
 typedef int SockType;
 
-enum class IpVersion : char {
+enum class IpVersion : uint8_t {
 	Unknown, V4, V6
+};
+
+enum class SockBlockingType: uint8_t{
+	Blocking,
+	NonBlocking
 };
 
 struct LIBFF_API SockAddr_t {
@@ -112,7 +121,7 @@ public:
 	Socket& shutdown(int type = SHUT_RDWR);
 	Socket& attach(int sockFd);
 	SocketFd dettach();
-	Socket& setBlocking(bool nonBlocking);
+	Socket& setBlocking(SockBlockingType blockingType);
 	bool isNonBlocking() const;
 	bool isUseSelect() const;
 	Socket& setUseSelect(bool useSelect);
@@ -141,11 +150,11 @@ public:
 	Socket accept(sockaddr_in6& addr);
 	Socket accept(sockaddr* addr, socklen_t* addrSize);
 
-	int send(const void* buf, socklen_t bufLen);
+	int send(const void* buf, socklen_t bufLen, int timeoutMs = 10 * 1000);
 	int read(void* buf, socklen_t readBytes, int timeoutMs = -1);
 
 	int sendTo(const char* buf, socklen_t bufLen, const sockaddr* addr,
-			size_t addrSize);
+			int addrSize);
 	int sendTo(const char* buf, socklen_t bufLen, const std::string& host,
 			int port);
 	int recvFrom(char* buf, socklen_t readBytes, sockaddr_in& addr,
@@ -154,7 +163,7 @@ public:
 			int timeoutMs = -1);
 	void enableUdpBroadcast(bool enable = true);
 
-	static bool SetBlocking(SocketFd sockFd, bool isNonBlocking = true);
+	static bool SetBlocking(SocketFd sockFd, SockBlockingType blockingType);
 	static bool IsNonBlocking(SocketFd sockFd);
 
 	static std::string Host2IpStr(const std::string& host);
@@ -165,6 +174,7 @@ private:
 	SocketFd m_socketFd;
 	bool m_useSelect;
 	IpVersion m_ipVer;
+	SockBlockingType m_blockingType;
 };
 
 typedef std::shared_ptr<Socket> SocketPtr;

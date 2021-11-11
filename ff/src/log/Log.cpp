@@ -82,13 +82,13 @@ Log& Log::operator()(const LogLevel &m_logLevel) {
 }
 
 Log& Log::done() {
-	string logInfo = this->str();
+	string logInfo = this->m_stream.str();
 
 	if (logInfo.empty())
 		return *this;
 
-	this->clear();
-	this->str("");
+	this->m_stream.clear();
+	this->m_stream.str("");
 
 	this->log(
 			LogInfo(this->m_logLevel, logInfo, this->m_module, Timestamp::now(),

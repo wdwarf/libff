@@ -4,7 +4,7 @@
  *  Created on: 2018年7月2日
  *      Author: admin
  */
-#if defined(WIN32) || defined(__MINGW32__)
+#if defined(_WIN32) || defined(WIN32) || defined(__MINGW32__)
 
 #include "ProcessImplWindows.h"
 #include <cstdlib>

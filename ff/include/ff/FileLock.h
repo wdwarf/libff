@@ -14,7 +14,7 @@
 
 NS_FF_BEG
 
-class FileLock {
+class LIBFF_API FileLock {
 public:
 	FileLock(const std::string& file);
 	~FileLock();

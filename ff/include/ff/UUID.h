@@ -16,7 +16,7 @@ NS_FF_BEG
 
 typedef uint8_t uuid_t[16];
 
-class Uuid {
+class LIBFF_API Uuid {
 public:
 	Uuid();
 	Uuid(const std::string& uuidStr);

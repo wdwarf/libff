@@ -21,11 +21,11 @@ Buffer::Buffer() :
 
 }
 
-Buffer::Buffer(unsigned int initSize) :
+Buffer::Buffer(uint32_t initSize) :
 		impl(new Buffer::BufferImpl(initSize)) {
 }
 
-Buffer::Buffer(const void* data, unsigned int size) :
+Buffer::Buffer(const void* data, uint32_t size) :
 		impl(new Buffer::BufferImpl(data, size)) {
 }
 
@@ -73,11 +73,11 @@ bool Buffer::operator==(const Buffer& buffer) {
 	return (0 == memcmp(this->getData(), buffer.getData(), this->getSize()));
 }
 
-void Buffer::attach(void* data, unsigned int size) {
+void Buffer::attach(void* data, uint32_t size) {
 	this->impl->attach(data, size);
 }
 
-void Buffer::append(const void* data, unsigned int size) {
+void Buffer::append(const void* data, uint32_t size) {
 	this->impl->append(data, size);
 }
 
@@ -85,11 +85,11 @@ void Buffer::append(const Buffer& buffer) {
 	this->impl->append(*buffer.impl);
 }
 
-unsigned char& Buffer::operator[](unsigned int index) {
+unsigned char& Buffer::operator[](uint32_t index) {
 	return this->impl->at(index);
 }
 
-const unsigned char& Buffer::operator[](unsigned int index) const {
+const unsigned char& Buffer::operator[](uint32_t index) const {
 	return this->impl->at(index);
 }
 
@@ -102,11 +102,11 @@ unsigned char* Buffer::getData() const {
 	return this->impl->getData();
 }
 
-unsigned int Buffer::getSize() const {
+uint32_t Buffer::getSize() const {
 	return this->impl->getSize();
 }
 
-void Buffer::resize(unsigned int size) {
+void Buffer::resize(uint32_t size) {
 	this->impl->resize(size);
 }
 
@@ -139,19 +139,23 @@ Buffer& Buffer::reverse() {
 	return *this;
 }
 
-void Buffer::alloc(unsigned int size) {
+void Buffer::alloc(uint32_t size) {
 	this->impl->alloc(size);
 }
 
-unsigned int Buffer::getCapacity() const {
+uint32_t Buffer::getCapacity() const {
 	return this->impl->getCapacity();
+}
+
+void Buffer::setCapacity(uint32_t capacity) {
+	return this->impl->setCapacity(capacity);
 }
 
 void Buffer::zero() {
 	this->impl->zero();
 }
 
-int Buffer::read(void* buf, unsigned int size) {
+int Buffer::read(void* buf, uint32_t size) {
 	return this->impl->read(buf, size);
 }
 
@@ -208,7 +212,7 @@ BUF_IN_OPERATOR_IMPL(short);
 BUF_IN_OPERATOR_IMPL(char);
 BUF_IN_OPERATOR_IMPL(unsigned long long);
 BUF_IN_OPERATOR_IMPL(unsigned long);
-BUF_IN_OPERATOR_IMPL(unsigned int);
+BUF_IN_OPERATOR_IMPL(uint32_t);
 BUF_IN_OPERATOR_IMPL(unsigned short);
 BUF_IN_OPERATOR_IMPL(unsigned char);
 BUF_IN_OPERATOR_IMPL(float);
@@ -221,7 +225,7 @@ BUF_OUT_OPERATOR_IMPL(short);
 BUF_OUT_OPERATOR_IMPL(char);
 BUF_OUT_OPERATOR_IMPL(unsigned long long);
 BUF_OUT_OPERATOR_IMPL(unsigned long);
-BUF_OUT_OPERATOR_IMPL(unsigned int);
+BUF_OUT_OPERATOR_IMPL(uint32_t);
 BUF_OUT_OPERATOR_IMPL(unsigned short);
 BUF_OUT_OPERATOR_IMPL(unsigned char);
 BUF_OUT_OPERATOR_IMPL(float);

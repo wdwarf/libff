@@ -9,14 +9,28 @@
 #define FF_COMPRESS_ZIP_H_
 
 #include <ff/Exception.h>
+#include <ff/File.h>
 #include <ff/Object.h>
 #include <ff/ZipEntry.h>
 
+#include <istream>
 #include <string>
 
 NS_FF_BEG
 
-class Zip {
+class LIBFF_API ZipBuffer {
+ public:
+  ZipBuffer(const void *data, uint32_t size);
+
+  const void *data() const;
+  uint32_t size() const;
+
+ private:
+  const void *m_data;
+  uint32_t m_size;
+};
+
+class LIBFF_API Zip {
  public:
   Zip(const std::string &filePath);
   virtual ~Zip();
@@ -26,18 +40,16 @@ class Zip {
   void close();
   bool isOpened() const;
 
-  // 设定当前entry
   Zip &operator<<(const ZipEntry &entry) _throws(Exception);
-  /**
-   * 添加一个文件file到压缩包
-   * 文件会按原名称加入到当前entry，同zip(file);
-   */
-  Zip &operator<<(const std::string &file) _throws(Exception);
+  Zip &operator<<(const ff::File &file) _throws(Exception);
+  Zip &operator<<(std::istream &stream) _throws(Exception);
+  Zip &operator<<(const ff::ZipBuffer &buffer) _throws(Exception);
+  Zip &write(const void *data, uint32_t size) _throws(Exception);
 
   /**
-   * 将源文件/目录src以名称newFileName加入到entry里去
+   * 将源文件/目录src以名称newFileName加入到parentEntry里去
    */
-  Zip &zip(const std::string &src, const std::string &entry = "",
+  Zip &zip(const std::string &src, const std::string &parentEntry = "",
            const std::string &newFileName = "") _throws(Exception);
 
   const std::string &getFilePath() const;

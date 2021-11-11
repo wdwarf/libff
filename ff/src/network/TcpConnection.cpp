@@ -5,518 +5,586 @@
  *      Author: liyawu
  */
 
-#include <iostream>
-#include <cstring>
 #include <errno.h>
 #include <ff/Bind.h>
 #include <ff/EPoll.h>
-#include <ff/StringWrapper.h>
 #include <ff/Exception.h>
+#include <ff/StringWrapper.h>
 #include <ff/TcpConnection.h>
-#include <ff/Bind.h>
+
+#include <cstring>
+#include <iostream>
 
 using namespace std;
 
-#define RD_BUF_SIZE 4096
+#define MAX_BUF_SIZE 8192
 
 NS_FF_BEG
 
 #ifdef _WIN32
 
-	// TcpConnection::TcpConnection() :
-	// 	m_isServer(false), m_readBuffer(RD_BUF_SIZE) {
-	// 	this->m_socket.setUseSelect(false);
-	// }
+enum class IocpEvent { Accept, Connected, Recv, Send, Close };
 
-	TcpConnection::TcpConnection(IOCPPtr iocp) :
-		m_isServer(false), m_readBuffer(RD_BUF_SIZE), m_iocp(iocp) {
-		this->m_socket.setUseSelect(false);
-	}
+struct IoContext : public OVERLAPPED {
+  IocpEvent iocpEevent;
+  char buf[MAX_BUF_SIZE];
+  WSABUF buffer;
 
-	TcpConnection::TcpConnection(Socket&& socket, IOCPPtr iocp) :
-		m_isServer(false), m_socket(std::move(socket)), m_readBuffer(RD_BUF_SIZE) {
-		this->m_socket.setUseSelect(false);
-		this->m_socket.setBlocking(true);
+  IoContext() {
+    memset(this, 0, sizeof(IoContext));
+    iocpEevent = IocpEvent::Recv;
+    buffer.buf = this->buf;
+    buffer.len = MAX_BUF_SIZE;
+  }
+};
 
-		this->m_iocp = iocp;
-		this->m_iocp->connect((HANDLE)this->m_socket.getHandle(), (ULONG_PTR)&m_context,
-			Bind(&TcpConnection::workThreadFunc, this));
-	}
+// TcpConnection::TcpConnection() :
+// 	m_isServer(false), m_readBuffer(MAX_BUF_SIZE) {
+// 	this->m_socket.setUseSelect(false);
+// }
 
-	TcpConnectionPtr TcpConnection::CreateInstance(IOCPPtr iocp){
-		return TcpConnectionPtr(new TcpConnection(iocp));
-	}
+TcpConnection::TcpConnection(IOCPPtr iocp)
+    : m_isServer(false), m_readBuffer(MAX_BUF_SIZE), m_iocp(iocp) {
+  this->m_socket.setUseSelect(false);
+}
 
-	TcpConnection::~TcpConnection() {
-		this->m_socket.close();
-		if (this->m_isServer) {
-			this->m_acceptThread.join();
-		}
-	}
+TcpConnection::TcpConnection(Socket&& socket, IOCPPtr iocp)
+    : m_isServer(false),
+      m_socket(std::move(socket)),
+      m_readBuffer(MAX_BUF_SIZE) {
+  this->m_socket.setUseSelect(false);
+  this->m_socket.setBlocking(SockBlockingType::NonBlocking);
 
-	bool TcpConnection::isServer() const {
-		return this->m_isServer;
-	}
+  this->m_iocp = iocp;
+}
 
-	void TcpConnection::resetCallbackFunctions() {
-		lock_guard<mutex> lk(this->m_mutex);
-		this->m_onDataFunc = nullptr;
-		this->m_onCloseFunc = nullptr;
-		this->m_onAcceptFunc = nullptr;
-		this->m_sendBuffers.clear();
-	}
+void TcpConnection::active() {
+  this->m_iocpCtx.handle = (HANDLE)this->m_socket.getHandle();
+  this->m_iocpCtx.eventFunc = Bind(&TcpConnection::workThreadFunc, this);
+  if (!this->m_iocp->connect(&this->m_iocpCtx)) {
+    /** FIXME how to do with this ?? */
+    return;
+  }
+  this->m_pThis = this->shared_from_this();
+  IoContext* ioCtx = new IoContext;
+  ioCtx->iocpEevent = IocpEvent::Connected;
+  this->m_iocp->postQueuedCompletionStatus(0, (ULONG_PTR) & this->m_iocpCtx,
+                                           ioCtx);
+}
 
-	void TcpConnection::workThreadFunc(LPDWORD lpNumberOfBytesTransferred,
-		PULONG_PTR lpCompletionKey,
-		LPOVERLAPPED* lpOverlapped)
-	{
-		PIocpContext context = (PIocpContext)*lpOverlapped;
-		if (nullptr == context) return;
+TcpConnectionPtr TcpConnection::CreateInstance(IOCPPtr iocp) {
+  return TcpConnectionPtr(new TcpConnection(iocp));
+}
 
-		switch (context->iocpEevent) {
-		case IocpEvent::Recv:
-		{
-			if (0 == *lpNumberOfBytesTransferred)
-			{
-				auto pThis = this->shared_from_this();
-				OnCloseFunc func;
-				{
-					lock_guard<mutex> lk(this->m_mutex);
-					func = this->m_onCloseFunc;
-				}
-				if (func)
-					func(pThis);
+TcpConnection::~TcpConnection() {
+  this->resetCallbackFunctions();
+  this->m_socket.close();
+  if (this->m_isServer) {
+    this->m_acceptThread.join();
+  }
+}
 
-				this->m_socket.close();
+bool TcpConnection::isServer() const { return this->m_isServer; }
 
-				break;
-			}
+void TcpConnection::resetCallbackFunctions() {
+  lock_guard<mutex> lk(this->m_mutex);
+  this->m_onDataFunc = nullptr;
+  this->m_onCloseFunc = nullptr;
+  this->m_onAcceptFunc = nullptr;
+  this->m_sendBuffers.clear();
+}
 
-			DWORD flags = MSG_PARTIAL;
-			DWORD numToRecvd = 0;
+void TcpConnection::workThreadFunc(DWORD numberOfBytesTransferred,
+                                   ULONG_PTR completionKey,
+                                   LPOVERLAPPED lpOverlapped) {
+  PIocpContext context = (PIocpContext)completionKey;
+  if (nullptr == context) return;
 
-			OnDataFunc func;
-			{
-				lock_guard<mutex> lk(this->m_mutex);
-				func = this->m_onDataFunc;
-			}
-			if (func)
-				func((const uint8_t*)context->buffer.buf, *lpNumberOfBytesTransferred,
-					this->shared_from_this());
+  IoContext* ioCtx = (IoContext*)lpOverlapped;
 
-			int ret = WSARecv(this->m_socket.getHandle(),
-				&m_context.buffer,
-				1,
-				&numToRecvd,
-				&flags,
-				&m_context,
-				NULL);
-			if (SOCKET_ERROR == ret)
-			{
-				if (WSA_IO_PENDING != WSAGetLastError())
-				{
-					OnCloseFunc func;
-					{
-						lock_guard<mutex> lk(this->m_mutex);
-						func = this->m_onCloseFunc;
-					}
-					if (func)
-						func(this->shared_from_this());
+  TcpConnectionPtr pThis;
 
-					this->m_socket.close();
-				}
-			}
+  try {
+    pThis = this->shared_from_this();
+  } catch (...) {
+    delete ioCtx;
+    return;
+  }
 
-			break;
-		}
-		case IocpEvent::Send:
-			break;
-		}
+  switch (ioCtx->iocpEevent) {
+    case IocpEvent::Connected: {
+      DWORD flags = 0;
+      DWORD numToRecvd = 0;
 
-	}
+      ioCtx->iocpEevent = IocpEvent::Recv;
+      int ret = WSARecv(this->m_socket.getHandle(), &ioCtx->buffer, 1,
+                        &numToRecvd, &flags, ioCtx, NULL);
+      if (SOCKET_ERROR == ret) {
+        auto error = WSAGetLastError();
+        if (WSA_IO_PENDING != error) {
+          cout << __func__ << " WSAGetLastError: " << error
+               << ", socket: " << this->m_socket.getHandle() << ", "
+               << this->m_socket.getRemoteAddress() << endl;
 
-	bool TcpConnection::listen(uint16_t port, const std::string& ip,
-		IpVersion ipVer, int backlog) {
-		// this->resetCallbackFunctions();
+          delete ioCtx;
+          this->close();
+        }
+      }
+      break;
+    }
 
-		try {
-			if (!this->m_socket.createTcp(ipVer))
-				THROW_EXCEPTION(Exception, "Create socket failed.", errno);
-			if (!this->m_socket.bind(port, ip))
-				THROW_EXCEPTION(Exception,
-					SW("Bind to ")(port)(":")(ip)(" failed. ")(strerror(errno)),
-					errno);
-			this->m_socket.listen(backlog);
-		}
-		catch (std::exception& e) {
-			this->m_socket.close();
-			return false;
-		}
+    case IocpEvent::Recv: {
+      if (0 == numberOfBytesTransferred) {
+        delete ioCtx;
+        this->close();
+        break;
+      }
 
-		this->m_isServer = true;
+      DWORD flags = 0;
+      DWORD numToRecvd = 0;
 
-		/** TODO start accept thread */
-		this->m_acceptThread = thread([this] {
-			SockAddr addr;
-			while (this->m_socket.getHandle() > 0) {
-				Socket client = this->m_socket.accept(addr);
-				if (client.getHandle() <= 0 || this->m_socket.getHandle() <= 0) break;
-				TcpConnectionPtr tcpSock = TcpConnectionPtr(
-					new TcpConnection(move(client)));
+      OnDataFunc func;
+      {
+        lock_guard<mutex> lk(this->m_mutex);
+        func = this->m_onDataFunc;
+      }
+      if (func)
+        func((const uint8_t*)ioCtx->buffer.buf, numberOfBytesTransferred,
+             pThis);
 
-				OnAcceptFunc func;
-				{
-					lock_guard<mutex> lk(this->m_mutex);
-					func = m_onAcceptFunc;
-				}
-				if (func)
-					func(tcpSock);
-			}
-			});
+      ioCtx->iocpEevent = IocpEvent::Recv;
+      int ret = WSARecv(this->m_socket.getHandle(), &ioCtx->buffer, 1,
+                        &numToRecvd, &flags, ioCtx, NULL);
+      if (SOCKET_ERROR == ret) {
+        auto error = WSAGetLastError();
+        if (WSA_IO_PENDING != error) {
+          cout << __func__ << " WSAGetLastError: " << error
+               << ", socket: " << this->m_socket.getHandle() << ", "
+               << this->m_socket.getRemoteAddress() << endl;
 
-			return true;
-	}
+          delete ioCtx;
+          this->close();
+        }
+      }
 
-	bool TcpConnection::connect(uint16_t remotePort, const std::string& remoteHost,
-		uint16_t localPort, const std::string& localIp) {
-		// this->resetCallbackFunctions();
+      break;
+    }
 
-		this->m_isServer = false;
-		try {
-			IpVersion ipVer = IpVersion::V4;
-			SockAddr addr(remoteHost, remotePort);
-			if (addr.isValid()) {
-				ipVer = addr.getVersion();
-			}
+    case IocpEvent::Send:
+      delete ioCtx;
+      break;
 
-			if (!this->m_socket.createTcp(ipVer))
-				THROW_EXCEPTION(Exception, "Create socket failed.", errno);
+    case IocpEvent::Close: {
+      delete ioCtx;
+      if (!this->m_pThis) {
+        break;
+      }
 
-			if (localPort > 0) {
-				if (!this->m_socket.bind(localPort, localIp))
-					THROW_EXCEPTION(Exception,
-						SW("Bind to ")(localPort)(":")(localIp)(" failed. ")(strerror(errno)),
-						errno);
-			}
+      OnCloseFunc func;
+      {
+        lock_guard<mutex> lk(this->m_mutex);
+        func = this->m_onCloseFunc;
+      }
 
-			if (!this->m_socket.connect(remoteHost, remotePort, 5000)) {
-				THROW_EXCEPTION(Exception,
-					SW("Connect to ")(remoteHost)(":")(remotePort)(" failed.")(strerror(errno)),
-					errno);
-			}
+      if (func) func(pThis);
+      this->m_socket.close();
+      this->m_pThis = nullptr;
+      break;
+    }
+  }
+}
 
-			this->m_socket.setBlocking(true);
+bool TcpConnection::listen(uint16_t port, const std::string& ip,
+                           IpVersion ipVer, int backlog) {
+  // this->resetCallbackFunctions();
 
-		}
-		catch (std::exception& e) {
-			this->m_socket.close();
-			return false;
-		}
+  try {
+    if (!this->m_socket.createTcp(ipVer))
+      THROW_EXCEPTION(Exception, "Create socket failed.", errno);
+    if (!this->m_socket.bind(port, ip))
+      THROW_EXCEPTION(
+          Exception,
+          SW("Bind to ")(port)(":")(ip)(" failed. ")(strerror(errno)), errno);
+    this->m_socket.listen(backlog);
+  } catch (std::exception& e) {
+    this->m_socket.close();
+    return false;
+  }
 
-		/** TODO add to iocp */
-		this->m_iocp->connect((HANDLE)this->m_socket.getHandle(), this->m_socket.getHandle(),
-			Bind(&TcpConnection::workThreadFunc, this));
-		return true;
-	}
+  this->m_isServer = true;
 
-	void TcpConnection::close() {
-		this->m_socket.shutdown();
+  /** TODO start accept thread */
+  this->m_acceptThread = thread([this] {
+    auto pThis = this->shared_from_this();
+    SockAddr addr;
+    while (INVALID_SOCKET != this->m_socket.getHandle()) {
+      Socket client = this->m_socket.accept(addr);
+      if (client.getHandle() <= 0 || INVALID_SOCKET == client.getHandle() ||
+          INVALID_SOCKET == this->m_socket.getHandle())
+        break;
+      TcpConnectionPtr tcpSock =
+          TcpConnectionPtr(new TcpConnection(move(client), this->m_iocp));
+      tcpSock->m_pThis = tcpSock;
 
-		OnCloseFunc func;
-		{
-			lock_guard<mutex> lk(this->m_mutex);
-			func = this->m_onCloseFunc;
-		}
-		if (!func) {
-			this->m_socket.close();
-		}
-	}
+      OnAcceptFunc func;
+      {
+        lock_guard<mutex> lk(this->m_mutex);
+        func = m_onAcceptFunc;
+      }
+      if (func) func(tcpSock);
+      tcpSock->active();
+    }
 
-	Socket& TcpConnection::getSocket() {
-		return this->m_socket;
-	}
+    if (this->m_onCloseFunc) this->m_onCloseFunc(pThis);
+  });
 
-	void TcpConnection::send(const void* buf, uint32_t bufSize) {
-		if (this->m_isServer)
-			return;
-		this->m_socket.send(buf, bufSize);
-	}
+  return true;
+}
 
-	TcpConnection& TcpConnection::onAccept(const OnAcceptFunc& func) {
-		lock_guard<mutex> lk(this->m_mutex);
-		this->m_onAcceptFunc = func;
-		return *this;
-	}
+bool TcpConnection::connect(uint16_t remotePort, const std::string& remoteHost,
+                            uint16_t localPort, const std::string& localIp) {
+  // this->resetCallbackFunctions();
 
-	TcpConnection& TcpConnection::onData(const OnDataFunc& func) {
-		lock_guard<mutex> lk(this->m_mutex);
-		this->m_onDataFunc = func;
+  this->m_isServer = false;
+  try {
+    IpVersion ipVer = IpVersion::V4;
+    SockAddr addr(remoteHost, remotePort);
+    if (addr.isValid()) {
+      ipVer = addr.getVersion();
+    }
 
-		DWORD flags = MSG_PARTIAL;
-		DWORD numToRecvd = 0;
+    if (!this->m_socket.createTcp(ipVer))
+      THROW_EXCEPTION(Exception, "Create socket failed.", errno);
 
-		m_context.handle = (HANDLE)this->m_socket.getHandle();
-		m_context.iocpEevent = IocpEvent::Recv;
-		m_context.buffer.buf = (char*)this->m_readBuffer.getData();
-		m_context.buffer.len = this->m_readBuffer.getSize();
+    if (localPort > 0) {
+      if (!this->m_socket.bind(localPort, localIp))
+        THROW_EXCEPTION(Exception,
+                        SW("Bind to ")(localPort)(
+                            ":")(localIp)(" failed. ")(strerror(errno)),
+                        errno);
+    }
 
-		int ret = WSARecv(this->m_socket.getHandle(),
-			&m_context.buffer,
-			1,
-			&numToRecvd,
-			&flags,
-			&m_context,
-			NULL);
+    if (!this->m_socket.connect(remoteHost, remotePort, 5000)) {
+      THROW_EXCEPTION(Exception,
+                      SW("Connect to ")(remoteHost)(
+                          ":")(remotePort)(" failed.")(strerror(errno)),
+                      errno);
+    }
 
-		return *this;
-	}
+    this->m_socket.setBlocking(SockBlockingType::NonBlocking);
 
-	TcpConnection& TcpConnection::onClose(const OnCloseFunc& func) {
-		lock_guard<mutex> lk(this->m_mutex);
-		this->m_onCloseFunc = func;
-		return *this;
-	}
+  } catch (std::exception& e) {
+    this->m_socket.close();
+    return false;
+  }
+
+  /** TODO add to iocp */
+  this->active();
+
+  return true;
+}
+
+void TcpConnection::close() { this->postCloseEvent(); }
+
+Socket& TcpConnection::getSocket() { return this->m_socket; }
+
+void TcpConnection::send(const void* buf, uint32_t bufSize) {
+  if (this->m_isServer) return;
+
+  lock_guard<mutex> lk(this->m_sendMutex);
+
+  uint32_t sendCnt = bufSize / MAX_BUF_SIZE;
+  if (0 != (bufSize % MAX_BUF_SIZE)) ++sendCnt;
+
+  const char* p = (const char*)buf;
+  for (uint32_t i = 0; i < sendCnt; ++i) {
+    uint32_t bytes2Send = ((bufSize - MAX_BUF_SIZE * i) >= MAX_BUF_SIZE)
+                              ? MAX_BUF_SIZE
+                              : (bufSize % MAX_BUF_SIZE);
+
+    IoContext* context = new IoContext();
+    context->iocpEevent = IocpEvent::Send;
+    // context->buffer.buf = new char[bufSize];
+    // context->buffer.len = bufSize;
+    memcpy(context->buffer.buf, p, bytes2Send);
+    context->buffer.len = bytes2Send;
+    p += bytes2Send;
+    DWORD dwOfBytesSent = 0;
+    int re = WSASend(this->m_socket.getHandle(), &context->buffer, 1,
+                     &dwOfBytesSent, 0, context, NULL);
+    // cout << "send ret:" << re << endl;
+    auto err = WSAGetLastError();
+    if (SOCKET_ERROR == re && err != WSA_IO_PENDING) {
+      cout << "send failed, errno: " << err << ", buf: " << Buffer(context->buffer.buf, bytes2Send).toHexString() << endl;
+      // this->m_socket.shutdown();
+      // this->m_socket.close();
+      this->close();
+
+      delete context;
+    }
+  }
+}
+
+bool TcpConnection::postCloseEvent() {
+  if (this->m_isServer) return false;
+  IoContext* context = new IoContext();
+  context->iocpEevent = IocpEvent::Close;
+  if (!this->m_iocp->postQueuedCompletionStatus(
+          0, (ULONG_PTR) & this->m_iocpCtx, context)) {
+    delete context;
+    return false;
+  }
+  return true;
+}
+
+TcpConnection& TcpConnection::onAccept(const OnAcceptFunc& func) {
+  lock_guard<mutex> lk(this->m_mutex);
+  this->m_onAcceptFunc = func;
+  return *this;
+}
+
+TcpConnection& TcpConnection::onData(const OnDataFunc& func) {
+  lock_guard<mutex> lk(this->m_mutex);
+  this->m_onDataFunc = func;
+
+  return *this;
+}
+
+TcpConnection& TcpConnection::onClose(const OnCloseFunc& func) {
+  lock_guard<mutex> lk(this->m_mutex);
+  this->m_onCloseFunc = func;
+  return *this;
+}
 
 #else
 
-	TcpConnection::TcpConnection() :
-		m_isServer(false), m_readBuffer(RD_BUF_SIZE) {
-		this->m_socket.setUseSelect(false);
-		this->m_ep = &PollMgr::instance().getEPoll();
-	}
+TcpConnection::TcpConnection() : m_isServer(false), m_readBuffer(MAX_BUF_SIZE) {
+  this->m_socket.setUseSelect(false);
+  this->m_ep = &PollMgr::instance().getEPoll();
+}
 
-	TcpConnection::TcpConnection(Socket&& socket) :
-		m_isServer(false), m_socket(std::move(socket)), m_readBuffer(RD_BUF_SIZE) {
-		this->m_socket.setUseSelect(false);
-		this->m_ep = &PollMgr::instance().getEPoll();
-		this->m_ep->addFd(this->m_socket.getHandle(),
-			Bind(&TcpConnection::onSocketUpdate, this));
-	}
+TcpConnection::TcpConnection(int sock)
+    : m_isServer(false), m_socket(sock), m_readBuffer(MAX_BUF_SIZE) {
+  this->m_socket.setUseSelect(false);
+  this->m_ep = &PollMgr::instance().getEPoll();
+  this->m_ep->addFd(this->m_socket.getHandle(),
+                    Bind(&TcpConnection::onSocketUpdate, this));
+}
 
-	TcpConnection::~TcpConnection() {
-		this->m_ep->delFd(this->m_socket.getHandle());
-		this->m_socket.close();
-	}
+TcpConnection::~TcpConnection() {
+  this->m_ep->delFd(this->m_socket.getHandle());
+  this->m_socket.close();
+}
 
-	bool TcpConnection::isServer() const {
-		return this->m_isServer;
-	}
+bool TcpConnection::isServer() const { return this->m_isServer; }
 
-	void TcpConnection::resetCallbackFunctions() {
-		lock_guard<mutex> lk(this->m_mutex);
-		this->m_onDataFunc = nullptr;
-		this->m_onCloseFunc = nullptr;
-		this->m_onAcceptFunc = nullptr;
-		this->m_sendBuffers.clear();
-	}
+void TcpConnection::resetCallbackFunctions() {
+  lock_guard<mutex> lk(this->m_mutex);
+  this->m_onDataFunc = nullptr;
+  this->m_onCloseFunc = nullptr;
+  this->m_onAcceptFunc = nullptr;
+  this->m_sendBuffers.clear();
+}
 
-	bool TcpConnection::listen(uint16_t port, const std::string& ip,
-		IpVersion ipVer, int backlog) {
-		this->resetCallbackFunctions();
+bool TcpConnection::listen(uint16_t port, const std::string& ip,
+                           IpVersion ipVer, int backlog) {
+  // this->resetCallbackFunctions();
 
-		try {
-			if (!this->m_socket.createTcp(ipVer))
-				THROW_EXCEPTION(Exception, "Create socket failed.", errno);
-			if (!this->m_socket.bind(port, ip))
-				THROW_EXCEPTION(Exception,
-					SW("Bind to ")(port)(":")(ip)(" failed. ")(strerror(errno)),
-					errno);
-			this->m_socket.listen(backlog);
-		}
-		catch (std::exception& e) {
-			this->m_socket.close();
-			return false;
-		}
+  try {
+    if (!this->m_socket.createTcp(ipVer))
+      THROW_EXCEPTION(Exception, "Create socket failed.", errno);
+    if (!this->m_socket.bind(port, ip))
+      THROW_EXCEPTION(
+          Exception,
+          SW("Bind to ")(port)(":")(ip)(" failed. ")(strerror(errno)), errno);
+    this->m_socket.listen(backlog);
+  } catch (std::exception& e) {
+    this->m_socket.close();
+    return false;
+  }
 
-		this->m_isServer = true;
-		this->m_ep->addFd(this->m_socket.getHandle(),
-			Bind(&TcpConnection::onSocketUpdate, this));
-		return true;
-	}
+  this->m_isServer = true;
+  this->m_ep->addFd(this->m_socket.getHandle(),
+                    Bind(&TcpConnection::onSocketUpdate, this));
+  this->m_ep->addEvents(this->m_socket.getHandle(), POLLIN);
+  return true;
+}
 
-	bool TcpConnection::connect(uint16_t remotePort, const std::string& remoteHost,
-		uint16_t localPort, const std::string& localIp) {
-		this->resetCallbackFunctions();
+bool TcpConnection::connect(uint16_t remotePort, const std::string& remoteHost,
+                            uint16_t localPort, const std::string& localIp) {
+  // this->resetCallbackFunctions();
 
-		this->m_isServer = false;
-		try {
-			IpVersion ipVer = IpVersion::V4;
-			SockAddr addr(remoteHost, remotePort);
-			if (addr.isValid()) {
-				ipVer = addr.getVersion();
-			}
+  this->m_isServer = false;
+  try {
+    IpVersion ipVer = IpVersion::V4;
+    SockAddr addr(remoteHost, remotePort);
+    if (addr.isValid()) {
+      ipVer = addr.getVersion();
+    }
 
-			if (this->m_socket.createTcp(ipVer) <= 0)
-				THROW_EXCEPTION(Exception, "Create socket failed.", errno);
+    if (!this->m_socket.createTcp(ipVer))
+      THROW_EXCEPTION(Exception, "Create socket failed.", errno);
 
-			if (localPort > 0) {
-				if (!this->m_socket.bind(localPort, localIp))
-					THROW_EXCEPTION(Exception,
-						SW("Bind to ")(localPort)(":")(localIp)(" failed. ")(strerror(errno)),
-						errno);
-			}
+    if (localPort > 0) {
+      if (!this->m_socket.bind(localPort, localIp))
+        THROW_EXCEPTION(Exception,
+                        SW("Bind to ")(localPort)(
+                            ":")(localIp)(" failed. ")(strerror(errno)),
+                        errno);
+    }
 
-			if (!this->m_socket.connect(remoteHost, remotePort, 5000)) {
-				THROW_EXCEPTION(Exception,
-					SW("Connect to ")(remoteHost)(":")(remotePort)(" failed.")(strerror(errno)),
-					errno);
-			}
+    if (!this->m_socket.connect(remoteHost, remotePort, 5000)) {
+      THROW_EXCEPTION(Exception,
+                      SW("Connect to ")(remoteHost)(
+                          ":")(remotePort)(" failed.")(strerror(errno)),
+                      errno);
+    }
 
-		}
-		catch (std::exception& e) {
-			this->m_socket.close();
-			return false;
-		}
+  } catch (std::exception& e) {
+    this->m_socket.close();
+    return false;
+  }
 
-		this->m_ep->addFd(this->m_socket.getHandle(),
-			Bind(&TcpConnection::onSocketUpdate, this));
-		return true;
-	}
+  this->m_ep->addFd(this->m_socket.getHandle(),
+                    Bind(&TcpConnection::onSocketUpdate, this));
+  this->m_ep->addEvents(this->m_socket.getHandle(), POLLIN);
+  return true;
+}
 
-	void TcpConnection::close() {
-		this->m_socket.shutdown();
+void TcpConnection::close() {
+  this->m_socket.shutdown();
 
-		OnCloseFunc func;
-		{
-			lock_guard<mutex> lk(this->m_mutex);
-			func = this->m_onCloseFunc;
-		}
-		if (!func) {
-			this->m_ep->delFd(this->m_socket.getHandle());
-			this->m_socket.close();
-		}
-	}
+  OnCloseFunc func;
+  {
+    lock_guard<mutex> lk(this->m_mutex);
+    func = this->m_onCloseFunc;
+  }
+  if (!func) {
+    this->m_ep->delFd(this->m_socket.getHandle());
+    this->m_socket.close();
+  }
+}
 
-	Socket& TcpConnection::getSocket() {
-		return this->m_socket;
-	}
+Socket& TcpConnection::getSocket() { return this->m_socket; }
 
-	void TcpConnection::send(const void* buf, uint32_t bufSize) {
-		if (this->m_isServer)
-			return;
+void TcpConnection::send(const void* buf, uint32_t bufSize) {
+  if (this->m_isServer) return;
 
-		lock_guard<mutex> lk(this->m_sendMutex);
-		this->m_sendBuffers.push_back(BufferPtr(new Buffer(buf, bufSize)));
+  lock_guard<mutex> lk(this->m_sendMutex);
+  this->m_sendBuffers.push_back(BufferPtr(new Buffer(buf, bufSize)));
 
-		if (1 == this->m_sendBuffers.size())
-			this->m_ep->addEvents(this->m_socket.getHandle(),
-				POLLOUT);
-	}
+  if (1 == this->m_sendBuffers.size())
+    this->m_ep->addEvents(this->m_socket.getHandle(), POLLOUT);
+}
 
-	TcpConnection& TcpConnection::onAccept(const OnAcceptFunc& func) {
-		lock_guard<mutex> lk(this->m_mutex);
-		this->m_onAcceptFunc = func;
-		this->m_ep->addEvents(this->m_socket.getHandle(),
-			POLLIN);
-		return *this;
-	}
+TcpConnection& TcpConnection::onAccept(const OnAcceptFunc& func) {
+  lock_guard<mutex> lk(this->m_mutex);
+  this->m_onAcceptFunc = func;
+  this->m_ep->addEvents(this->m_socket.getHandle(), POLLIN);
+  return *this;
+}
 
-	TcpConnection& TcpConnection::onData(const OnDataFunc& func) {
-		lock_guard<mutex> lk(this->m_mutex);
-		this->m_onDataFunc = func;
-		this->m_ep->addEvents(this->m_socket.getHandle(),
-			POLLIN);
-		return *this;
-	}
+TcpConnection& TcpConnection::onData(const OnDataFunc& func) {
+  lock_guard<mutex> lk(this->m_mutex);
+  this->m_onDataFunc = func;
+  this->m_ep->addEvents(this->m_socket.getHandle(), POLLIN);
+  return *this;
+}
 
-	TcpConnection& TcpConnection::onClose(const OnCloseFunc& func) {
-		lock_guard<mutex> lk(this->m_mutex);
-		this->m_onCloseFunc = func;
-		this->m_ep->addEvents(this->m_socket.getHandle(),
-			POLLHUP);
-		return *this;
-	}
+TcpConnection& TcpConnection::onClose(const OnCloseFunc& func) {
+  lock_guard<mutex> lk(this->m_mutex);
+  this->m_onCloseFunc = func;
+  this->m_ep->addEvents(this->m_socket.getHandle(), POLLHUP);
+  return *this;
+}
 
-	void TcpConnection::onSvrSocketUpdate(int fd, int events) {
-		if (events & POLLIN) {
-			SockAddr addr;
-			auto sock = this->m_socket.accept(addr);
-			TcpConnectionPtr tcpSock = TcpConnectionPtr(
-				new TcpConnection(move(sock)));
+void TcpConnection::onSvrSocketUpdate(int fd, int events) {
+  if (events & POLLIN) {
+    SockAddr addr;
+    auto sock = this->m_socket.accept(addr);
+    if (sock.getHandle() <= 0) return;
+    TcpConnectionPtr tcpSock =
+        TcpConnectionPtr(new TcpConnection(sock.getHandle()));
+    sock.dettach();
 
-			OnAcceptFunc func;
-			{
-				lock_guard<mutex> lk(this->m_mutex);
-				func = m_onAcceptFunc;
-			}
-			if (func)
-				func(tcpSock);
-		}
+    OnAcceptFunc func;
+    {
+      lock_guard<mutex> lk(this->m_mutex);
+      func = m_onAcceptFunc;
+    }
+    if (func) func(tcpSock);
+  }
 
-		if (events & POLLHUP) {
-			this->m_ep->delFd(this->m_socket.getHandle());
-			this->m_socket.close();
+  if (events & POLLHUP) {
+    this->m_ep->delFd(this->m_socket.getHandle());
+    this->m_socket.close();
 
-			OnCloseFunc func;
-			{
-				lock_guard<mutex> lk(this->m_mutex);
-				func = m_onCloseFunc;
-			}
-			if (func)
-				func(this->shared_from_this());
-		}
-	}
+    OnCloseFunc func;
+    {
+      lock_guard<mutex> lk(this->m_mutex);
+      func = m_onCloseFunc;
+    }
+    if (func) func(this->shared_from_this());
+  }
+}
 
-	void TcpConnection::onClientSocketUpdate(int fd, int events) {
-		if (events & POLLIN) {
-			int readBytes = this->m_socket.read(m_readBuffer.getData(),
-				m_readBuffer.getSize());
-			if (readBytes <= 0) {
-				this->m_socket.shutdown();
-			}
-			else {
-				OnDataFunc func;
-				{
-					lock_guard<mutex> lk(this->m_mutex);
-					func = this->m_onDataFunc;
-				}
-				if (func)
-					func((const uint8_t*)m_readBuffer.getData(), readBytes,
-						this->shared_from_this());
-			}
-		}
+void TcpConnection::onClientSocketUpdate(int fd, int events) {
+  if (events & POLLHUP) {
+    this->m_ep->delFd(this->m_socket.getHandle());
 
-		if (events & POLLOUT) {
-			BufferPtr buffer;
-			{
-				lock_guard<mutex> lk(this->m_sendMutex);
-				if (!this->m_sendBuffers.empty()) {
-					buffer = this->m_sendBuffers.front();
-					this->m_sendBuffers.pop_front();
-				}
-				else {
-					this->m_ep->delEvents(this->m_socket.getHandle(), POLLOUT);
-				}
-			}
+    OnCloseFunc func;
+    {
+      lock_guard<mutex> lk(this->m_mutex);
+      func = m_onCloseFunc;
+    }
+    if (func) func(this->shared_from_this());
+    // this->m_socket.close();
+    return;
+  }
 
-			if (buffer) {
-				this->m_socket.send(buffer->getData(), buffer->getSize());
-			}
-		}
+  if (events & POLLIN) {
+    int readBytes =
+        this->m_socket.read(m_readBuffer.getData(), m_readBuffer.getSize());
+    if (readBytes <= 0) {
+      this->m_socket.shutdown();
+    } else {
+      OnDataFunc func;
+      {
+        lock_guard<mutex> lk(this->m_mutex);
+        func = this->m_onDataFunc;
+      }
+      if (func)
+        func((const uint8_t*)m_readBuffer.getData(), readBytes,
+             this->shared_from_this());
+    }
+  }
 
-		if (events & POLLHUP) {
-			this->m_ep->delFd(this->m_socket.getHandle());
-			this->m_socket.close();
+  if (events & POLLOUT) {
+    BufferPtr buffer;
+    {
+      lock_guard<mutex> lk(this->m_sendMutex);
+      if (!this->m_sendBuffers.empty()) {
+        buffer = this->m_sendBuffers.front();
+        this->m_sendBuffers.pop_front();
+      } else {
+        this->m_ep->delEvents(this->m_socket.getHandle(), POLLOUT);
+      }
+    }
 
-			OnCloseFunc func;
-			{
-				lock_guard<mutex> lk(this->m_mutex);
-				func = m_onCloseFunc;
-			}
-			if (func)
-				func(this->shared_from_this());
-		}
-	}
+    if (buffer) {
+      this->m_socket.send(buffer->getData(), buffer->getSize());
+    }
+  }
+}
 
-	void TcpConnection::onSocketUpdate(int fd, int events) {
-		(this->m_isServer ?
-			this->onSvrSocketUpdate(fd, events) :
-			this->onClientSocketUpdate(fd, events));
-	}
+void TcpConnection::onSocketUpdate(int fd, int events) {
+  (this->m_isServer ? this->onSvrSocketUpdate(fd, events)
+                    : this->onClientSocketUpdate(fd, events));
+}
 
-	TcpConnectionPtr TcpConnection::CreateInstance() {
-		return TcpConnectionPtr(new TcpConnection);
-	}
+TcpConnectionPtr TcpConnection::CreateInstance() {
+  return TcpConnectionPtr(new TcpConnection);
+}
 
 #endif
 

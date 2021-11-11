@@ -17,7 +17,7 @@ NS_FF_BEG
 
 using CliMembers = std::map<std::string, Variant>;
 
-class CliResult{
+class LIBFF_API CliResult{
 public:
 	CliResult();
 	CliResult(uint32_t code, const std::string& data);
@@ -37,7 +37,7 @@ private:
 	std::string m_data;
 };
 
-class CliPacket {
+class LIBFF_API CliPacket {
 public:
 	CliPacket();
 	CliPacket(const std::string& action, 

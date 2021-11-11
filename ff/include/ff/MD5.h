@@ -17,8 +17,13 @@ using std::stringstream;
 
 NS_FF_BEG
 
+<<<<<<< HEAD
 struct MD5Result {
   unsigned char result[16];
+=======
+struct LIBFF_API MD5Result {
+	unsigned char result[16];
+>>>>>>> fbb2cbdeaca42c8ff99a99810aaaee5afe716190
 
   MD5Result();
   std::string toString() const;

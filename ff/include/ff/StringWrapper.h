@@ -8,50 +8,43 @@
 #ifndef FF_STRINGWRAPPER_H_
 #define FF_STRINGWRAPPER_H_
 
-#include <string>
-#include <sstream>
-#include <initializer_list>
 #include <ff/ff_config.h>
+
+#include <initializer_list>
+#include <sstream>
+#include <string>
 
 NS_FF_BEG
 
-class LIBFF_API StringWrapper: protected std::stringstream {
-public:
-	StringWrapper();
-	virtual ~StringWrapper();
+class LIBFF_API StringWrapper {
+ public:
+  StringWrapper();
+  virtual ~StringWrapper();
 
-	template<class T> StringWrapper(const T& t) {
-		std::stringstream& str = *this;
-		str << t;
-	}
+  template <class T>
+  StringWrapper(const T& t) {
+    m_stream << t;
+  }
 
-	template <typename T, typename... TAIL>
-	StringWrapper(const T& t, const TAIL&... tail){
-		this->operator()(t);
-		this->operator()(std::forward<TAIL>(tail)...);
-	}
+  template <class T>
+  StringWrapper& operator()(const T& t) {
+    m_stream << t;
+    return *this;
+  }
 
-	template<class T> StringWrapper& operator()(const T& t) {
-		std::stringstream& str = *this;
-		str << t;
-		return *this;
-	}
+  template <class T>
+  StringWrapper& operator<<(const T& t) {
+    return this->operator()(t);
+  }
 
-	template <typename T, typename... TAIL>
-	StringWrapper& operator()(const T& t, const TAIL&... tail) {
-		this->operator()(t);
-		this->operator()(std::forward<TAIL>(tail)...);
-		return *this;
-	}
+  std::string toString() const;
+  operator std::string() const;
 
-	template<class T> StringWrapper& operator<<(const T& t) {
-		return this->operator()(t);
-	}
+  friend LIBFF_API std::ostream& operator<<(std::ostream& o,
+                                            const StringWrapper& wp);
 
-	std::string toString() const;
-	operator std::string() const;
-
-	friend std::ostream& operator<<(std::ostream& o, const StringWrapper& wp);
+ private:
+  std::stringstream m_stream;
 };
 
 typedef StringWrapper SW;

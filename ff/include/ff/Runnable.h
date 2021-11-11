@@ -17,6 +17,8 @@ NS_FF_BEG
 
 EXCEPTION_DEF(RunnableException);
 
+using RunnableFunc = std::function<void ()>;
+
 class LIBFF_API Runnable {
 public:
 	Runnable() = default;
@@ -27,29 +29,7 @@ public:
 
 typedef std::shared_ptr<Runnable> RunnablePtr;
 
-template<class T>
-class _FuncRunnable: public Runnable {
-public:
-	_FuncRunnable(T func) :
-			m_func(func) {
-	}
-
-	void run() override {
-		try {
-			this->m_func();
-		} catch (std::exception &e) {
-			throw;
-		}
-	}
-
-private:
-	T m_func;
-};
-
-template<class Func>
-RunnablePtr MakeRunnable(Func func) {
-	return std::make_shared<_FuncRunnable<Func> >(func);
-}
+LIBFF_API RunnablePtr MakeRunnable(RunnableFunc func);
 
 NS_FF_END
 

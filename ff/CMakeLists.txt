@@ -1,15 +1,22 @@
 
-cmake_minimum_required(VERSION 2.6)
-project(ff)
-add_compile_options(-std=c++11 -g)
+cmake_minimum_required(VERSION 2.8.12)
+project(ff LANGUAGES CXX)
+
+set(PROJECT_VERSION "1")
+set(PROJECT_VERSION_MAJOR "1")
+set(PROJECT_VERSION_MINOR "0")
+set(PROJECT_VERSION_PATCH "0")
 
 MESSAGE(STATUS "operation system is ${CMAKE_SYSTEM}")
 
+MESSAGE(STATUS "CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}")
+	
 include_directories(
   include
   third_party/jsoncpp/include
 	third_party/zlib-1.2.11
 	third_party/zlib-1.2.11/contrib
+	third_party/zlib-1.2.11/contrib/minizip
 )
 
 add_definitions(
@@ -17,18 +24,56 @@ add_definitions(
 	-DBUILDING_LIBCURL
 )
 
+link_directories(
+	${CMAKE_SOURCE_DIR}/build/lib/${CMAKE_BUILD_TYPE}
+)
+
 IF (MINGW)
 	MESSAGE(STATUS "Now is MinGW")
 	file(GLOB windows_files "src/windows/*.cpp")
+
 ELSEIF (WIN32)
 	MESSAGE(STATUS "Now is windows")
+
 	file(GLOB_RECURSE windows_files "src/windows/*.cpp")
 
 	include_directories(
 		third_party/curl-7.77.0/include
+		third_party/googletest/googletest/include
 	)
 	
-	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
+	set(EXTRA_LIBS
+		ws2_32
+		winmm
+		wldap32
+	)
+
+	if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
+
+	MESSAGE(STATUS "building ${CMAKE_BUILD_TYPE}")
+	
+	set(EXTRA_LIBS
+	${EXTRA_LIBS}
+		libcurl-d
+		zlibd
+		gtestd
+  	gmockd
+		jsoncppd
+	)
+
+	else()
+	
+	set(EXTRA_LIBS
+	${EXTRA_LIBS}
+	libvcruntime
+		libcurl
+		zlib
+		gtest
+  	gmock
+		jsoncpp
+	)
+
+	endif()
 
 ELSEIF (APPLE)
 	MESSAGE(STATUS "Now is Apple OS's.")
@@ -72,8 +117,15 @@ if(BUILDIN_ZLIB)
 else()
 
 	if(UNIX)
+		add_compile_options(-std=c++11 -g)
+	
 		set(EXTRA_LIBS
+			pthread
 			z
+			libcurl
+			jsoncpp
+			gtest
+			gmock
 		)
 	endif()
 endif()
@@ -85,8 +137,8 @@ third_party/zlib-1.2.11/contrib/minizip/mztools.c
 third_party/zlib-1.2.11/contrib/minizip/ioapi.c
 )
 
-add_library(ff
-	${windows_files}
+set(lib_srcs
+${windows_files}
 	${jsoncpp_src}
 	${ZLIB_SRCS}
 	${MINIZIP_SRCS}
@@ -116,6 +168,7 @@ add_library(ff
 	src/log/LogInfo.cpp
 	src/log/StdoutAppender.cpp
 	src/log/FileAppender.cpp
+	src/message_bus/MessageBus.cpp
 	src/network/EPoll.cpp
 	src/network/IP.cpp
 	src/network/Socket.cpp
@@ -142,21 +195,31 @@ add_library(ff
 	src/rtp/RtpPacket.cpp
 	src/compress/Zip.cpp
 	src/compress/ZipEntry.cpp
+	src/compress/Unzip.cpp
+)
+
+add_library(ff 
+	${lib_srcs}
+)
+
+target_link_libraries(ff
+	# STATIC
+	${EXTRA_LIBS}
 )
 
 file(GLOB test_files "test/*.cpp")
 
-add_executable(ff_test
+add_executable(ff_test 
+	# ${lib_srcs}
 	${test_files}
 )
 
-target_link_libraries(ff_test
-  ff
-	curl
+target_link_libraries(ff_test 
+	ff
 	${EXTRA_LIBS}
-  gtest
-  gmock
-  pthread
 )
 
-
+if(MSVC)
+target_compile_options(ff PUBLIC "/Zc:__cplusplus")
+target_compile_options(ff_test PUBLIC "/Zc:__cplusplus")
+endif()
