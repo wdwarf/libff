@@ -3,9 +3,14 @@
 #include <ff/Exception.h>
 #include <ff/File.h>
 #include <ff/Unzip.h>
+#include <ff/String.h>
 
 #include <cstring>
 #include <fstream>
+
+#if defined(unix) || defined(__APPLE__)
+#include <utime.h>
+#endif
 
 using namespace std;
 
@@ -185,7 +190,7 @@ static int DoExtractFile(unzFile uf, bool overwrite = false,
   }
 
   if ((*filename_withoutpath) == '\0') {
-    if (!popt_extract_without_path) {
+    if (popt_extract_without_path) {
       printf("creating directory: %s\n", filename_inzip);
       File(filename_inzip).mkdirs();
     }
