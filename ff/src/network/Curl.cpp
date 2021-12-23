@@ -97,7 +97,8 @@ Curl& Curl::setContentType(const std::string& contentType) {
 }
 
 Curl& Curl::setBody(const std::string& body) {
-  this->setOption(CURLOPT_POSTFIELDS, body.c_str());
+  this->m_postFields = body;
+  this->setOption(CURLOPT_POSTFIELDS, this->m_postFields.c_str());
   return *this;
 }
 

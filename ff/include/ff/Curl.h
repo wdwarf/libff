@@ -37,16 +37,8 @@ class LIBFF_API Curl {
   Curl& setHeaders(const CurlHeaders& headers);
   Curl& setMethod(HttpMethod method);
   Curl& setContentType(const std::string& contentType);
-
-  /**
-   * @brief Set the request Body
-   * 
-   * @param body 
-   * @return Curl& 
-   * @note 数据不会拷贝，不要使用临时变量
-   */
   Curl& setBody(const std::string& body);
-  
+
   Curl& setOAuth2Token(const std::string& token);
   Curl& setConnectTimeout(int64_t msTimeout);
   Curl& setReadTimeout(int64_t msTimeout);
@@ -73,6 +65,7 @@ class LIBFF_API Curl {
   curl_slist* m_headers;
   std::stringstream m_outputStream;
   std::ostream* m_pOutputStream;
+  std::string m_postFields;
 
   static size_t CurlWriteData(void* buf, size_t size, size_t nmemb,
                               void* stream);

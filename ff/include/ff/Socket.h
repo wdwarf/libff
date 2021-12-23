@@ -77,12 +77,28 @@ enum class SockBlockingType: uint8_t{
 struct LIBFF_API SockAddr_t {
 	sockaddr_storage sockaddr;
 
-	sockaddr_in* V4() const {
-		return (sockaddr_in*) &sockaddr;
+	sockaddr_in* v4() {
+		return reinterpret_cast<sockaddr_in*>(&sockaddr);
 	}
 
-	sockaddr_in6* V6() const {
-		return (sockaddr_in6*) &sockaddr;
+	const sockaddr_in* const v4() const {
+		return reinterpret_cast<const sockaddr_in* const>(&sockaddr);
+	}
+
+	operator sockaddr_in*(){
+		return this->v4();
+	}
+
+	sockaddr_in6* v6() {
+		return reinterpret_cast<sockaddr_in6*>(&sockaddr);
+	}
+
+	const sockaddr_in6* const v6() const{
+		return reinterpret_cast<const sockaddr_in6* const>(&sockaddr);
+	}
+
+	operator sockaddr_in6*(){
+		return this->v6();
 	}
 };
 

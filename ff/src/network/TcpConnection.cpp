@@ -216,12 +216,19 @@ bool TcpConnection::listen(uint16_t port, const std::string& ip,
   /** TODO start accept thread */
   this->m_acceptThread = thread([this] {
     auto pThis = this->shared_from_this();
-    SockAddr addr;
     while (INVALID_SOCKET != this->m_socket.getHandle()) {
+      SockAddr addr;
       Socket client = this->m_socket.accept(addr);
-      if (client.getHandle() <= 0 || INVALID_SOCKET == client.getHandle() ||
-          INVALID_SOCKET == this->m_socket.getHandle())
+
+      if (INVALID_SOCKET == this->m_socket.getHandle()) break;
+
+      if (INVALID_SOCKET == client.getHandle()) {
+        auto errNo = WSAGetLastError();
+        if (WSAECONNRESET == errNo || WSAEINTR == errNo) continue;
+        cout << "Failed to accept with error(" << errNo << ")" << endl;
         break;
+      }
+
       TcpConnectionPtr tcpSock =
           TcpConnectionPtr(new TcpConnection(move(client), this->m_iocp));
       tcpSock->m_pThis = tcpSock;
@@ -315,7 +322,9 @@ void TcpConnection::send(const void* buf, uint32_t bufSize) {
     // cout << "send ret:" << re << endl;
     auto err = WSAGetLastError();
     if (SOCKET_ERROR == re && err != WSA_IO_PENDING) {
-      cout << "send failed, errno: " << err << ", buf: " << Buffer(context->buffer.buf, bytes2Send).toHexString() << endl;
+      cout << "send failed, errno: " << err
+           << ", buf: " << Buffer(context->buffer.buf, bytes2Send).toHexString()
+           << endl;
       // this->m_socket.shutdown();
       // this->m_socket.close();
       this->close();
