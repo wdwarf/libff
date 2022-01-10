@@ -41,7 +41,7 @@ TEST(TcpConnectionTest, TcpConnectionTest4) {
   TcpConnectionPtr svr = TcpConnection::CreateInstance();
   TcpConnectionPtr clientPtr = TcpConnection::CreateInstance();
 
-  EXPECT_TRUE(svr->listen(5678, "127.0.0.1", IpVersion::V4))
+  EXPECT_TRUE(svr->listen(5678, "127.0.0.1", AF_INET))
       << "server listen failed.";
   set<TcpConnectionPtr> clients;
   svr->onAccept([&](const TcpConnectionPtr& tcpSock) {
@@ -1076,7 +1076,7 @@ TEST(TcpConnectionTest, TcpConnectionTest) {
   svr->onClose(
       [&](const TcpConnectionPtr& connection) { LOGD << "tcp server stoped"; });
 
-  EXPECT_TRUE(svr->listen(5678, "", IpVersion::V4)) << "server listen failed.";
+  EXPECT_TRUE(svr->listen(5678, "", AF_INET)) << "server listen failed.";
 
   do {
     buffers.clear();
@@ -1160,7 +1160,7 @@ TEST(TcpConnectionTest, TcpConnectionTest6) {
   TcpConnectionPtr clientPtr = TcpConnection::CreateInstance();
 
   EXPECT_TRUE(
-      svr->listen(5678, "fe80::aced:719b:c05d:5f5%ens33", IpVersion::V6))
+      svr->listen(5678, "fe80::aced:719b:c05d:5f5%ens33", AF_INET6))
       << "server listen failed.";
 
   set<TcpConnectionPtr> clients;

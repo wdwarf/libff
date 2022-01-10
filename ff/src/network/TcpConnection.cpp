@@ -195,11 +195,11 @@ void TcpConnection::workThreadFunc(DWORD numberOfBytesTransferred,
 }
 
 bool TcpConnection::listen(uint16_t port, const std::string& ip,
-                           IpVersion ipVer, int backlog) {
+                           uint16_t family, int backlog) {
   // this->resetCallbackFunctions();
 
   try {
-    if (!this->m_socket.createTcp(ipVer))
+    if (!this->m_socket.createTcp(family))
       THROW_EXCEPTION(Exception, "Create socket failed.", errno);
     if (!this->m_socket.bind(port, ip))
       THROW_EXCEPTION(
@@ -254,13 +254,8 @@ bool TcpConnection::connect(uint16_t remotePort, const std::string& remoteHost,
 
   this->m_isServer = false;
   try {
-    IpVersion ipVer = IpVersion::V4;
     SockAddr addr(remoteHost, remotePort);
-    if (addr.isValid()) {
-      ipVer = addr.getVersion();
-    }
-
-    if (!this->m_socket.createTcp(ipVer))
+    if (!this->m_socket.createTcp(addr.getFamily()))
       THROW_EXCEPTION(Exception, "Create socket failed.", errno);
 
     if (localPort > 0) {
@@ -396,11 +391,11 @@ void TcpConnection::resetCallbackFunctions() {
 }
 
 bool TcpConnection::listen(uint16_t port, const std::string& ip,
-                           IpVersion ipVer, int backlog) {
+                           uint16_t family, int backlog) {
   // this->resetCallbackFunctions();
 
   try {
-    if (!this->m_socket.createTcp(ipVer))
+    if (!this->m_socket.createTcp(family))
       THROW_EXCEPTION(Exception, "Create socket failed.", errno);
     if (!this->m_socket.bind(port, ip))
       THROW_EXCEPTION(
@@ -425,13 +420,8 @@ bool TcpConnection::connect(uint16_t remotePort, const std::string& remoteHost,
 
   this->m_isServer = false;
   try {
-    IpVersion ipVer = IpVersion::V4;
     SockAddr addr(remoteHost, remotePort);
-    if (addr.isValid()) {
-      ipVer = addr.getVersion();
-    }
-
-    if (!this->m_socket.createTcp(ipVer))
+    if (!this->m_socket.createTcp(addr.getFamily()))
       THROW_EXCEPTION(Exception, "Create socket failed.", errno);
 
     if (localPort > 0) {

@@ -15,11 +15,11 @@
 using namespace std;
 USE_NS_FF
 
-#define SVR_PORT 65008
+#define SVR_PORT 65108
 
 TEST(TestSocket, TestSocket) {
   Socket svrSock;
-  svrSock.createTcp();
+  EXPECT_TRUE(svrSock.createTcp());
   EXPECT_NE(svrSock.getHandle(), INVALID_SOCKET);
   EXPECT_TRUE(svrSock.bind(SVR_PORT));
   EXPECT_TRUE(svrSock.listen());
