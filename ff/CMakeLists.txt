@@ -186,6 +186,7 @@ ${windows_files}
 	src/string/StringWrapper.cpp
 	src/string/StringEncoding.cpp
 	src/system/FileSystem.cpp
+	src/system/System.cpp
 	src/thread/Runnable.cpp
 	src/thread/Semaphore.cpp
 	src/thread/Synchronizable.cpp
