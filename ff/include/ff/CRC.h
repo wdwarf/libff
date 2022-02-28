@@ -15,13 +15,13 @@
 
 /**
  * 用法：
- * CrcCalculator c(CrcAlgorithms::Crc16Arc);
+ * CrcCalculator c(CrcAlgorithm::Crc16Arc);
  * cout << hex << c.calc(buf, bufSize) << endl;
  */
 
 NS_FF_BEG
 
-enum class CrcAlgorithms {
+enum class CrcAlgorithm {
 	Crc8,
 	Crc8Cdma2000,
 	Crc8Darc,
@@ -110,7 +110,7 @@ private:
 	uint64_t m_check;
 };
 
-typedef std::map<CrcAlgorithms, CrcParamInfo> CrcParamInfos;
+typedef std::map<CrcAlgorithm, CrcParamInfo> CrcParamInfos;
 
 class LIBFF_API CrcParams {
 public:
@@ -121,7 +121,7 @@ public:
 		return crcParams;
 	}
 
-	const CrcParamInfo* getCrcParamInfo(CrcAlgorithms crcAlgorithms) const;
+	const CrcParamInfo* getCrcParamInfo(CrcAlgorithm crcAlgorithm) const;
 	const CrcParamInfos& getCrcParamInfos() const;
 
 private:
@@ -134,7 +134,7 @@ private:
 
 class LIBFF_API CrcCalculator {
 public:
-	CrcCalculator(CrcAlgorithms crcAlgorithms);
+	CrcCalculator(CrcAlgorithm crcAlgorithm);
 	CrcCalculator(const CrcParamInfo* crcParamInfo);
 	uint64_t calc(const void* buf, int length) const;
 	const CrcParamInfo* getCrcParamInfo() const;

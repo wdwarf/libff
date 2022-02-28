@@ -14,7 +14,7 @@ using namespace std;
 
 NS_FF_BEG
 
-IOCP::IOCP(DWORD concurrentThreads) : m_handle(NULL) {
+IOCP::IOCP(DWORD concurrentThreads) : m_handle(NULL), m_activeWorkThreadCnt(0) {
   if (concurrentThreads > 0) {
     this->create(concurrentThreads);
   }
@@ -25,6 +25,10 @@ IOCP::~IOCP() { this->close(); }
 IOCP::operator HANDLE() const { return this->m_handle; }
 
 IOCP::operator bool() const { return (NULL != this->m_handle); }
+
+uint16_t IOCP::activeWorkThreadCnt() const {
+  return this->m_activeWorkThreadCnt.load();
+}
 
 bool IOCP::create(DWORD numberOfConcurrentThreads) {
   if (numberOfConcurrentThreads <= 0) return false;
@@ -38,6 +42,7 @@ bool IOCP::create(DWORD numberOfConcurrentThreads) {
   this->m_workThreads = std::vector<std::thread>(numberOfConcurrentThreads);
   for (DWORD i = 0; i < numberOfConcurrentThreads; ++i) {
     this->m_workThreads[i] = thread([this] {
+      ++this->m_activeWorkThreadCnt;
       while (true) {
         DWORD numberOfBytesTransferred = 0;
         ULONG_PTR completionKey = 0;
@@ -58,6 +63,7 @@ bool IOCP::create(DWORD numberOfConcurrentThreads) {
         context->eventFunc(numberOfBytesTransferred, completionKey,
                            lpOverlapped);
       }
+      --this->m_activeWorkThreadCnt;
     });
   }
 

@@ -16,6 +16,7 @@
 #include <mutex>
 #include <thread>
 #include <vector>
+#include <atomic>
 
 NS_FF_BEG
 
@@ -38,6 +39,7 @@ class LIBFF_API IOCP {
   bool connect(PIocpContext context);
   operator HANDLE() const;
   operator bool() const;
+  uint16_t activeWorkThreadCnt() const;
   bool getQueuedCompletionStatus(LPDWORD lpNumberOfBytesTransferred,
                                  PULONG_PTR lpCompletionKey,
                                  LPOVERLAPPED* lpOverlapped,
@@ -51,6 +53,7 @@ class LIBFF_API IOCP {
   HANDLE m_handle;
   std::mutex m_mutex;
   std::vector<std::thread> m_workThreads;
+  std::atomic_uint16_t m_activeWorkThreadCnt;;
 };
 
 using IOCPPtr = std::shared_ptr<IOCP>;

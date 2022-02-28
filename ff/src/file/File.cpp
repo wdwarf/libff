@@ -168,9 +168,13 @@ void File::setPath(const std::string& path) {
 
   this->path.clear();
 
+  if(StartsWith(p, "\\\\")){
+    this->path.push_back("\\\\");
+    p = p.substr(2);
+  }
+
   stringstream nodeStr;
-  for (string::iterator it = p.begin(); it != p.end(); ++it) {
-    char c = *it;
+  for(char c : p){
     if ('/' == c || '\\' == c) {
       string node = nodeStr.str();
       nodeStr.clear();
@@ -201,15 +205,14 @@ void File::setPath(const std::string& path) {
 
 string File::getPath() const {
   string path;
-  for (std::list<std::string>::const_iterator it = this->path.begin();
-       it != this->path.end(); ++it) {
+  for (auto& name : this->path) {
     if (path.empty()) {
-      path = *it;
+      path = name;
     } else {
-      if ("/" == path || "\\" == path) {
-        path += *it;
+      if ("/" == path || "\\" == path || "\\\\" == path) {
+        path += name;
       } else {
-        path += PATH_SEPARATER + *it;
+        path += PATH_SEPARATER + name;
       }
     }
   }

@@ -17,7 +17,7 @@ NS_FF_BEG
 class LIBFF_API Synchronizable {
 public:
 	Synchronizable();
-	~Synchronizable();
+	virtual ~Synchronizable();
 
 	void lock();
 	bool trylock();
