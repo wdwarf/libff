@@ -28,6 +28,14 @@ class LIBFF_API CpuInfo {
   std::string cpuId();
   std::string vendor();
   std::string brand();
+  uint32_t clock();
+  uint32_t cores();
+  uint32_t cacheSize();
+  uint32_t family();
+  uint32_t extendedFamily();
+  uint32_t model();
+  uint32_t extendedModel();
+  uint32_t steppingId();
 
   bool SSE3();
   bool PCLMULQDQ();

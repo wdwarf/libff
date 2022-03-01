@@ -9,6 +9,7 @@
 #include <array>
 #include <bitset>
 #include <cstring>
+#include <fstream>
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -20,33 +21,82 @@
 #else
 #include <sys/sysinfo.h>
 #include <unistd.h>
+#include <cpuid.h>
 #endif
 
 using namespace std;
 
 NS_FF_BEG
 
-#ifdef __linux__
-#define __cpuid(pInfo, func)                                           \
+#ifdef __linux0__
+#define cpu_regs(pInfo, func)                                           \
   asm volatile("cpuid"                                                 \
                : "=a"((pInfo)[0]), "=b"((pInfo)[1]), "=c"((pInfo)[2]), \
                  "=d"((pInfo)[3])                                      \
                : "a"((func)))
-
-// ecx is often an input as well as an output
-#define __cpuid4(func, a, b, c, d) \
-  asm volatile("cpuid" : "=a"(a), "=b"(b), "=c"(c), "=d"(d) : "a"(func))
-
 #endif
+
+static void cpu_regs(int* info, int eax){
+#ifdef _WIN32
+  __cpuid(info, eax);
+#else
+  __cpuid(eax, (info)[0], (info)[1], (info)[2], (info)[3]);
+#endif
+}
+
+static  void cpu_regs(int* info, int eax, int ecx){
+#ifdef _WIN32
+  __cpuidex(info, eax, ecx);
+#else
+  __cpuid_count(eax, ecx, (info)[0], (info)[1], (info)[2], (info)[3]);
+#endif
+
+}
 
 class __CpuInfo {
   class __CpuInfoImpl;
 
  public:
-  // getters
   static std::string Vendor() { return impl.vendor_; }
   static std::string Brand() { return impl.brand_; }
   static std::string CpuId() { return impl.cpuId_; }
+  static uint32_t Cores() { return impl.m_cores; }
+  static uint32_t CacheSize() { return impl.m_cacheSize; }
+  static uint32_t Family() { return impl.m_family; }
+  static uint32_t Model() { return impl.m_model; }
+  static uint32_t ExtendedFamily() { return impl.m_extFamily; }
+  static uint32_t ExtendedModel() { return impl.m_extModel; }
+  static uint32_t SteppingId() { return impl.m_steppingId; }
+
+  static uint32_t Clock() {
+#ifdef _WIN32
+    HKEY key;
+    DWORD result = 0;
+    DWORD size = 4;
+
+    if (ERROR_SUCCESS ==
+        RegOpenKeyEx(HKEY_LOCAL_MACHINE,
+                     TEXT("HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0"),
+                     0, KEY_READ, &key)) {
+      RegQueryValueEx(key, TEXT("~MHz"), NULL, NULL, (LPBYTE)&result, &size);
+      RegCloseKey(key);
+    }
+
+    return result;
+#else
+    fstream f;
+    f.open("/proc/cpuinfo", ios::in);
+    while (!f.eof()) {
+      string line;
+      std::getline(f, line);
+      if (line.find("cpu MHz") != string::npos) {
+        line = line.substr(line.find(':') + 1);
+        return atoi(line.c_str());
+      }
+    }
+    return 0;
+#endif
+  }
 
   static bool SSE3() { return impl.f_1_ECX_[0]; }
   static bool PCLMULQDQ() { return impl.f_1_ECX_[1]; }
@@ -126,17 +176,16 @@ class __CpuInfo {
           extdata_{} {
       std::array<int, 4> cpui;
 
-      // Calling __cpuid with 0x0 as the function_id argument
-      // gets the number of the highest valid function ID.
-      __cpuid(cpui.data(), 0);
+      // Maximum Input Value for Basic CPUID Information
+      cpu_regs(cpui.data(), 0);
       nIds_ = cpui[0];
 
       for (int i = 0; i <= nIds_; ++i) {
-        __cpuid(cpui.data(), i);
+        cpu_regs(cpui.data(), i);
         data_.push_back(cpui);
       }
 
-      // Capture vendor string
+      // vendor
       char vendor[0x20] = {0};
       *reinterpret_cast<int *>(vendor) = data_[0][1];
       *reinterpret_cast<int *>(vendor + 4) = data_[0][3];
@@ -148,10 +197,12 @@ class __CpuInfo {
         isAMD_ = true;
       }
 
-      // load bitset with flags for function 0x00000001
+      // 0x00000001
       if (nIds_ >= 1) {
         f_1_ECX_ = data_[1][2];
         f_1_EDX_ = data_[1][3];
+
+        auto eax = data_[1][0];
 
         stringstream str;
         str << hex;
@@ -160,31 +211,55 @@ class __CpuInfo {
         str << std::uppercase << data_[1][3];
         str.fill('0');
         str.width(8);
-        str << std::uppercase << data_[1][0];
+        str << std::uppercase << eax;
 
         this->cpuId_ = str.str();
+
+        this->m_family = (eax & 0x0F00) >> 8;
+        this->m_model = (eax & 0xF0) >> 4;
+        this->m_extFamily = (eax & 0xff00000) >> 20;
+        this->m_extModel = (eax & 0xf0000) >> 16;
+        this->m_steppingId = eax & 0xF;
       }
 
-      // load bitset with flags for function 0x00000007
+      if (nIds_ >= 4) {
+        auto eax = data_[4][0];
+        this->m_cores = (eax >> 27) + 1;
+        cout << "m_cores: " << m_cores << endl;
+      }
+
       if (nIds_ >= 7) {
         f_7_EBX_ = data_[7][1];
         f_7_ECX_ = data_[7][2];
       }
 
-      // Calling __cpuid with 0x80000000 as the function_id argument
-      // gets the number of the highest valid extended ID.
-      __cpuid(cpui.data(), 0x80000000);
+      /**
+       * 0x16
+       * EAX Bits 15 - 00: Processor Base Frequency (in MHz).
+       * Bits 31 - 16: Reserved =0.
+       * EBX Bits 15 - 00: Maximum Frequency (in MHz).
+       * Bits 31 - 16: Reserved = 0.
+       * ECX Bits 15 - 00: Bus (Reference) Frequency (in MHz).
+       * Bits 31 - 16: Reserved = 0.
+       * EDX Reserved.
+       */
+      if (nIds_ >= 0x16) {
+        auto ebx = data_[0x16][1];
+        // Maximum Frequency ((ebx & 0x0000ffff))
+      }
+
+      // Maximum Input Value for Extended Function CPUID Information.
+      cpu_regs(cpui.data(), 0x80000000);
       nExIds_ = cpui[0];
 
       char brand[0x40];
       memset(brand, 0, sizeof(brand));
 
       for (int i = 0x80000000; i <= nExIds_; ++i) {
-        __cpuid(cpui.data(), i);
+        cpu_regs(cpui.data(), i);
         extdata_.push_back(cpui);
       }
 
-      // load bitset with flags for function 0x80000001
       if (nExIds_ >= 0x80000001) {
         f_81_ECX_ = extdata_[1][2];
         f_81_EDX_ = extdata_[1][3];
@@ -197,6 +272,11 @@ class __CpuInfo {
         memcpy(brand + 32, extdata_[4].data(), sizeof(cpui));
         brand_ = brand;
       }
+
+      if (nExIds_ >= 0x80000006) {
+        auto cacheInfo = extdata_[6][2];
+        this->m_cacheSize = (cacheInfo >> 16);
+      }
     };
 
     int nIds_;
@@ -204,6 +284,13 @@ class __CpuInfo {
     std::string cpuId_;
     std::string vendor_;
     std::string brand_;
+    uint32_t m_family;
+    uint32_t m_model;
+    uint32_t m_extFamily;
+    uint32_t m_extModel;
+    uint32_t m_steppingId;
+    uint32_t m_cores;
+    uint32_t m_cacheSize;
     bool isIntel_;
     bool isAMD_;
     std::bitset<32> f_1_ECX_;
@@ -222,6 +309,14 @@ const __CpuInfo::__CpuInfoImpl __CpuInfo::impl;
 std::string CpuInfo::cpuId() { return __CpuInfo::CpuId(); }
 std::string CpuInfo::vendor() { return __CpuInfo::Vendor(); }
 std::string CpuInfo::brand() { return __CpuInfo::Brand(); }
+uint32_t CpuInfo::cores() { return __CpuInfo::Cores(); }
+uint32_t CpuInfo::cacheSize() { return __CpuInfo::CacheSize(); }
+uint32_t CpuInfo::extendedFamily() { return __CpuInfo::ExtendedFamily(); }
+uint32_t CpuInfo::family() { return __CpuInfo::Family(); }
+uint32_t CpuInfo::model() { return __CpuInfo::Model(); }
+uint32_t CpuInfo::extendedModel() { return __CpuInfo::ExtendedModel(); }
+uint32_t CpuInfo::steppingId() { return __CpuInfo::SteppingId(); }
+uint32_t CpuInfo::clock() { return __CpuInfo::Clock(); }
 
 bool CpuInfo::SSE3() { return __CpuInfo::SSE3(); }
 bool CpuInfo::PCLMULQDQ() { return __CpuInfo::PCLMULQDQ(); }

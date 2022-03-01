@@ -25,8 +25,12 @@ TEST(SystemTest, SystemTest){
 	LOGD << "swapUsed:\t" << memInfo.swapUsed;
 
 	auto cpuInfo = System::CpuInfo();
-	LOGD << cpuInfo.cpuId();
-	LOGD << cpuInfo.vendor();
-	LOGD << cpuInfo.brand();
-	LOGD << cpuInfo.SSE3();
+	LOGD << "cpuid: " << cpuInfo.cpuId() << ", cores: " << cpuInfo.cores() 
+		<< ", clock(MHz): " << cpuInfo.clock()
+		<< ", cache size: " << cpuInfo.cacheSize();
+	LOGD << "vendor: " << cpuInfo.vendor();
+	LOGD << "brand: " << cpuInfo.brand();
+	LOGD << "SSE3 suported: " << cpuInfo.SSE3();
+	LOGD << "Family: " << cpuInfo.family() << ", Model: " << cpuInfo.model() << ", Stepping ID: " << cpuInfo.steppingId();
+	LOGD << "ext family: " << cpuInfo.extendedFamily() << ", ext model: " << cpuInfo.extendedModel() << ", model synth: " << ((cpuInfo.extendedModel() << 4) | cpuInfo.model());
 }
