@@ -86,7 +86,8 @@ using SStreamT = std::stringstream;
  */
 #define STRUCT_DEF_BEGIN(structName) class LIBFF_API structName{\
   public:\
-  structName(){memset(this, 0, sizeof(structName));}
+  structName(){memset(this, 0, sizeof(structName));}\
+  static size_t Size(){ return sizeof(structName); }
 
 #define STRUCT_DEF_END };
 

@@ -72,6 +72,7 @@ TEST(MessageBusTest, MessageBusTest) {
   this_thread::sleep_for(chrono::seconds(1));
 
   thread([&client3, &client2, &client1]() {
+    int n = 0;
     do {
       this_thread::sleep_for(chrono::milliseconds(100));
       LOGD << "start req";
@@ -79,7 +80,7 @@ TEST(MessageBusTest, MessageBusTest) {
       auto promise = client3.req(101, 1);
       auto pkg = promise->get(5 * 1000);
       if (pkg.get()) {
-        LOGD << "responsed: " << pkg->header()->msgId();
+        LOGD << pkg->header()->id() << " responsed: " << pkg->header()->msgId();
       } else {
         LOGD << "response timeout";
       }
@@ -91,7 +92,7 @@ TEST(MessageBusTest, MessageBusTest) {
       } else {
         LOGD << "response timeout";
       }
-    } while (false);
+    } while (n++ < 100);
   }).join();
 
   // while (true) {

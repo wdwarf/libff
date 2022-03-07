@@ -66,6 +66,7 @@ bool MsgBusPackage::generate(const MsgBusPkgHeader& header, const void* data,
   pHdr->checksum(pHdr->generateChecksum());
   return true;
 }
+
 void* MsgBusPackage::data() const {
   if (this->isEmpty()) return nullptr;
   return (this->getData() + sizeof(MsgBusPkgHeader));
@@ -92,10 +93,11 @@ MsgBusPackageHelper& MsgBusPackageHelper::append(const void* data,
 
 MsgBusPackagePtr MsgBusPackageHelper::getPackage() {
   lock_guard<mutex> lk(this->m_mutex);
-  if (this->m_buffer.getSize() < sizeof(MsgBusPkgHeader)) return nullptr;
+  if (this->m_buffer.getSize() < MsgBusPkgHeader::Size()) return nullptr;
 
   const MsgBusPkgHeader* hdr = (const MsgBusPkgHeader*)this->m_buffer.getData();
   auto length = hdr->length();
+  if (this->m_buffer.getSize() < length) return nullptr;
   if (length > MAX_MSGBUS_PKG_SIZE ||
       hdr->checksum() != hdr->generateChecksum()) {
     this->m_buffer.clear();

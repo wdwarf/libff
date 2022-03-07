@@ -20,7 +20,7 @@ using namespace std;
 
 namespace {
 
-const float BUF_INC_RATIO = 1.2;
+const float BUF_INC_RATIO = 1.2f;
 
 }
 
