@@ -40,6 +40,7 @@ public:
 	int getCommandLineCount() const;
 
 	static std::string GetApplicationPath();
+	static std::string GetApplicationDir();
 	static std::string GetApplicationName();
 	static std::string GetCurrentWorkDir();
 

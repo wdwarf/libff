@@ -6,11 +6,13 @@
  */
 
 #include <ff/Application.h>
-#include "ApplicationImpl.h"
+
 #include <cassert>
-#include <vector>
-#include <string>
 #include <set>
+#include <string>
+#include <vector>
+
+#include "ApplicationImpl.h"
 
 using namespace std;
 
@@ -18,70 +20,63 @@ NS_FF_BEG
 
 static Application* __app = nullptr;
 
-Application* GetApp() {
-	return __app;
-}
+Application* GetApp() { return __app; }
 
-Application::Application(int argc, char** argv) :
-		impl(new Application::ApplicationImpl(this, argc, argv)) {
-	assert(nullptr == __app);
-	if (nullptr != __app) {
-		THROW_EXCEPTION(ApplicationException,
-				"There is anther application on running.", -1);
-	}
-	__app = this;
+Application::Application(int argc, char** argv)
+    : impl(new Application::ApplicationImpl(this, argc, argv)) {
+  assert(nullptr == __app);
+  if (nullptr != __app) {
+    THROW_EXCEPTION(ApplicationException,
+                    "There is anther application on running.", -1);
+  }
+  __app = this;
 }
 
 Application::~Application() {
-	if (this == __app) {
-		__app = nullptr;
-	}
-	delete this->impl;
+  if (this == __app) {
+    __app = nullptr;
+  }
+  delete this->impl;
 }
 
-int Application::run() {
-	return this->impl->run();
-}
+int Application::run() { return this->impl->run(); }
 
 const std::vector<std::string>& Application::getCommandLines() const {
-	return this->impl->getCommandLines();
+  return this->impl->getCommandLines();
 }
 
 const std::string& Application::getCommandLine(int index) const {
-	return this->impl->getCommandLine(index);
+  return this->impl->getCommandLine(index);
 }
 
 int Application::getCommandLineCount() const {
-	return this->impl->getCommandLineCount();
+  return this->impl->getCommandLineCount();
 }
 
-void Application::exit(int code) {
-	this->impl->exit(code);
-}
+void Application::exit(int code) { this->impl->exit(code); }
 
-int Application::getArgc() const {
-	return this->impl->getArgc();
-}
+bool Application::isRunning() const { return this->impl->isRunning(); }
 
-char** Application::getArgv() const {
-	return this->impl->getArgv();
-}
+int Application::getArgc() const { return this->impl->getArgc(); }
 
-int Application::getExitCode() const {
-	return this->impl->getExitCode();
-}
+char** Application::getArgv() const { return this->impl->getArgv(); }
+
+int Application::getExitCode() const { return this->impl->getExitCode(); }
 
 std::string Application::GetApplicationName() {
-	return Application::ApplicationImpl::GetApplicationName();
+  return Application::ApplicationImpl::GetApplicationName();
 }
 
 std::string Application::GetApplicationPath() {
-	return Application::ApplicationImpl::GetApplicationPath();
+  return Application::ApplicationImpl::GetApplicationPath();
+}
+
+std::string Application::GetApplicationDir() {
+  return Application::ApplicationImpl::GetApplicationDir();
 }
 
 std::string Application::GetCurrentWorkDir() {
-	return Application::ApplicationImpl::GetCurrentWorkDir();
+  return Application::ApplicationImpl::GetCurrentWorkDir();
 }
 
 NS_FF_END /* namespace NS_FF */
-

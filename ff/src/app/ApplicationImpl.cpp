@@ -112,6 +112,10 @@ NS_FF_BEG
 #endif
 	}
 
+	std::string Application::ApplicationImpl::GetApplicationDir() {
+		return File(GetApplicationPath()).getParent().getPath();
+	}
+
 	std::string Application::ApplicationImpl::GetApplicationName() {
 		auto path = Application::ApplicationImpl::GetApplicationPath();
 		auto pos = path.find_last_of('/');

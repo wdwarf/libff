@@ -13,6 +13,7 @@
 #include <memory>
 #include <mutex>
 #include <set>
+#include <thread>
 
 NS_FF_BEG
 
@@ -188,6 +189,7 @@ class LIBFF_API MessageBusClient {
   TcpConnectionPtr m_conn;
   std::atomic_bool m_connected;
   std::atomic_bool m_stoped;
+  std::thread m_connThread;
   std::mutex m_mutexMsgId2Func;
   std::map<uint32_t, MsgBusReqFunc> msgId2Func;
   std::map<uint32_t, PkgPromise*> m_pkgId2Promise;

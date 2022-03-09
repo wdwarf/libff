@@ -350,57 +350,57 @@ bool MessageBusClient::start(uint16_t serverPort, const std::string& serverHost,
                              uint16_t localPort, const std::string& localHost) {
   if (!this->m_stoped) return true;
   this->m_stoped = false;
-  thread([this, serverPort, serverHost, localPort, localHost]() {
-    Tick hbTick;
-    uint32_t hbLoseCnt = 0;
-    while (!this->m_stoped) {
-      if (this->m_conn->getSocket().isConnected() && this->m_connected) {
-        this_thread::sleep_for(chrono::milliseconds(1000));
-        if (hbTick.tock() >= 5000) {
-          MsgBusPkgHeader hdr;
-          hdr.code(MsgCode::HeartBeat);
-          hdr.from(this->m_clientId);
-          hdr.options(MsgOpt::Req);
-          MsgBusPackage pkg;
-          pkg.generate(hdr);
+  this->m_connThread =
+      thread([this, serverPort, serverHost, localPort, localHost]() {
+        Tick hbTick;
+        uint32_t hbLoseCnt = 0;
+        while (!this->m_stoped) {
+          if (this->m_conn->getSocket().isConnected() && this->m_connected) {
+            this_thread::sleep_for(chrono::milliseconds(1000));
+            if (hbTick.tock() >= 5000) {
+              MsgBusPkgHeader hdr;
+              hdr.code(MsgCode::HeartBeat);
+              hdr.from(this->m_clientId);
+              hdr.options(MsgOpt::Req);
+              MsgBusPackage pkg;
+              pkg.generate(hdr);
 
-          auto promise = this->req(pkg);
-          auto rspPkg = promise->get(5000);
-          if (!rspPkg) {
-            ++this->m_heartbeatLossCnt;
-            if (this->m_heartbeatLossCnt >= 3) {
-              lock_guard<mutex> lk(this->m_mutex);
-              if (this->m_onHbLossFunc) this->m_onHbLossFunc();
-              this->m_conn->close();
-              this->m_heartbeatLossCnt = 0;
+              auto promise = this->req(pkg);
+              auto rspPkg = promise->get(5000);
+              if (!rspPkg) {
+                ++this->m_heartbeatLossCnt;
+                if (this->m_heartbeatLossCnt >= 3) {
+                  lock_guard<mutex> lk(this->m_mutex);
+                  if (this->m_onHbLossFunc) this->m_onHbLossFunc();
+                  this->m_conn->close();
+                  this->m_heartbeatLossCnt = 0;
+                }
+              }
+
+              hbTick.tick();
             }
+            continue;
           }
 
-          hbTick.tick();
-        }
-        continue;
-      }
+          if (!this->m_conn->connect(serverPort, serverHost, localPort,
+                                     localHost)) {
+            this_thread::sleep_for(chrono::milliseconds(300));
+            continue;
+          }
+          if (!this->sendRegisterInfo()) {
+            this->m_conn->close();
+            while (this->m_conn->getSocket().isConnected()) {
+              this_thread::sleep_for(chrono::milliseconds(100));
+            }
+            continue;
+          }
 
-      if (!this->m_conn->connect(serverPort, serverHost, localPort,
-                                 localHost)) {
-        this_thread::sleep_for(chrono::milliseconds(300));
-        continue;
-      }
-      if (!this->sendRegisterInfo()) {
-        this->m_conn->close();
-        while (this->m_conn->getSocket().isConnected()) {
-          this_thread::sleep_for(chrono::milliseconds(100));
+          unique_lock<mutex> lk(this->m_mutex);
+          this->m_connected = true;
+          this->m_heartbeatLossCnt = 0;
+          if (this->m_onConnectedFunc) this->m_onConnectedFunc();
         }
-        continue;
-      }
-
-      unique_lock<mutex> lk(this->m_mutex);
-      this->m_connected = true;
-      this->m_heartbeatLossCnt = 0;
-      if (this->m_onConnectedFunc) this->m_onConnectedFunc();
-      // this->m_cond.wait_for(lk, chrono::milliseconds(10 * 1000));
-    }
-  }).detach();
+      });
 
   return true;
 }
@@ -410,6 +410,7 @@ bool MessageBusClient::stop() {
   this->m_stoped = true;
   this->m_conn->close();
   this->m_cond.notify_one();
+  if (this->m_connThread.joinable()) this->m_connThread.join();
   return true;
 }
 
