@@ -448,6 +448,7 @@ void MessageBusClient::onClose(const TcpConnectionPtr& client) {
     this->m_onDisconnectedFunc();
   }
   this->m_connected = false;
+  this->m_conn->getSocket().close();
   this->m_cond.notify_one();
 }
 

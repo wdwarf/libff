@@ -196,28 +196,6 @@ bool Match(const std::string& str, const std::string& reg) {
   return regex_match(str, regex(reg));
 }
 
-std::wstring ToWs(const std::string& str) {
-  char* oldLocale = setlocale(LC_ALL, "");
-  auto len = str.length();
-  vector<wchar_t> buf(len + 1);
-  std::fill(buf.begin(), buf.end(), 0);
-  mbstowcs(&buf[0], str.c_str(), len);
-  buf[len] = '\0';
-  setlocale(LC_ALL, oldLocale);
-  return wstring(&buf[0]);
-}
-
-std::string ToMbs(const std::wstring& str) {
-  auto len = str.length() * 3;
-  vector<char> buf(len + 1);
-  std::fill(buf.begin(), buf.end(), 0);
-  char* oldLocale = setlocale(LC_ALL, "");
-  wcstombs(&buf[0], str.c_str(), len);
-  buf[len] = '\0';
-  setlocale(LC_ALL, oldLocale);
-  return string(&buf[0]);
-}
-
 /////////////////////////////////////////////////////////////////
 /// Split
 /////////////////////////////////////////////////////////////////

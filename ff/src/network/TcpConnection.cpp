@@ -261,15 +261,15 @@ bool TcpConnection::connect(uint16_t remotePort, const std::string& remoteHost,
     if (localPort > 0) {
       if (!this->m_socket.bind(localPort, localIp))
         THROW_EXCEPTION(Exception,
-                        SW("Bind to ")(localPort)(
-                            ":")(localIp)(" failed. ")(strerror(errno)),
+                        SW("Bind to ")(localPort)(":")(localIp)(" failed. ")(
+                            strerror(errno)),
                         errno);
     }
 
     if (!this->m_socket.connect(remoteHost, remotePort, 5000)) {
       THROW_EXCEPTION(Exception,
-                      SW("Connect to ")(remoteHost)(
-                          ":")(remotePort)(" failed.")(strerror(errno)),
+                      SW("Connect to ")(remoteHost)(":")(
+                          remotePort)(" failed.")(strerror(errno)),
                       errno);
     }
 
@@ -427,15 +427,15 @@ bool TcpConnection::connect(uint16_t remotePort, const std::string& remoteHost,
     if (localPort > 0) {
       if (!this->m_socket.bind(localPort, localIp))
         THROW_EXCEPTION(Exception,
-                        SW("Bind to ")(localPort)(
-                            ":")(localIp)(" failed. ")(strerror(errno)),
+                        SW("Bind to ")(localPort)(":")(localIp)(" failed. ")(
+                            strerror(errno)),
                         errno);
     }
 
     if (!this->m_socket.connect(remoteHost, remotePort, 5000)) {
       THROW_EXCEPTION(Exception,
-                      SW("Connect to ")(remoteHost)(
-                          ":")(remotePort)(" failed.")(strerror(errno)),
+                      SW("Connect to ")(remoteHost)(":")(
+                          remotePort)(" failed.")(strerror(errno)),
                       errno);
     }
 
@@ -462,12 +462,17 @@ void TcpConnection::close() {
     this->m_ep->delFd(this->m_socket.getHandle());
     this->m_socket.close();
   }
+
+  lock_guard<mutex> lk(this->m_sendMutex);
+  this->m_sendBuffers.clear();
 }
 
 Socket& TcpConnection::getSocket() { return this->m_socket; }
 
 void TcpConnection::send(const void* buf, uint32_t bufSize) {
   if (this->m_isServer) return;
+
+  if (!this->m_socket.isConnected()) return;
 
   lock_guard<mutex> lk(this->m_sendMutex);
   this->m_sendBuffers.push_back(BufferPtr(new Buffer(buf, bufSize)));

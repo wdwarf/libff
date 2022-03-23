@@ -26,8 +26,8 @@ NS_FF_BEG
 EPoll::EPoll(uint32_t maxEpollEvents)
     : m_epFd(epoll_create1(0)),
       epollEvents(maxEpollEvents)
-      // m_fdChanged(false) 
-			{
+// m_fdChanged(false)
+{
   this->initSignalPipe();
 
   this->addFd(this->m_signalPipe[0], Bind(&EPoll::onPipeEvents, this));
@@ -60,11 +60,12 @@ bool EPoll::addFd(int fd, const FdUpdateFunc& updateFunc) {
 
   {
     lock_guard<mutex> lk(this->m_fdInfosMutex);
+    this->m_fdInfos.erase(fd);
     if (!this->m_fdInfos.insert(make_pair(fd, fdInfo)).second) {
       return false;
     }
 
-    this->addFd2Poll(fd);
+    if (!this->addFd2Poll(fd)) return false;
     // this->m_fdChanged = true;
   }
 
