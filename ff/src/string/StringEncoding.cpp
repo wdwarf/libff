@@ -190,6 +190,8 @@ string Utf8ToGbk(const std::string& srcStr) {
   return string(&outBuf[0]);
 }
 
+#endif
+
 std::wstring ToWs(const std::string& str) {
   char* oldLocale = setlocale(LC_ALL, "");
   auto len = str.length();
@@ -211,7 +213,5 @@ std::string ToMbs(const std::wstring& str) {
   setlocale(LC_ALL, oldLocale);
   return string(&buf[0]);
 }
-
-#endif
 
 NS_FF_END

@@ -14,9 +14,9 @@
 #include <ff/Synchronizable.h>
 #include <ff/ff_config.h>
 
+#include <list>
 #include <memory>
 #include <string>
-#include <list>
 
 #ifndef _WIN32
 #include <termios.h>
@@ -80,6 +80,8 @@ class LIBFF_API Serial : public Synchronizable, protected Noncopyable {
   DWORD m_readTimeout;
   COMMTIMEOUTS m_commTimeouts;
   DCB m_dcb;
+  OVERLAPPED m_overLappedRead;
+  OVERLAPPED m_overLappedWrite;
 #endif
 };
 

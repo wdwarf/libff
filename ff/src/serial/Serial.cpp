@@ -38,13 +38,22 @@ Serial::Serial() : m_fd(INVALID_HANDLE_VALUE), m_readTimeout(-1) {
   this->m_commTimeouts.WriteTotalTimeoutConstant = 2000;
   this->m_commTimeouts.WriteTotalTimeoutMultiplier = 0;
 
+  memset(&this->m_overLappedRead, 0, sizeof(OVERLAPPED));
+  memset(&this->m_overLappedWrite, 0, sizeof(OVERLAPPED));
+  this->m_overLappedRead.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+  this->m_overLappedWrite.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+
   this->setBaudrate(9600);
   this->setParity(Parity::NONE);
   this->setDatabit(8);
   this->setStopBit(StopBit::_1);
 }
 
-Serial::~Serial() { this->close(); }
+Serial::~Serial() {
+  this->close();
+  CloseHandle(this->m_overLappedRead.hEvent);
+  CloseHandle(this->m_overLappedWrite.hEvent);
+}
 
 void Serial::open(const std::string& device) {
   if (this->isOpen()) {
@@ -53,8 +62,9 @@ void Serial::open(const std::string& device) {
 
   _W(string) strPort = _T("\\\\.\\") + device;
 
-  this->m_fd = CreateFile(strPort.c_str(), GENERIC_READ | GENERIC_WRITE, 0, 0,
-                          OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
+  this->m_fd = CreateFile(strPort.c_str(), GENERIC_READ | GENERIC_WRITE, 0,
+                          NULL, OPEN_EXISTING,
+                          FILE_ATTRIBUTE_NORMAL | FILE_FLAG_OVERLAPPED, NULL);
 
   if (INVALID_HANDLE_VALUE == this->m_fd)
     THROW_EXCEPTION(SerialException, device + " open failed." + strerror(errno),
@@ -67,6 +77,8 @@ void Serial::open(const std::string& device) {
     THROW_EXCEPTION(SerialException, device + " open failed." + strerror(errno),
                     errno);
   }
+  PurgeComm(this->m_fd, PURGE_TXCLEAR | PURGE_RXCLEAR);
+  ClearCommError(this->m_fd, NULL, NULL);
 }
 
 bool Serial::isOpen() const { return (INVALID_HANDLE_VALUE != this->m_fd); }
@@ -88,14 +100,41 @@ int Serial::read(char* buf, int len, int msTimeout) {
   }
 
   DWORD readBytes = 0;
-  return (ReadFile(this->m_fd, buf, len, &readBytes, NULL)) ? readBytes : -1;
+  DWORD evMask = 0;
+  SetCommMask(this->m_fd, EV_RXCHAR);
+  if (!WaitCommEvent(this->m_fd, &evMask, &this->m_overLappedRead)) {
+    if (GetLastError() != ERROR_IO_PENDING) return -1;
+    WaitForSingleObject(this->m_overLappedRead.hEvent, msTimeout);
+    if (EV_RXCHAR == (EV_RXCHAR & evMask)) {
+      if (!ReadFile(this->m_fd, buf, len, &readBytes, &m_overLappedRead)) {
+        if (GetLastError() != ERROR_IO_PENDING) return -1;
+        if (!GetOverlappedResult(this->m_fd, &m_overLappedRead, &readBytes,
+                                 TRUE))
+          return -1;
+      }
+    }
+  }
+
+  return readBytes;
 }
 
 int Serial::send(const void* buf, int len) {
   if (!this->isOpen()) return -1;
 
   DWORD writeBytes = 0;
-  return (WriteFile(this->m_fd, buf, len, &writeBytes, NULL)) ? writeBytes : -1;
+  const uint8_t* p = (const uint8_t*)buf;
+  while (writeBytes < len) {
+    DWORD sendBytes = 0;
+    if (!WriteFile(this->m_fd, (p + writeBytes), len - writeBytes, &sendBytes,
+                   &m_overLappedWrite)) {
+      if (GetLastError() != ERROR_IO_PENDING) return -1;
+      if (!GetOverlappedResult(this->m_fd, &m_overLappedWrite, &sendBytes,
+                               TRUE))
+        return -1;
+    }
+    writeBytes += sendBytes;
+  }
+  return writeBytes;
 }
 
 void Serial::flush() {
