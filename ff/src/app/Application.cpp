@@ -63,6 +63,19 @@ char** Application::getArgv() const { return this->impl->getArgv(); }
 
 int Application::getExitCode() const { return this->impl->getExitCode(); }
 
+std::string Application::GetEnv(const std::string& varName) {
+  return Application::ApplicationImpl::GetEnv(varName);
+}
+
+bool Application::UnsetEnv(const std::string& varName) {
+  return Application::ApplicationImpl::UnsetEnv(varName);
+}
+
+bool Application::SetEnv(const std::string& varName,
+                         const std::string& varValue) {
+  return Application::ApplicationImpl::SetEnv(varName, varValue);
+}
+
 std::string Application::GetApplicationName() {
   return Application::ApplicationImpl::GetApplicationName();
 }

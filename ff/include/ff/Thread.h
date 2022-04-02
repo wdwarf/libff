@@ -8,38 +8,44 @@
 #ifndef FF_THREAD_H_
 #define FF_THREAD_H_
 
-#include <functional>
-#include <thread>
-#include <memory>
-#include <ff/ff_config.h>
-#include <ff/Runnable.h>
 #include <ff/Exception.h>
 #include <ff/Noncopyable.h>
+#include <ff/Runnable.h>
+#include <ff/ff_config.h>
+
+#include <functional>
+#include <memory>
+#include <thread>
 
 NS_FF_BEG
 
 EXCEPTION_DEF2(ThreadException, RunnableException);
 
-class LIBFF_API Thread: public Runnable, public Noncopyable {
-public:
-	Thread();
-	Thread(RunnablePtr runnable);
-	Thread(RunnableFunc func);
-	virtual ~Thread();
+using ThreadIdT = uint32_t;
 
-	void start();
-	void join();
-	bool isJoinable() const;
-	void detach();
+class LIBFF_API Thread : public Runnable, public Noncopyable {
+ public:
+  Thread();
+  Thread(RunnablePtr runnable);
+  Thread(RunnableFunc func);
+  virtual ~Thread();
 
-	static void Sleep(unsigned int ms);
-	static void (Yield)();
-private:
-	void run() override;
+  void start();
+  void join();
+  bool isJoinable() const;
+  void detach();
+  ThreadIdT id();
 
-private:
-	RunnablePtr m_runnable;
-	std::thread m_thread;
+  static void Sleep(unsigned int ms);
+  static void(Yield)();
+  static ThreadIdT CurrentThreadId();
+
+ private:
+  void run() override;
+
+ private:
+  RunnablePtr m_runnable;
+  std::thread m_thread;
 };
 
 typedef std::shared_ptr<Thread> ThreadPtr;

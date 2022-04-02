@@ -13,46 +13,49 @@
 #include <unistd.h>
 #endif
 
-#include <string>
-#include <list>
-#include <mutex>
-#include <condition_variable>
-#include <map>
-
 #include <ff/Application.h>
 #include <ff/Settings.h>
+
+#include <condition_variable>
+#include <list>
+#include <map>
+#include <mutex>
+#include <string>
 
 NS_FF_BEG
 
 class Application::ApplicationImpl {
-public:
-	ApplicationImpl(Application* _app, int argc, char** argv);
-	virtual ~ApplicationImpl();
+ public:
+  ApplicationImpl(Application* _app, int argc, char** argv);
+  virtual ~ApplicationImpl();
 
-	int run();
-	void exit(int code);
-	int getArgc() const;
-	char** getArgv() const;
-	int getExitCode() const;
-	bool isRunning() const;
-	const std::vector<std::string>& getCommandLines() const;
-	const std::string& getCommandLine(int index) const;
-	int getCommandLineCount() const;
+  int run();
+  void exit(int code);
+  int getArgc() const;
+  char** getArgv() const;
+  int getExitCode() const;
+  bool isRunning() const;
+  const std::vector<std::string>& getCommandLines() const;
+  const std::string& getCommandLine(int index) const;
+  int getCommandLineCount() const;
 
-	static std::string GetApplicationPath();
-	static std::string GetApplicationDir();
-	static std::string GetApplicationName();
-	static std::string GetCurrentWorkDir();
+  static std::string GetEnv(const std::string& varName);
+  static bool SetEnv(const std::string& varName, const std::string& varValue);
+  static bool UnsetEnv(const std::string& varName);
+  static std::string GetApplicationPath();
+  static std::string GetApplicationDir();
+  static std::string GetApplicationName();
+  static std::string GetCurrentWorkDir();
 
-private:
-	Application* m_app;
-	int m_argc;
-	char** m_argv;
-	std::vector<std::string> m_cmdLines;
-	std::mutex m_mutex;
-	std::condition_variable m_cond;
-	int m_exitCode;
-	bool m_running;
+ private:
+  Application* m_app;
+  int m_argc;
+  char** m_argv;
+  std::vector<std::string> m_cmdLines;
+  std::mutex m_mutex;
+  std::condition_variable m_cond;
+  int m_exitCode;
+  bool m_running;
 };
 
 NS_FF_END

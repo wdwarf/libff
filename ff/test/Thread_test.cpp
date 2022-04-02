@@ -5,45 +5,48 @@
  *      Author: root
  */
 
-#include <gtest/gtest.h>
 #include <ff/Thread.h>
-#include "TestDef.h"
+#include <gtest/gtest.h>
+
 #include <iostream>
+
+#include "TestDef.h"
 
 using namespace std;
 USE_NS_FF
 
 void threadFunc() {
-	int n = 0;
-	while (++n <= 3) {
-		LOGD << __func__;
-		this_thread::sleep_for(std::chrono::seconds(1));
-	}
-	LOGD << __func__ << " end.";
+  LOGD << "thread id: " << Thread::CurrentThreadId();
+  int n = 0;
+  while (++n <= 3) {
+    LOGD << __func__;
+    this_thread::sleep_for(std::chrono::seconds(1));
+  }
+  LOGD << __func__ << " end.";
 }
 
-class Func{
-public:
-	Func& operator()(){
-		cout << "Functor operate" << endl;
-		return *this;
-	}
+class Func {
+ public:
+  Func& operator()() {
+    cout << "Functor operate" << endl;
+    return *this;
+  }
 };
 
 TEST(TestThread, TestThread) {
-	{
-		Thread t(&threadFunc);
-		t.start();
-		t.detach();
+  {
+    Thread t(&threadFunc);
+    t.start();
+    LOGD << "t id: " << t.id();
+    t.detach();
 
-		Thread t2((Func()));
-		t2.start();
-		t2.join();
+    Thread t2((Func()));
+    t2.start();
+    t2.join();
 
-		this_thread::sleep_for(chrono::seconds(1));
-	}
-//	Thread(MakeRunnable(threadFunc)).start();
+    this_thread::sleep_for(chrono::seconds(1));
+  }
+  //	Thread(MakeRunnable(threadFunc)).start();
 
-	LOGD << "test end";
+  LOGD << "test end";
 }
-
