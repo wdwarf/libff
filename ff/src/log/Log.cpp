@@ -91,7 +91,7 @@ Log& Log::done() {
 	this->m_stream.str("");
 
 	this->log(
-			LogInfo(this->m_logLevel, logInfo, this->m_module, Timestamp::now(),
+			LogInfo(this->m_logLevel, logInfo, this->m_module, Timestamp(),
 					m_fileName, this->m_functionName, this->m_lineNumber));
 
 	return *this;

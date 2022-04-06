@@ -179,6 +179,7 @@ ${windows_files}
 	src/process/ProcessImplLinux.cpp
 	src/process/ProcessImplWindows.cpp
 	src/random/Random.cpp
+	src/random/Snowflake.cpp
 	src/random/UUID.cpp
 	src/serial/Serial.cpp
 	src/settings/Settings.cpp

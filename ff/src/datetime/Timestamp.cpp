@@ -6,6 +6,7 @@
  */
 
 #include <ff/Timestamp.h>
+
 #include <cstring>
 #include <ctime>
 #include <vector>
@@ -15,148 +16,68 @@
 #include <sys/time.h>
 #endif
 
-#include <iostream>
+#include <atomic>
+#include <chrono>
 #include <iomanip>
+#include <iostream>
 #include <sstream>
 
 using namespace std;
 
-#define EPOCHFILETIME   (116444736000000000UL)
-
 NS_FF_BEG
 
-class Timestamp::TimestampImpl {
-public:
-	TimestampImpl() {
-		memset(&ts, 0, sizeof(timespec));
-	}
+Timestamp::Timestamp() : m_ts(Now()) {}
 
-	void setCurrentTime() {
-#ifdef _WIN32
+Timestamp::Timestamp(uint64_t t) : m_ts(t) {}
 
-		FILETIME ft;
-		GetSystemTimeAsFileTime(&ft);
+Timestamp::Timestamp(const Timestamp &t) { this->m_ts = t.m_ts.load(); }
 
-		LARGE_INTEGER li;
-		int64_t tt = 0;
-		
-		li.LowPart = ft.dwLowDateTime;
-		li.HighPart = ft.dwHighDateTime;
-		li.QuadPart -= EPOCHFILETIME;
-		ts.tv_sec = (long)(li.QuadPart / (10000 * 1000));
-		ts.tv_nsec = (long)((li.QuadPart % (10000 * 1000)) * 100);
-#else
-		clock_gettime(CLOCK_REALTIME, &ts);
-#endif
-	}
-
-	bool operator==(const TimestampImpl &t) const {
-		if (t.ts.tv_sec == this->ts.tv_sec) {
-			return (t.ts.tv_nsec == this->ts.tv_nsec);
-		}
-		return false;
-	}
-
-	bool operator!=(const TimestampImpl &t) const {
-		return !this->operator ==(t);
-	}
-
-	bool operator<(const TimestampImpl &t) const {
-		if (this->ts.tv_sec < t.ts.tv_sec) {
-			return true;
-		} else if (this->ts.tv_sec == t.ts.tv_sec) {
-			return (t.ts.tv_nsec < this->ts.tv_nsec);
-		}
-		return false;
-	}
-
-	bool operator<=(const TimestampImpl &t) const {
-		if (this->ts.tv_sec < t.ts.tv_sec) {
-			return true;
-		} else
-			return this->operator ==(t);
-	}
-
-	bool operator>(const TimestampImpl &t) const {
-		return !this->operator <(t);
-	}
-
-	bool operator>=(const TimestampImpl &t) const {
-		if (this->ts.tv_sec > t.ts.tv_sec) {
-			return true;
-		} else
-			return this->operator ==(t);
-	}
-
-	string toLocalString(const string &f = "") const {
-		string format = f.empty() ? "%F %T" : f;
-		stringstream str;
-		str << DateTime(this->ts.tv_sec).toLocalString(format) << "." << setw(3)
-				<< setfill('0') << (this->ts.tv_nsec / 1000000);
-		return str.str();
-	}
-
-private:
-	timespec ts;
-	friend class Timestamp;
-};
-
-Timestamp::Timestamp() :
-		impl(new TimestampImpl) {
-	//
+uint64_t Timestamp::Now() {
+  return std::chrono::time_point_cast<std::chrono::milliseconds>(
+             std::chrono::system_clock::now())
+      .time_since_epoch()
+      .count();
 }
 
-Timestamp::Timestamp(const Timestamp &t) :
-		impl(new TimestampImpl) {
-	*this->impl = *t.impl;
-}
-
-Timestamp::~Timestamp() {
-	delete this->impl;
-}
-
-Timestamp& Timestamp::operator=(const Timestamp &t) {
-	*this->impl = *t.impl;
-	return *this;
-}
-
-DateTime Timestamp::toDateTime() const {
-	return DateTime(this->impl->ts.tv_sec);
-}
-
-string Timestamp::toLocalString(const string &f) const {
-	return this->impl->toLocalString(f);
-}
-
-Timestamp Timestamp::now() {
-	Timestamp t;
-	t.impl->setCurrentTime();
-	return t;
+Timestamp &Timestamp::operator=(const Timestamp &t) {
+  this->m_ts = t.m_ts.load();
+  return *this;
 }
 
 bool Timestamp::operator==(const Timestamp &t) const {
-	return this->impl->operator==(*t.impl);
+  return (this->m_ts == t.m_ts);
 }
 
 bool Timestamp::operator!=(const Timestamp &t) const {
-	return this->impl->operator!=(*t.impl);
+  return !this->operator==(t);
 }
 
 bool Timestamp::operator<(const Timestamp &t) const {
-	return this->impl->operator<(*t.impl);
+  return (this->m_ts < t.m_ts);
 }
 
 bool Timestamp::operator<=(const Timestamp &t) const {
-	return this->impl->operator<=(*t.impl);
+  return (this->m_ts <= t.m_ts);
 }
 
 bool Timestamp::operator>(const Timestamp &t) const {
-	return this->impl->operator>(*t.impl);
+  return !this->operator<(t);
 }
 
 bool Timestamp::operator>=(const Timestamp &t) const {
-	return this->impl->operator>=(*t.impl);
+  return (this->m_ts >= t.m_ts);
 }
 
-NS_FF_END
+string Timestamp::toLocalString(const string &f) const {
+  string format = f.empty() ? "%F %T" : f;
+  stringstream str;
+  str << DateTime(this->m_ts / 1000).toLocalString(format) << "." << setw(3)
+      << setfill('0') << (m_ts % 1000);
+  return str.str();
+}
 
+uint64_t Timestamp::get() const { return this->m_ts; }
+
+Timestamp::operator uint64_t() const { return this->m_ts; }
+
+NS_FF_END

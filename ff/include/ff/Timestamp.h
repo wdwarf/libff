@@ -8,36 +8,40 @@
 #ifndef FF_TIMESTAMP_H_
 #define FF_TIMESTAMP_H_
 
-#include <ff/Object.h>
-#include <ff/Exception.h>
 #include <ff/DateTime.h>
+#include <ff/Exception.h>
+#include <ff/Object.h>
+
+#include <atomic>
 
 NS_FF_BEG
 
 EXCEPTION_DEF(TimestampException);
 
 class LIBFF_API Timestamp {
-public:
-	Timestamp();
-	Timestamp(const Timestamp& t);
-	virtual ~Timestamp();
+ public:
+  Timestamp();
+  Timestamp(uint64_t t);
+  Timestamp(const Timestamp& t);
 
-	Timestamp& operator=(const Timestamp& t);
+  Timestamp& operator=(const Timestamp& t);
 
-	DateTime toDateTime() const;
-	std::string toLocalString(const std::string& f = "") const;
+  uint64_t get() const;
+  operator uint64_t() const;
+  DateTime toDateTime() const;
+  std::string toLocalString(const std::string& f = "") const;
 
-	static Timestamp now();
+  bool operator==(const Timestamp& t) const;
+  bool operator!=(const Timestamp& t) const;
+  bool operator<(const Timestamp& t) const;
+  bool operator<=(const Timestamp& t) const;
+  bool operator>(const Timestamp& t) const;
+  bool operator>=(const Timestamp& t) const;
 
-	bool operator==(const Timestamp& t) const;
-	bool operator!=(const Timestamp& t) const;
-	bool operator<(const Timestamp& t) const;
-	bool operator<=(const Timestamp& t) const;
-	bool operator>(const Timestamp& t) const;
-	bool operator>=(const Timestamp& t) const;
-private:
-	class TimestampImpl;
-	TimestampImpl* impl;
+  static uint64_t Now();
+
+ private:
+  std::atomic<uint64_t> m_ts;
 };
 
 NS_FF_END

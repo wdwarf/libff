@@ -45,7 +45,7 @@ LogLevel LogLevelFromStr(const std::string& ll) {
 }
 
 LogInfo::LogInfo() :
-		m_logLevel(LogLevel::Info), m_logTime(Timestamp::now()), m_lineNumber(0) {
+		m_logLevel(LogLevel::Info), m_lineNumber(0) {
 	//
 }
 
