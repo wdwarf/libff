@@ -208,9 +208,10 @@ Socket::Socket()
       m_useSelect(true),
       m_blockingType(SockBlockingType::Blocking) {}
 
-Socket::Socket(int socketFd)
-    : m_useSelect(true), m_blockingType(SockBlockingType::Blocking) {
+Socket::Socket(int socketFd) : m_useSelect(true) {
   this->m_socketFd = socketFd;
+  this->m_blockingType = this->isNonBlocking() ? SockBlockingType::NonBlocking
+                                               : SockBlockingType::Blocking;
 }
 
 Socket::Socket(Socket&& sock) {
@@ -297,33 +298,27 @@ bool Socket::close() {
   return (0 == re);
 }
 
-bool Socket::createTcp(uint16_t family) {
+bool Socket::createTcp(int family) {
   if (AF_UNSPEC == family) return false;
   return this->create(AF_INET == family ? PF_INET : PF_INET6, SOCK_STREAM);
 }
 
-bool Socket::createUdp(uint16_t family) {
+bool Socket::createUdp(int family) {
   if (AF_UNSPEC == family) return false;
   return this->create(AF_INET == family ? PF_INET : PF_INET6, SOCK_DGRAM);
 }
 
-bool Socket::connect(const std::string& host, uint16_t port, int msTimeout) {
+bool Socket::connect(const sockaddr* addr, int addrLen, int msTimeout) {
   if (INVALID_SOCKET == this->m_socketFd) {
     return false;
   }
 
   bool re = false;
-  SockAddr sockAddr = Socket::Host2SockAddr(host);
-  if (!sockAddr.isValid()) return false;
 
-  sockAddr.setPort(port);
-  const sockaddr* pAddr = sockAddr;
-  socklen_t addrSize = (AF_INET == sockAddr.getFamily()) ? sizeof(sockaddr_in)
-                                                         : sizeof(sockaddr_in6);
   bool nonBlock = this->isNonBlocking();
   Socket::SetBlocking(this->m_socketFd, SockBlockingType::NonBlocking);
 
-  int ret = ::connect(this->m_socketFd, pAddr, addrSize);
+  int ret = ::connect(this->m_socketFd, addr, addrLen);
   if (-1 == ret) {
     timeval tm;
     timeval* ptm = NULL;
@@ -347,7 +342,31 @@ bool Socket::connect(const std::string& host, uint16_t port, int msTimeout) {
     }
   }
   Socket::SetBlocking(this->m_socketFd, this->m_blockingType);
+
   return re;
+}
+
+bool Socket::connect(const std::string& host, uint16_t port, int msTimeout) {
+  if (INVALID_SOCKET == this->m_socketFd) {
+    return false;
+  }
+
+  bool re = false;
+  SockAddr sockAddr = Socket::Host2SockAddr(host);
+  if (!sockAddr.isValid()) return false;
+
+  sockAddr.setPort(port);
+  const sockaddr* pAddr = sockAddr;
+  socklen_t addrSize = (AF_INET == sockAddr.getFamily()) ? sizeof(sockaddr_in)
+                                                         : sizeof(sockaddr_in6);
+  bool nonBlock = this->isNonBlocking();
+  Socket::SetBlocking(this->m_socketFd, SockBlockingType::NonBlocking);
+
+  return this->connect(pAddr, addrSize, msTimeout);
+}
+
+bool Socket::bind(const sockaddr* addr, int addrLen) {
+  return (0 == ::bind(this->getHandle(), addr, addrLen));
 }
 
 bool Socket::bind(uint16_t port, const std::string& ip) {
@@ -713,6 +732,52 @@ bool Socket::setKeepAlive(bool keepAlive, uint32_t idle, uint32_t interval,
                          reinterpret_cast<const char*>(&val), sizeof(val)) != 0)
       return false;
   }
+
+  return true;
+}
+
+bool Socket::SocketPair(SocketFd fdPair[2], int family, int type,
+                        int protocol) {
+#ifndef _WIN32
+  return (0 == socketpair(family, type, protocol, fdPair));
+#endif
+  Socket sockListen;
+  Socket sockConn;
+  if (!sockListen.create(AF_INET, type, 0) ||
+      !sockConn.create(AF_INET, type, 0))
+    return false;
+
+  sockaddr_in addrListen;
+  memset(&addrListen, 0, sizeof(addrListen));
+  addrListen.sin_family = AF_INET;
+  addrListen.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+  addrListen.sin_port = 0;
+
+  if (!sockListen.bind((sockaddr*)&addrListen, sizeof(addrListen)) ||
+      !sockListen.listen(1))
+    return false;
+
+  sockaddr_in addrConn;
+  memset(&addrConn, 0, sizeof(addrConn));
+  int size = sizeof(addrConn);
+  if (-1 == getsockname(sockListen.getHandle(), (sockaddr*)&addrConn, &size))
+    return false;
+
+  if (!sockConn.connect((sockaddr*)&addrConn, size)) return false;
+
+  auto sockAccept = sockListen.accept((sockaddr*)&addrListen, &size);
+  if (INVALID_SOCKET == sockAccept.getHandle()) return false;
+
+  if (-1 == getsockname(sockConn.getHandle(), (struct sockaddr*)&addrConn,
+                        &size) ||
+      size != sizeof(addrConn) ||
+      addrListen.sin_family != addrConn.sin_family ||
+      addrListen.sin_addr.s_addr != addrConn.sin_addr.s_addr ||
+      addrListen.sin_port != addrConn.sin_port)
+    return false;
+
+  fdPair[0] = sockConn.dettach();
+  fdPair[1] = sockAccept.dettach();
 
   return true;
 }

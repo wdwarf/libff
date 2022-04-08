@@ -11,6 +11,7 @@
 #include <ff/Exception.h>
 #include <ff/Object.h>
 
+#include <array>
 #include <memory>
 #include <string>
 
@@ -77,7 +78,7 @@ class LIBFF_API SockAddr {
   void setFamily(uint16_t family);
   uint16_t getPort() const;
   void setPort(uint16_t port);
-	std::string getIp() const;
+  std::string getIp() const;
 
   bool isValid() const;
 
@@ -110,8 +111,8 @@ class LIBFF_API Socket {
   ~Socket();
 
   bool create(int af, int style, int protocol = 0);
-  bool createTcp(uint16_t family = AF_INET);
-  bool createUdp(uint16_t family = AF_INET);
+  bool createTcp(int family = AF_INET);
+  bool createUdp(int family = AF_INET);
   SocketFd getHandle() const;
   bool close();
   Socket& shutdown(int type = SHUT_RDWR);
@@ -122,7 +123,7 @@ class LIBFF_API Socket {
   bool isUseSelect() const;
   Socket& setUseSelect(bool useSelect);
 
-	SockAddr getLocalSockAddr() const;
+  SockAddr getLocalSockAddr() const;
   std::string getLocalAddress() const;
   int getLocalPort() const;
   std::string getRemoteAddress() const;
@@ -135,8 +136,10 @@ class LIBFF_API Socket {
   bool setKeepAlive(bool keepAlive, uint32_t idle = 10, uint32_t interval = 10,
                     uint32_t count = 9);
 
+  bool connect(const sockaddr* addr, int addrLen, int msTimeout = 3000);
   bool connect(const std::string& host, uint16_t port, int msTimeout = 3000);
   bool isConnected() const;
+  bool bind(const sockaddr* addr, int addrLen);
   bool bind(uint16_t port, const std::string& ip = "");
   bool joinMulticastGroup(const std::string& ip);
   bool listen(int n = 10);
@@ -165,6 +168,8 @@ class LIBFF_API Socket {
   static in_addr_t Host2Ip(const std::string& host);
   static in6_addr Host2IpV6(const std::string& host);
   static SockAddr Host2SockAddr(const std::string& host);
+  static bool SocketPair(SocketFd fdPair[2], int family = AF_INET,
+                         int type = SOCK_STREAM, int protocol = 0);
 
  private:
   SocketFd m_socketFd;

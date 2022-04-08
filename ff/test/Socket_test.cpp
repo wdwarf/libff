@@ -17,7 +17,7 @@ USE_NS_FF
 
 #define SVR_PORT 65108
 
-TEST(TestSocket, TestSocket) {
+TEST(SocketTest, SocketTest) {
   Socket svrSock;
   EXPECT_TRUE(svrSock.createTcp());
   EXPECT_NE(svrSock.getHandle(), INVALID_SOCKET);
@@ -56,4 +56,23 @@ TEST(TestSocket, TestSocket) {
 
   acceptThread.join();
   clientThread.join();
+}
+
+TEST(SocketTest, TestSocketPair) {
+  SocketFd pair[2] = {INVALID_SOCKET, INVALID_SOCKET};
+  ASSERT_TRUE(Socket::SocketPair(pair));
+
+  Socket s0(pair[0]);
+  Socket s1(pair[1]);
+
+  char buf[16] = {0};
+  ASSERT_EQ(3, s0.send("123", 3));
+  ASSERT_EQ(3, s1.read(buf, 3, 1000));
+
+  LOGD << "s1 read: " << buf;
+
+  ASSERT_EQ(4, s1.send("abcd", 4));
+  ASSERT_EQ(4, s0.read(buf, 4, 1000));
+
+  LOGD << "s0 read: " << buf;
 }
