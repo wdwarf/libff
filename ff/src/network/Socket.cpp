@@ -759,7 +759,7 @@ bool Socket::SocketPair(SocketFd fdPair[2], int family, int type,
 
   sockaddr_in addrConn;
   memset(&addrConn, 0, sizeof(addrConn));
-  int size = sizeof(addrConn);
+  socklen_t size = sizeof(addrConn);
   if (-1 == getsockname(sockListen.getHandle(), (sockaddr*)&addrConn, &size))
     return false;
 
