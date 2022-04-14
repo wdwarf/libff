@@ -60,7 +60,13 @@ TEST(SocketTest, SocketTest) {
 
 TEST(SocketTest, TestSocketPair) {
   SocketFd pair[2] = {INVALID_SOCKET, INVALID_SOCKET};
-  ASSERT_TRUE(Socket::SocketPair(pair));
+#ifdef _WIN32
+  int af = AF_INET;
+#else
+  int af = AF_UNIX;
+#endif
+
+  ASSERT_TRUE(Socket::SocketPair(pair, af));
 
   Socket s0(pair[0]);
   Socket s1(pair[1]);
