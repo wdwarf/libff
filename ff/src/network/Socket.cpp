@@ -436,6 +436,18 @@ Socket Socket::accept(sockaddr_in6& addr) {
   return this->accept((sockaddr*)&addr, &size);
 }
 
+int Socket::getReadableBytes() {
+#ifdef _WIN32
+  u_long n = 0;
+  if (ioctlsocket(this->m_socketFd, FIONREAD, &n) < 0) return -1;
+  return (int)n;
+#else
+  int n = -1;
+  if (ioctl(this->m_socketFd, FIONREAD, &n) < 0) return -1;
+  return n;
+#endif
+}
+
 int Socket::send(const void* buf, socklen_t bufLen, int timeoutMs) {
   if (INVALID_SOCKET == this->m_socketFd) return -1;
 

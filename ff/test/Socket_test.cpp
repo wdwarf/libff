@@ -67,12 +67,14 @@ TEST(SocketTest, TestSocketPair) {
 
   char buf[16] = {0};
   ASSERT_EQ(3, s0.send("123", 3));
+  LOGD << "s1 readable: " << s1.getReadableBytes();
   ASSERT_EQ(3, s1.read(buf, 3, 1000));
-
   LOGD << "s1 read: " << buf;
+  LOGD << "s1 readable: " << s1.getReadableBytes();
 
   ASSERT_EQ(4, s1.send("abcd", 4));
+  LOGD << "s0 readable: " << s0.getReadableBytes();
   ASSERT_EQ(4, s0.read(buf, 4, 1000));
-
   LOGD << "s0 read: " << buf;
+  LOGD << "s0 readable: " << s0.getReadableBytes();
 }

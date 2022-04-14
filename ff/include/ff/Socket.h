@@ -148,6 +148,7 @@ class LIBFF_API Socket {
   Socket accept(sockaddr_in6& addr);
   Socket accept(sockaddr* addr, socklen_t* addrSize);
 
+  int getReadableBytes();
   int send(const void* buf, socklen_t bufLen, int timeoutMs = 10 * 1000);
   int read(void* buf, socklen_t readBytes, int timeoutMs = -1);
 
