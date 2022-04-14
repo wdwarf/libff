@@ -19,8 +19,8 @@
 #include <netdb.h>
 #include <netinet/tcp.h>
 #include <sys/errno.h>
+#include <sys/ioctl.h>
 #include <unistd.h>
-
 #define sockopt_flat_t int
 #endif
 
