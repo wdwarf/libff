@@ -33,6 +33,7 @@ struct placeholader_trais<1, I...> {
 	static auto bind(T* obj, R (T::*F)(Args...)) -> decltype(std::bind(F, obj, __placeholder<I> {}...)) {
 		return std::bind(F, obj, __placeholder<I> {}...);
 	}
+
 };
 
 template<typename R, typename ...Args>
@@ -41,13 +42,18 @@ auto Bind(R (*f)(Args...)) -> decltype(placeholader_trais<sizeof...(Args)+1>::bi
 }
 
 template<typename T, typename R, typename ...Args>
-auto Bind(T* t, R (T::*f)(Args...)) -> decltype(placeholader_trais<sizeof...(Args)+1>::bind(t, f)) {
+auto Bind(R (T::*f)(Args...), T* t) -> decltype(placeholader_trais<sizeof...(Args)+1>::bind(t, f)) {
 	return placeholader_trais<sizeof...(Args)+1>::bind(t, f);
 }
 
-template<typename T, typename R, typename ...Args>
-auto Bind(R (T::*f)(Args...), T* t) -> decltype(placeholader_trais<sizeof...(Args)+1>::bind(t, f)) {
-	return placeholader_trais<sizeof...(Args)+1>::bind(t, f);
+template<typename R, typename ...Args, typename... _Types>
+auto Bind(R (*f)(Args...), _Types&&... args) {
+	return std::bind(f, forward<_Types>(args)...);
+}
+
+template<typename T, typename R, typename ...Args, typename... _Types>
+auto Bind(R (T::*f)(Args...), T* t, _Types&&... args) {
+	return std::bind(f, t, forward<_Types>(args)...);
 }
 
 }

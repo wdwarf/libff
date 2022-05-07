@@ -10,6 +10,9 @@ set(PROJECT_VERSION_PATCH "0")
 MESSAGE(STATUS "operation system is ${CMAKE_SYSTEM}")
 
 MESSAGE(STATUS "CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}")
+
+option(BUILDIN_JSONCPP OFF)
+option(BUILDIN_ZLIB OFF)
 	
 include_directories(
   include
@@ -188,6 +191,7 @@ ${windows_files}
 	src/string/StringEncoding.cpp
 	src/system/FileSystem.cpp
 	src/system/System.cpp
+	src/timer/Timer.cpp
 	src/thread/Runnable.cpp
 	src/thread/Semaphore.cpp
 	src/thread/Synchronizable.cpp
