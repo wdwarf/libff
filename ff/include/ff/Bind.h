@@ -46,16 +46,6 @@ auto Bind(R (T::*f)(Args...), T* t) -> decltype(placeholader_trais<sizeof...(Arg
 	return placeholader_trais<sizeof...(Args)+1>::bind(t, f);
 }
 
-template<typename R, typename ...Args, typename... _Types>
-auto Bind(R (*f)(Args...), _Types&&... args) {
-	return std::bind(f, forward<_Types>(args)...);
-}
-
-template<typename T, typename R, typename ...Args, typename... _Types>
-auto Bind(R (T::*f)(Args...), T* t, _Types&&... args) {
-	return std::bind(f, t, forward<_Types>(args)...);
-}
-
 }
 /* namespace NS_FF */
 

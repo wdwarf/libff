@@ -28,7 +28,7 @@ TEST(TimerTest, TimerTest) {
 
   cout << "id3: " << tm.setTimeout(
       [t, &tm] {
-        Sleep(5000);
+        this_thread::sleep_for(chrono::milliseconds(5000));
         cout << "timeout exec3 " << t.tock() << endl;
 
         cout << "id5: " << tm.setTimeout([t] { cout << "timeout exec5 " << t.tock() << endl; },
@@ -36,17 +36,20 @@ TEST(TimerTest, TimerTest) {
       },
       500) << endl;
 
-  cout << "id4: " << tm.setTimeout(
-      [&tm, t, intervalTaskId] {
-        Sleep(5000);
+  uint32_t n = 0;
+  cout << "id4: " << tm.setInterval(
+      [&tm, intervalTaskId, &n] {
+        static Tick t;
         cout << "timeout exec4 " << t.tock() << endl;
-        tm.cancelTimeout(intervalTaskId);
+        t.tick();
+        // tm.cancelTimeout(intervalTaskId);
+        ++n;
       },
-      100) << endl;
+      300) << endl;
 
       cout << "=================" << endl;
 
-  while (true) {
+  while (n < 100) {
     this_thread::sleep_for(chrono::seconds(1));
   }
 }

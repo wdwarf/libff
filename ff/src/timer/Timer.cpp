@@ -30,6 +30,17 @@ Timer::~Timer() {
   if (this->m_timerThread.joinable()) {
     this->m_timerThread.join();
   }
+
+  auto p = this->m_tasks;
+  while (p) {
+    auto tmp = p;
+    p = p->next;
+    delete tmp;
+  }
+
+  for (auto& p : this->m_insertTasks) {
+    delete p;
+  }
 }
 
 int64_t Timer::getNextWaitMs() {
@@ -50,7 +61,7 @@ void Timer::timerThreadFunc() {
       unique_lock<mutex> lk(this->m_mutex);
 
       auto mil = this->getNextWaitMs();
-      (mil >= 0) ? this->m_cond.wait_for(lk, chrono::milliseconds(mil))
+      (mil >= 0) ? ((void)this->m_cond.wait_for(lk, chrono::milliseconds(mil)))
                  : this->m_cond.wait(lk);
 
       if (nullptr == this->m_tasks) continue;
@@ -66,10 +77,7 @@ void Timer::timerThreadFunc() {
           auto prev = task->prev;
           auto next = task->next;
 
-          if (0 == m_threadPool.getIdelThreadCount())
-            this->execTask(task);
-          else
-            m_threadPool.exec(bind(&Timer::execTask, this, task));
+          m_threadPool.exec(bind(&Timer::execTask, this, task));
 
           if (nullptr == prev) {
             this->m_tasks = next;
