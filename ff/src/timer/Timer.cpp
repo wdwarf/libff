@@ -31,6 +31,8 @@ Timer::~Timer() {
     this->m_timerThread.join();
   }
 
+  m_threadPool.waitAll();
+
   auto p = this->m_tasks;
   while (p) {
     auto tmp = p;
