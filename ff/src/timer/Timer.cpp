@@ -199,6 +199,17 @@ void Timer::cancelTimeout(TimerID id) {
 
   lock_guard<mutex> lk2(this->m_mutexNewTask);
 
+  for (auto it = this->m_reapetTasks.begin(); it != this->m_reapetTasks.end();
+       ++it) {
+    auto t = *it;
+    if (t->id == id) {
+      this->m_reapetTasks.erase(it);
+      t->cancled = true;
+      this->m_cond.notify_one();
+      return;
+    }
+  }
+  
   auto p = this->m_tasks;
   while (p) {
     if (p->id == id) {
@@ -217,16 +228,6 @@ void Timer::cancelTimeout(TimerID id) {
     }
   }
 
-  for (auto it = this->m_reapetTasks.begin(); it != this->m_reapetTasks.end();
-       ++it) {
-    auto t = *it;
-    if (t->id == id) {
-      this->m_reapetTasks.erase(it);
-      t->cancled = true;
-      this->m_cond.notify_one();
-      return;
-    }
-  }
 }
 
 NS_FF_END
