@@ -182,7 +182,7 @@ CrcCalculator::CrcCalculator(const CrcParamInfo* crcParamInfo) :
 }
 
 void CrcCalculator::initTable() {
-	for (size_t i = 0; i < 255; i++)
+	for (size_t i = 0; i < 256; i++)
 		this->m_table[i] = this->tableEntry(i);
 }
 
