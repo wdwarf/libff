@@ -5,8 +5,11 @@
  *      Author: ducky
  */
 
+#include <iostream>
 #include <ff/CRC.h>
 #include <ff/Buffer.h>
+
+using namespace std;
 
 NS_FF_BEG
 
@@ -167,7 +170,7 @@ CrcCalculator::CrcCalculator(CrcAlgorithm crcAlgorithm) :
 		m_crcParamInfo(CrcParams::instance().getCrcParamInfo(crcAlgorithm)), m_hashSize(
 				m_crcParamInfo->getHashSize()), m_mask(0xFFFFFFFFFFFFFFFFull) {
 	if (this->m_hashSize < 64) {
-		this->m_mask = (1L << this->m_hashSize) - 1;
+		this->m_mask = (1ULL << this->m_hashSize) - 1;
 	}
 	this->initTable();
 }
@@ -176,7 +179,7 @@ CrcCalculator::CrcCalculator(const CrcParamInfo* crcParamInfo) :
 		m_crcParamInfo(crcParamInfo), m_hashSize(m_crcParamInfo->getHashSize()), m_mask(
 				0xFFFFFFFFFFFFFFFFull) {
 	if (this->m_hashSize < 64) {
-		this->m_mask = (1L << this->m_hashSize) - 1;
+		this->m_mask = (1ULL << this->m_hashSize) - 1;
 	}
 	this->initTable();
 }
@@ -194,7 +197,7 @@ uint64_t CrcCalculator::tableEntry(int index) {
 	else if (this->m_hashSize > 8)
 		r <<= (this->m_hashSize - 8);
 
-	uint64_t lastBit = (1L << (this->m_hashSize - 1));
+	uint64_t lastBit = (1ULL << (this->m_hashSize - 1));
 
 	for (int i = 0; i < 8; i++) {
 		if ((r & lastBit) != 0)
