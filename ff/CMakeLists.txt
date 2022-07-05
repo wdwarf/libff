@@ -149,6 +149,7 @@ ${windows_files}
 	src/Object.cpp
 	src/app/Application.cpp
 	src/app/ApplicationImpl.cpp
+	src/app/CmdLineParser.cpp
 	src/buffer/Buffer.cpp
 	src/buffer/BufferImpl.cpp
 	src/cli/CliPacket.cpp
