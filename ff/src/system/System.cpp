@@ -225,7 +225,7 @@ class __CpuInfo {
       if (nIds_ >= 4) {
         auto eax = data_[4][0];
         this->m_cores = (eax >> 27) + 1;
-        cout << "m_cores: " << m_cores << endl;
+        // cout << "m_cores: " << m_cores << endl;
       }
 
       if (nIds_ >= 7) {
