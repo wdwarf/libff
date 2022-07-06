@@ -64,6 +64,7 @@ class LIBFF_API CmdLineParser {
 
   void parse(int argc, const char** argv);
   Variant get(const std::string& name) const;
+  bool has(const std::string& name) const;
   const std::string& usage() const;
 };
 

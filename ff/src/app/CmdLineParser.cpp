@@ -142,6 +142,10 @@ Variant CmdLineParser::get(const std::string& name) const {
   return this->m_pValueStore->getValue(name);
 }
 
+bool CmdLineParser::has(const std::string& name) const {
+  return this->m_pValueStore->hasValue(name);
+}
+
 const std::string& CmdLineParser::usage() const { return this->m_usage; }
 
 NS_FF_END
