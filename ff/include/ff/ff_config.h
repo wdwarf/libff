@@ -77,8 +77,12 @@ using SStreamT = std::stringstream;
 
 //#define __USE_SQLITE3_DB__
 
+#ifndef htonll
+
 #define htonll(x) ((1==htonl(1)) ? (x) : ((uint64_t)htonl((x) & 0xFFFFFFFF) << 32) | htonl((x) >> 32))
 #define ntohll(x) ((1==ntohl(1)) ? (x) : ((uint64_t)ntohl((x) & 0xFFFFFFFF) << 32) | ntohl((x) >> 32))
+
+#endif
 
 /**
  * @brief 结构体定义宏
@@ -95,13 +99,13 @@ using SStreamT = std::stringstream;
   type name() const{ return funcOut(this->m_##name); }\
   void name(const type val){ this->m_##name = funcIn(val); }\
   private:\
-  type m_##name
+    type m_##name
 
 #define MEMBER_DEF_I8(name) public:\
   int8_t name() const{ return this->m_##name; }\
   void name(const int8_t val){ this->m_##name = val; }\
   private:\
-  int8_t m_##name
+    int8_t m_##name
 
 #define MEMBER_DEF_I16(name) MEMBER_DEF_NUM_(name, int16_t, ntohs, htons)
 #define MEMBER_DEF_I32(name) MEMBER_DEF_NUM_(name, int32_t, ntohl, htonl)
@@ -116,6 +120,26 @@ using SStreamT = std::stringstream;
 #define MEMBER_DEF_U16(name) MEMBER_DEF_NUM_(name, uint16_t, ntohs, htons)
 #define MEMBER_DEF_U32(name) MEMBER_DEF_NUM_(name, uint32_t, ntohl, htonl)
 #define MEMBER_DEF_U64(name) MEMBER_DEF_NUM_(name, uint64_t, ntohll, htonll)
+
+#define MEMBER_DEF_FLOAT(name) public:\
+  float name() const{ float ret; \
+    uint32_t v = ntohl(this->m_##name); \
+    memcpy(&ret, &v, sizeof(ret)); \
+    return ret; }\
+  void name(const float val){ uint32_t v; \
+    memcpy(&v, &val, sizeof(v)); this->m_##name = htonl(v); }\
+  private:\
+    uint32_t m_##name
+
+#define MEMBER_DEF_DOUBLE(name) public:\
+  float name() const{ float ret; \
+    uint64_t v = ntohll(this->m_##name); \
+    memcpy(&ret, &v, sizeof(ret)); \
+    return ret; }\
+  void name(const float val){ uint64_t v; \
+    memcpy(&v, &val, sizeof(v)); this->m_##name = htonll(v); }\
+  private:\
+    uint64_t m_##name
 
 #define MEMBER_DEF_STR(name, size) public:\
   const char* name() const { return this->m_##name; }\
