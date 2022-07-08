@@ -72,9 +72,6 @@
 
 #endif
 
-using StringT = std::string;
-using SStreamT = std::stringstream;
-
 //#define __USE_SQLITE3_DB__
 
 #ifndef htonll
@@ -83,6 +80,19 @@ using SStreamT = std::stringstream;
 #define ntohll(x) ((1==ntohl(1)) ? (x) : ((uint64_t)ntohl((x) & 0xFFFFFFFF) << 32) | ntohl((x) >> 32))
 
 #endif
+
+NS_FF_BEG
+
+using StringT = std::string;
+using SStreamT = std::stringstream;
+
+template <typename T, typename U>
+void* bit_copy(T& dst, U& src) {
+  static_assert(sizeof(T) == sizeof(U), "the parameters dst and src mast has the same size!");
+  return memcpy(&dst, &src, sizeof(U));
+}
+
+NS_FF_END
 
 /**
  * @brief 结构体定义宏
@@ -124,20 +134,20 @@ using SStreamT = std::stringstream;
 #define MEMBER_DEF_FLOAT(name) public:\
   float name() const{ float ret; \
     uint32_t v = ntohl(this->m_##name); \
-    memcpy(&ret, &v, sizeof(ret)); \
+    ff::bit_copy(ret, v); \
     return ret; }\
   void name(const float val){ uint32_t v; \
-    memcpy(&v, &val, sizeof(v)); this->m_##name = htonl(v); }\
+    ff::bit_copy(v, val); this->m_##name = htonl(v); }\
   private:\
     uint32_t m_##name
 
 #define MEMBER_DEF_DOUBLE(name) public:\
   double name() const{ double ret; \
     uint64_t v = ntohll(this->m_##name); \
-    memcpy(&ret, &v, sizeof(ret)); \
+    ff::bit_copy(ret, v); \
     return ret; }\
   void name(const double val){ uint64_t v; \
-    memcpy(&v, &val, sizeof(v)); this->m_##name = htonll(v); }\
+    ff::bit_copy(v, val); this->m_##name = htonll(v); }\
   private:\
     uint64_t m_##name
 
