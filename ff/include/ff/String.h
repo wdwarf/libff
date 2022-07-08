@@ -91,26 +91,16 @@ LIBFF_API std::vector<std::string> Split(
 
 class LIBFF_API String : public std::string {
  public:
+  using std::string::string;
+
   String() = default;
   ~String() = default;
 
   String(const std::wstring& wstr);
   String& operator=(const std::wstring& wstr);
 
-  template <typename T>
-  String(const T& str) : std::string(str) {}
-
-  String(const String& str) : std::string(str) {}
-  String& operator=(const String& str) {
-    this->std::string::operator=(str);
-    return *this;
-  }
-
-  String(String&& str) : std::string(move(str)) {}
-  String& operator=(String&& str) {
-    this->std::string::operator=(move(str));
-    return *this;
-  }
+  String(const std::string& str) : std::string(str) {}
+  String(std::string&& str) : std::string(move(str)) {}
 
   operator std::wstring() const;
 
