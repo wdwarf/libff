@@ -132,11 +132,11 @@ using SStreamT = std::stringstream;
     uint32_t m_##name
 
 #define MEMBER_DEF_DOUBLE(name) public:\
-  float name() const{ float ret; \
+  double name() const{ double ret; \
     uint64_t v = ntohll(this->m_##name); \
     memcpy(&ret, &v, sizeof(ret)); \
     return ret; }\
-  void name(const float val){ uint64_t v; \
+  void name(const double val){ uint64_t v; \
     memcpy(&v, &val, sizeof(v)); this->m_##name = htonll(v); }\
   private:\
     uint64_t m_##name
