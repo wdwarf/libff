@@ -154,6 +154,7 @@ ${windows_files}
 	src/buffer/BufferImpl.cpp
 	src/cli/CliPacket.cpp
 	src/cli/CliService.cpp
+	src/data_service/DataService.cpp
 	src/datetime/DateTime.cpp
 	src/datetime/Tick.cpp
 	src/datetime/Timestamp.cpp
