@@ -342,8 +342,8 @@ long long File::getSize() const {
   string path = this->getPath();
   if (path.empty()) return false;
 
-  struct stat buf;
-  if (0 != stat(path.c_str(), &buf)) return 0;
+  struct _stat64 buf;
+  if (0 != _stat64(path.c_str(), &buf))  return 0;
 
 #ifdef _WIN32
   if (_S_IFDIR & buf.st_mode) return 0;
