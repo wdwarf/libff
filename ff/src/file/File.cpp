@@ -17,6 +17,9 @@
 
 #ifdef _WIN32
 #include <sys/stat.h>
+
+#define stat64 _stat64
+
 #else
 #include <dirent.h>
 #include <fcntl.h>
@@ -168,13 +171,13 @@ void File::setPath(const std::string& path) {
 
   this->path.clear();
 
-  if(StartsWith(p, "\\\\")){
+  if (StartsWith(p, "\\\\")) {
     this->path.push_back("\\\\");
     p = p.substr(2);
   }
 
   stringstream nodeStr;
-  for(char c : p){
+  for (char c : p) {
     if ('/' == c || '\\' == c) {
       string node = nodeStr.str();
       nodeStr.clear();
@@ -342,8 +345,8 @@ long long File::getSize() const {
   string path = this->getPath();
   if (path.empty()) return false;
 
-  struct _stat64 buf;
-  if (0 != _stat64(path.c_str(), &buf))  return 0;
+  struct stat64 buf;
+  if (0 != stat64(path.c_str(), &buf)) return 0;
 
 #ifdef _WIN32
   if (_S_IFDIR & buf.st_mode) return 0;
@@ -554,7 +557,7 @@ std::string File::getSuffix() const {
 }
 
 Buffer File::readAll() const {
-	Buffer out;
+  Buffer out;
   if (!this->isExists() || this->isDirectory()) return out;
 
   fstream f(this->getPath(), ios::in);
