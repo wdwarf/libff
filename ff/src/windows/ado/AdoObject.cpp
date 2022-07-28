@@ -11,11 +11,11 @@ NS_FF_BEG
 
 namespace {
 
-class __Init__ {
- public:
-  __Init__() { ::CoInitializeEx(NULL, COINIT_MULTITHREADED); }
-};
-static __Init__ __init__;
+// class __Init__ {
+//  public:
+//   __Init__() { ::CoInitializeEx(NULL, COINIT_MULTITHREADED); }
+// };
+// static __Init__ __init__;
 
 }  // namespace
 
