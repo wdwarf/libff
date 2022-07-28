@@ -8,22 +8,19 @@
 #include <ff/DataService.h>
 #include <ff/Settings.h>
 #include <ff/thirdparty/json/json.h>
+#include <ff/File.h>
 #include <gtest/gtest.h>
 
 #include <algorithm>
 #include <iostream>
 #include <sstream>
 #include <thread>
+#include <fstream>
 
 #include "TestDef.h"
 
 using namespace std;
 USE_NS_FF
-
-STRUCT_DEF_BEGIN(MyTest)
-MEMBER_DEF_FLOAT(f);
-MEMBER_DEF_DOUBLE(d);
-STRUCT_DEF_END
 
 struct C {
   C(int i) : c(i) {}
@@ -65,18 +62,8 @@ TEST(DataServiceTest, DataServiceTest) {
     cout << "isTemp: " << entity.isTemp << endl;
   }
 
-  MyTest mt;
-  mt.f(3.14159f);
-  mt.d(3.14159);
-  cout << "sizeof(MyTest): " << sizeof(MyTest) << endl;
-  cout << mt.f() << ", " << mt.d() << endl;
-
-  MyTest mt2;
-  bit_copy(mt2, mt);
-  cout << mt2.f() << ", " << mt2.d() << endl;
-
   DataServicePacket pkg;
-  cout << pkg.generate(1, DsFrameType::Rsp, 0x01, 0, &mt2, MyTest::Size())
+  cout << pkg.generate(1, DsFrameType::Rsp, DsOpCode::DataEntityInfo, 0, &mt2, MyTest::Size())
        << endl;
   auto hdr = pkg.header();
   cout << "id: " << hdr->id() << endl
@@ -117,4 +104,18 @@ cout << "=============================" << endl;
          << "dataHash: 0x" << hdr->dataHash() << endl
          << dec;
   }
+
+
+  DataServiceServer dss;
+  dss.setDataEntityInfoLoader(make_shared<JsonStrDataEntityLoader>(str));
+  dss.start();
+  this_thread::sleep_for(chrono::seconds(1));
+
+
+  DataServiceClient dsc;
+  dsc.start();
+  this_thread::sleep_for(chrono::seconds(1));
+  dsc.getDataEntityNames();
+  this_thread::sleep_for(chrono::seconds(2));
+
 }
