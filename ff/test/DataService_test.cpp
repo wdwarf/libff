@@ -22,6 +22,11 @@
 using namespace std;
 USE_NS_FF
 
+STRUCT_DEF_BEGIN(MyTest)
+MEMBER_DEF_FLOAT(f);
+MEMBER_DEF_DOUBLE(d);
+STRUCT_DEF_END
+
 struct C {
   C(int i) : c(i) {}
   int c;
@@ -61,6 +66,16 @@ TEST(DataServiceTest, DataServiceTest) {
     cout << "isSingle: " << entity.isSingle << endl;
     cout << "isTemp: " << entity.isTemp << endl;
   }
+
+  MyTest mt;
+  mt.f(3.14159f);
+  mt.d(3.14159);
+  cout << "sizeof(MyTest): " << sizeof(MyTest) << endl;
+  cout << mt.f() << ", " << mt.d() << endl;
+
+  MyTest mt2;
+  bit_copy(mt2, mt);
+  cout << mt2.f() << ", " << mt2.d() << endl;
 
   DataServicePacket pkg;
   cout << pkg.generate(1, DsFrameType::Rsp, DsOpCode::DataEntityInfo, 0, &mt2, MyTest::Size())
