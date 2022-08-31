@@ -123,14 +123,14 @@ Encode EncodeOf(const std::string& str) {
 #ifdef WIN32
 
 std::string Utf8ToGbk(const std::string& srcStr) {
-  int len = MultiByteToWideChar(CP_UTF8, 0, srcStr.c_str(), -1, NULL, 0);
-  wchar_t* wszGBK = new wchar_t[len + 1];
-  memset(wszGBK, 0, len * 2 + 2);
-  MultiByteToWideChar(CP_UTF8, 0, srcStr.c_str(), -1, wszGBK, len);
-  len = WideCharToMultiByte(CP_ACP, 0, wszGBK, -1, NULL, 0, NULL, NULL);
+  int wszLen = MultiByteToWideChar(CP_UTF8, 0, srcStr.c_str(), srcStr.length(), NULL, 0);
+  wchar_t* wszGBK = new wchar_t[wszLen + 1];
+  memset(wszGBK, 0, wszLen * 2 + 2);
+  MultiByteToWideChar(CP_UTF8, 0, srcStr.c_str(), srcStr.length(), wszGBK, wszLen);
+  int len = WideCharToMultiByte(CP_ACP, 0, wszGBK, wszLen, NULL, 0, NULL, NULL);
   char* szGBK = new char[len + 1];
   memset(szGBK, 0, len + 1);
-  WideCharToMultiByte(CP_ACP, 0, wszGBK, -1, szGBK, len, NULL, NULL);
+  WideCharToMultiByte(CP_ACP, 0, wszGBK, wszLen, szGBK, len, NULL, NULL);
   string strTemp(szGBK);
   if (wszGBK) delete[] wszGBK;
   if (szGBK) delete[] szGBK;
@@ -138,14 +138,14 @@ std::string Utf8ToGbk(const std::string& srcStr) {
 }
 
 std::string GbkToUtf8(const std::string& strSrc) {
-  int len = MultiByteToWideChar(CP_ACP, 0, strSrc.c_str(), -1, NULL, 0);
-  wchar_t* wstr = new wchar_t[len + 1];
-  memset(wstr, 0, len + 1);
-  MultiByteToWideChar(CP_ACP, 0, strSrc.c_str(), -1, wstr, len);
-  len = WideCharToMultiByte(CP_UTF8, 0, wstr, -1, NULL, 0, NULL, NULL);
+  int wszLen = MultiByteToWideChar(CP_ACP, 0, strSrc.c_str(), strSrc.length(), NULL, 0);
+  wchar_t* wstr = new wchar_t[wszLen + 1];
+  memset(wstr, 0, wszLen + 1);
+  MultiByteToWideChar(CP_ACP, 0, strSrc.c_str(), strSrc.length(), wstr, wszLen);
+  int len = WideCharToMultiByte(CP_UTF8, 0, wstr, wszLen, NULL, 0, NULL, NULL);
   char* str = new char[len + 1];
   memset(str, 0, len + 1);
-  WideCharToMultiByte(CP_UTF8, 0, wstr, -1, str, len, NULL, NULL);
+  WideCharToMultiByte(CP_UTF8, 0, wstr, wszLen, str, len, NULL, NULL);
   string strTemp = str;
   if (wstr) delete[] wstr;
   if (str) delete[] str;
@@ -198,7 +198,6 @@ std::wstring ToWs(const std::string& str) {
   vector<wchar_t> buf(len + 1);
   std::fill(buf.begin(), buf.end(), 0);
   mbstowcs(&buf[0], str.c_str(), len);
-  buf[len] = '\0';
   setlocale(LC_ALL, oldLocale);
   return wstring(&buf[0]);
 }
@@ -209,7 +208,6 @@ std::string ToMbs(const std::wstring& str) {
   std::fill(buf.begin(), buf.end(), 0);
   char* oldLocale = setlocale(LC_ALL, "");
   wcstombs(&buf[0], str.c_str(), len);
-  buf[len] = '\0';
   setlocale(LC_ALL, oldLocale);
   return string(&buf[0]);
 }
