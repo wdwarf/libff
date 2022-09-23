@@ -1078,6 +1078,7 @@ TEST(TcpConnectionTest, TcpConnectionTest) {
 
   EXPECT_TRUE(svr->listen(5678, "", AF_INET)) << "server listen failed.";
 
+  int testCnt = 0;
   do {
     buffers.clear();
     acceptCnt = 0;
@@ -1092,7 +1093,7 @@ TEST(TcpConnectionTest, TcpConnectionTest) {
           sock.setBlocking(SockBlockingType::Blocking);
           sock.setUseSelect(false);
 
-          if (!sock.connect("192.168.2.53", 5678, 10000)) {
+          if (!sock.connect("localhost", 5678, 10000)) {
             LOGE << "connect to server failed";
             continue;
           }
@@ -1144,7 +1145,7 @@ TEST(TcpConnectionTest, TcpConnectionTest) {
     }
 
     this_thread::sleep_for(chrono::seconds(3));
-  } while (true);
+  } while (++testCnt < 30);
 
   svr->close();
 }

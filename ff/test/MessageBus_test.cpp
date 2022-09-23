@@ -43,6 +43,8 @@ TEST(MessageBusTest, MessageBusTest) {
   client1.start(6600, "127.0.0.1", 0);
 
   MessageBusClient client2(2);
+  client2.onConnected([] { LOGD << "client 2 connected"; });
+  client2.onDisconnected([] { LOGD << "client 2 disconnected"; });
   client2
       .on(101,
           [&client2](const MsgBusPackage& pkg) {
@@ -78,6 +80,8 @@ TEST(MessageBusTest, MessageBusTest) {
   client2.start(6600, "127.0.0.1", 0);
 
   MessageBusClient client3(3);
+  client3.onConnected([] { LOGD << "client 3 connected"; });
+  client3.onDisconnected([] { LOGD << "client 3 disconnected"; });
   client3.on(102, [](const MsgBusPackage& pkg) {});
   client3.on(1000, [](const MsgBusPackage& pkg) {});
   client3.start(6600, "127.0.0.1", 0);
@@ -112,7 +116,7 @@ TEST(MessageBusTest, MessageBusTest) {
       } else {
         LOGE << "response timeout";
       }
-    } while (n++ < 100);
+    } while (n++ < 1000);
   });
 
   auto t3 = thread([&client3, &client2, &client1]() {
@@ -137,5 +141,7 @@ TEST(MessageBusTest, MessageBusTest) {
   client1.stop();
   client2.stop();
   client3.stop();
+
   svr.stop();
+  LOGD << "end===============";
 }

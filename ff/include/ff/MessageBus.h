@@ -17,6 +17,10 @@
 
 NS_FF_BEG
 
+#if __cplusplus <= 201103L
+#define MSGBUS_USE_CUSTOM_PROMISE
+#endif
+
 #define MAX_MSGBUS_PKG_SIZE 8192
 
 enum MsgOpt {
@@ -70,7 +74,7 @@ class LIBFF_API MsgBusPackage : public Buffer {
 using MsgBusPackagePtr = std::shared_ptr<MsgBusPackage>;
 using PkgPromiseRemoveFunc = std::function<void(uint32_t msgId)>;
 
-#if __cplusplus > 201103L
+#ifndef MSGBUS_USE_CUSTOM_PROMISE
 class LIBFF_API PkgPromise : public Synchronizable {
  public:
   PkgPromise(uint32_t msgId, PkgPromiseRemoveFunc func);
@@ -131,6 +135,7 @@ using ClientSessionPtr = std::shared_ptr<ClientSession>;
 class LIBFF_API MessageBusServer {
  public:
   MessageBusServer();
+  ~MessageBusServer();
 
   bool start(uint16_t port, const std::string& host = "");
   bool stop();
@@ -139,6 +144,9 @@ class LIBFF_API MessageBusServer {
   TcpConnectionPtr m_conn;
   std::mutex m_clientsMutex;
   std::map<uint32_t, std::set<ClientSessionPtr> > m_msgId2Clients;
+  std::atomic_bool m_running;
+  std::mutex m_stopMutex;
+  std::condition_variable m_stopCond;
 
   void onClose(const TcpConnectionPtr& client);
   void onAccept(const TcpConnectionPtr& client);

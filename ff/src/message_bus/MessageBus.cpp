@@ -127,7 +127,7 @@ ClientSession::~ClientSession() {}
  * class PkgPromise
  *
  */
-#if __cplusplus > 201103L
+#ifndef MSGBUS_USE_CUSTOM_PROMISE
 
 PkgPromise::PkgPromise(uint32_t id, PkgPromiseRemoveFunc func)
     : m_id(id), m_func(func) {
@@ -196,8 +196,14 @@ MessageBusServer::MessageBusServer() {
       .onClose(Bind(&MessageBusServer::onClose, this));
 }
 
+MessageBusServer::~MessageBusServer(){
+  unique_lock<mutex> lk(this->m_stopMutex);
+  if(this->m_running) this->m_stopCond.wait(lk);
+}
+
 bool MessageBusServer::start(uint16_t port, const std::string& host) {
-  return this->m_conn->listen(port, host);
+  this->m_running = this->m_conn->listen(port, host);
+  return this->m_running.load();
 }
 
 bool MessageBusServer::stop() {
@@ -278,13 +284,13 @@ void MessageBusServer::onClientData(const uint8_t* data, uint32_t size,
 }
 
 void MessageBusServer::onAccept(const TcpConnectionPtr& client) {
-  cout << "msg bus client " << client->getSocket().getRemoteAddress() << ":"
-       << client->getSocket().getRemotePort() << " connected" << endl;
+  // cout << "msg bus client " << client->getSocket().getRemoteAddress() << ":"
+  //      << client->getSocket().getRemotePort() << " connected" << endl;
   this->addClient(client);
-  client->onClose([this](const TcpConnectionPtr& client) {
-    cout << "msg bus client " << client->getSocket().getRemoteAddress() << ":"
-         << client->getSocket().getRemotePort() << " disconnected" << endl;
-    this->removeClient(client);
+  client->onClose([this](const TcpConnectionPtr& conn) {
+    // cout << "msg bus client " << conn->getSocket().getRemoteAddress() << ":"
+    //      << conn->getSocket().getRemotePort() << " disconnected" << endl;
+    this->removeClient(conn);
   });
   client->onData(Bind(&MessageBusServer::onClientData, this));
 }
@@ -292,6 +298,10 @@ void MessageBusServer::onAccept(const TcpConnectionPtr& client) {
 void MessageBusServer::onClose(const TcpConnectionPtr& client) {
   lock_guard<mutex> lk(this->m_clientsMutex);
   this->m_msgId2Clients.clear();
+
+  lock_guard<mutex> lkStop(this->m_stopMutex);
+  this->m_running = false;
+  this->m_stopCond.notify_one();
 }
 
 void MessageBusServer::addClient(const TcpConnectionPtr& client) {
@@ -409,7 +419,10 @@ bool MessageBusClient::stop() {
   unique_lock<mutex> lk(this->m_mutex);
   this->m_stoped = true;
   this->m_conn->close();
+
+#ifdef MSGBUS_USE_CUSTOM_PROMISE
   this->m_cond.notify_one();
+#endif
   if (this->m_connThread.joinable()) this->m_connThread.join();
   return true;
 }
@@ -449,7 +462,10 @@ void MessageBusClient::onClose(const TcpConnectionPtr& client) {
   }
   this->m_connected = false;
   this->m_conn->getSocket().close();
+
+#ifdef MSGBUS_USE_CUSTOM_PROMISE
   this->m_cond.notify_one();
+#endif
 }
 
 bool MessageBusClient::sendRegisterInfo() {
