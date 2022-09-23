@@ -330,7 +330,10 @@ void TcpConnection::send(const void* buf, uint32_t bufSize) {
 }
 
 bool TcpConnection::postCloseEvent() {
-  if (this->m_isServer) return false;
+  if (this->m_isServer) {
+    this->m_socket.close();
+    return false;
+  }
   IoContext* context = new IoContext();
   context->iocpEevent = IocpEvent::Close;
   if (!this->m_iocp->postQueuedCompletionStatus(
