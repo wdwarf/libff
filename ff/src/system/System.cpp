@@ -19,9 +19,10 @@
 #include <Windows.h>
 #include <intrin.h>
 #else
+#include <cpuid.h>
 #include <sys/sysinfo.h>
 #include <unistd.h>
-#include <cpuid.h>
+#include <pwd.h>
 #endif
 
 using namespace std;
@@ -29,14 +30,14 @@ using namespace std;
 NS_FF_BEG
 
 #ifdef __linux0__
-#define cpu_regs(pInfo, func)                                           \
+#define cpu_regs(pInfo, func)                                          \
   asm volatile("cpuid"                                                 \
                : "=a"((pInfo)[0]), "=b"((pInfo)[1]), "=c"((pInfo)[2]), \
                  "=d"((pInfo)[3])                                      \
                : "a"((func)))
 #endif
 
-static void cpu_regs(int* info, int eax){
+static void cpu_regs(int *info, int eax) {
 #ifdef _WIN32
   __cpuid(info, eax);
 #else
@@ -44,13 +45,12 @@ static void cpu_regs(int* info, int eax){
 #endif
 }
 
-static  void cpu_regs(int* info, int eax, int ecx){
+static void cpu_regs(int *info, int eax, int ecx) {
 #ifdef _WIN32
   __cpuidex(info, eax, ecx);
 #else
   __cpuid_count(eax, ecx, (info)[0], (info)[1], (info)[2], (info)[3]);
 #endif
-
 }
 
 class __CpuInfo {
@@ -417,5 +417,18 @@ ff::MemoryStatus System::MemoryStatus() {
 }
 
 CpuInfo System::CpuInfo() { return ff::CpuInfo(); }
+
+std::string System::Username() {
+#ifdef _WIN32
+  char user[128] = { 0 };
+  DWORD bufCharCount = 128;
+  if (FALSE == GetUserNameA(user, &bufCharCount)) return "";
+  return user;
+#else
+  uid_t user_id = geteuid();
+  struct passwd* pwd = getpwuid(user_id);
+  return (nullptr == pwd) ? "" : pwd->pw_name;
+#endif  // _WIN32
+}
 
 NS_FF_END

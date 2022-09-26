@@ -40,8 +40,9 @@ public:
 
 	Buffer toBuffer() const;
 
+	IP& operator=(const std::string& ip);
 
-	friend std::ostream& operator<<(std::ostream& o, const IP& ip);
+	friend LIBFF_API std::ostream& operator<<(std::ostream& o, const IP& ip);
 
 private:
 	static const unsigned int IPV6_LENGTH_NO_SCOPE = 16;

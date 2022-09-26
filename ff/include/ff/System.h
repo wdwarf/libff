@@ -106,6 +106,7 @@ class LIBFF_API System {
   static std::string Hostname();
   static ff::MemoryStatus MemoryStatus();
   static ff::CpuInfo CpuInfo();
+  static std::string Username();
 };
 
 NS_FF_END

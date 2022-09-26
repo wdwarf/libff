@@ -176,6 +176,7 @@ ${windows_files}
 	src/message_bus/MessageBus.cpp
 	src/network/EPoll.cpp
 	src/network/IP.cpp
+	src/network/NetworkDevices.cpp
 	src/network/Socket.cpp
 	src/network/TcpConnection.cpp
 	src/network/Curl.cpp

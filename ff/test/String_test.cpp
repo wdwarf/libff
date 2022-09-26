@@ -11,11 +11,14 @@
 #include "TestDef.h"
 #include <iostream>
 #include <algorithm>
+#include <fstream>
+#include <sstream>
 
 using namespace std;
 USE_NS_FF
 
 TEST(TestString, TestString){
+	#if 0
 	String s = "   test string...   ";
 	cout << "s: " << s << endl;
 	EXPECT_TRUE(s.equals("   test string...   "));
@@ -61,9 +64,10 @@ TEST(TestString, TestString){
 	cout << "GbkToUtf8: " << (str = GbkToUtf8(str)) << endl;
 	wstring ws = L"abcdef aaa中文 转转换！@#￥！转转转12142留个脚印工.";
 	
-	wcout << L"ToWs: " << ws << endl;
+	wcout << L"ws: " << ws << endl;
 	str = ToMbs(ws);
 	cout << "ToMbs: " << str << endl;
+	cout << "Utf8ToGbk: " << Utf8ToGbk(str) << endl;
 
 	string mbs = "abcdef aaa中文 转转换！@#￥！转转转12142留个脚印工.";
 	cout << "mbs: " << mbs << endl;
@@ -75,4 +79,55 @@ TEST(TestString, TestString){
 
 	string chs = "abcdef aaa中文 转转换！@#￥！转转转12142留个脚印工.";
 	cout << "EncodeOf: " << (uint32_t)EncodeOf(chs) << endl;
+#endif
+
+	// fstream utf8_file("doc/utf8.txt", ios::binary | ios::in);
+	// stringstream utf8Str;
+	// while(!utf8_file.eof()){
+	// 	char buf[1024] = {0};
+	// 	utf8_file.read(buf, 1024);
+	// 	auto len = utf8_file.gcount();
+	// 	utf8Str.write(buf, len);
+	// }
+
+	// cout << "Utf8ToGbk: " << Utf8ToGbk(utf8Str.str()) << endl;
+	
+
+	// fstream gbk_file("doc/gbk.txt", ios::binary | ios::in);
+	// stringstream gbkStr;
+	// while(!gbk_file.eof()){
+	// 	char buf[1024] = {0};
+	// 	gbk_file.read(buf, 1024);
+	// 	auto len = gbk_file.gcount();
+	// 	gbkStr.write(buf, len);
+	// }
+
+	// cout << "GbkToUtf8: " << GbkToUtf8(gbkStr.str()) << endl;
+
+	// char aa[] = {0X6d, 0X4b, 0X8b, 0Xd5, 0X77, 0Xed, 0X4f, 0Xe1, 0X4e, 0X00};
+	char aa[] = {0X4b, 0X6d, 0Xd5, 0X8b, 0Xed, 0X77, 0Xe1, 0X4f, 0X00,0X4e, 0x00, 0x00};
+	cout << ToMbs((const wchar_t*)aa) << endl;
+
+
+	string s = "测试短信一";
+	const uint8_t* bb = (const uint8_t*)s.c_str();
+	for(int i = 0; i < s.length(); ++i){
+		cout << hex << (uint16_t)bb[i] << ", ";
+	}
+	cout << endl;
+
+	s = Utf8ToGbk(s);
+	cout << s << endl;
+	
+	// wcout << ub << endl;
+	auto w = ToWs(s);
+	cout << w.length() << endl;
+	// wcout << w << endl;
+	const uint16_t* b = (const uint16_t*)w.c_str();
+	for(int i = 0; i < w.length(); ++i){
+		cout << hex << b[i] << ", ";
+	}
+	cout << endl;
+
+	cout << ToMbs(w) << endl;
 }

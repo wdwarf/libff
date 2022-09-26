@@ -10,12 +10,14 @@
 #include "TestDef.h"
 #include <iostream>
 #include <vector>
+#include <set>
 
 using namespace std;
 USE_NS_FF
 
 TEST(SystemTest, SystemTest){
 	LOGD << System::Hostname();
+	LOGD << "username: " << System::Username();
 	auto memInfo = System::MemoryStatus();
 	LOGD << "phyTotal:\t" << memInfo.phyTotal;
 	LOGD << "phyFree:\t" << memInfo.phyFree;
