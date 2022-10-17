@@ -22,12 +22,12 @@ using std::string;
 
 class LIBFF_API Semaphore {
 public:
-	Semaphore();
-	Semaphore(const string& name, int flag, ...);
+	Semaphore(int value = 0);
+	Semaphore(const string& name, int value = 0);
 
 	~Semaphore();
 
-	void wait(int mSec = -1);
+	bool wait(int mSec = -1);
 	void release();
 	int getValue();
 	void unlink();

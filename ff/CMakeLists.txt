@@ -189,6 +189,7 @@ ${windows_files}
 	src/random/UUID.cpp
 	src/serial/Serial.cpp
 	src/settings/Settings.cpp
+	src/shm/SHM.cpp
 	src/string/String.cpp
 	src/string/StringWrapper.cpp
 	src/string/StringEncoding.cpp
