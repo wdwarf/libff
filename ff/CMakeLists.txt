@@ -120,7 +120,7 @@ if(BUILDIN_ZLIB)
 else()
 
 	if(UNIX)
-		add_compile_options(-std=c++11 -g)
+		add_compile_options(-g)
 	
 		set(EXTRA_LIBS
 			pthread
@@ -233,3 +233,5 @@ if(MSVC)
 target_compile_options(ff PUBLIC "/Zc:__cplusplus")
 target_compile_options(ff_test PUBLIC "/Zc:__cplusplus")
 endif()
+
+add_subdirectory(test/shm_test)

@@ -7,305 +7,297 @@
 #if defined(_WIN32) || defined(WIN32) || defined(__MINGW32__)
 
 #include "ProcessImplWindows.h"
-#include <cstdlib>
-#include <cstdio>
-#include <Windows.h>
+
 #include <Tlhelp32.h>
-#include <iostream>
-#include <functional>
+#include <Windows.h>
 #include <ff/String.h>
+
+#include <cstdio>
+#include <cstdlib>
+#include <functional>
+#include <iostream>
 
 using namespace std;
 
 NS_FF_BEG
 
-	namespace {
+namespace {
 
-		typedef UINT PROCESSINFOCLASS;
-		typedef NTSTATUS(NTAPI *F_NtQueryInformationProcess)
-			(
-				HANDLE ProcessHandle,
-				PROCESSINFOCLASS InformationClass,
-				PVOID ProcessInformation,
-				ULONG ProcessInformationLength,
-				PULONG ReturnLength OPTIONAL
-				);
+typedef UINT PROCESSINFOCLASS;
+typedef NTSTATUS(NTAPI* F_NtQueryInformationProcess)(
+    HANDLE ProcessHandle, PROCESSINFOCLASS InformationClass,
+    PVOID ProcessInformation, ULONG ProcessInformationLength,
+    PULONG ReturnLength OPTIONAL);
 
-		typedef struct {
-			DWORD ExitStatus;
-			DWORD PebBaseAddress;
-			DWORD AffinityMask;
-			DWORD BasePriority;
-			ULONG UniqueProcessId;
-			ULONG InheritedFromUniqueProcessId;
-		} PROCESS_BASIC_INFORMATION;
+typedef struct {
+  DWORD ExitStatus;
+  DWORD PebBaseAddress;
+  DWORD AffinityMask;
+  DWORD BasePriority;
+  ULONG UniqueProcessId;
+  ULONG InheritedFromUniqueProcessId;
+} PROCESS_BASIC_INFORMATION;
 
-	}
+}  // namespace
 
-	Process::ProcessImpl::ProcessImpl(Process* proc, const std::string& command) :
-		_proc(proc), asyncRead(true), m_exitCode(-1), hRead(INVALID_HANDLE_VALUE), hWrite(
-			INVALID_HANDLE_VALUE) {
-		this->command = command;
-		memset(&this->pi, 0, sizeof(PROCESS_INFORMATION));
-		this->pi.hProcess = INVALID_HANDLE_VALUE;
-	}
+Process::ProcessImpl::ProcessImpl(Process* proc, const std::string& command)
+    : _proc(proc),
+      asyncRead(true),
+      m_exitCode(-1),
+      hRead(INVALID_HANDLE_VALUE),
+      hWrite(INVALID_HANDLE_VALUE) {
+  this->command = command;
+  memset(&this->pi, 0, sizeof(PROCESS_INFORMATION));
+  this->pi.hProcess = INVALID_HANDLE_VALUE;
+}
 
-	Process::ProcessImpl::~ProcessImpl() {
-		try {
-			this->stop();
-		}
-		catch (...) {
-		}
-	}
+Process::ProcessImpl::~ProcessImpl() {
+  try {
+    this->stop();
+  } catch (...) {
+  }
+}
 
-	void Process::ProcessImpl::start() {
-		this->stop();
+void Process::ProcessImpl::start() {
+  this->stop();
 
-		SECURITY_ATTRIBUTES sa;
-		sa.nLength = sizeof(SECURITY_ATTRIBUTES);
-		sa.lpSecurityDescriptor = NULL;
-		sa.bInheritHandle = TRUE;
-		if (!::CreatePipe(&this->hRead, &this->hWrite, &sa, 0)) {
-			THROW_EXCEPTION(ProcessException, "process start failed: CreatePipe failed.",
-				GetLastError());
-		}
+  SECURITY_ATTRIBUTES sa;
+  sa.nLength = sizeof(SECURITY_ATTRIBUTES);
+  sa.lpSecurityDescriptor = NULL;
+  sa.bInheritHandle = TRUE;
+  if (!::CreatePipe(&this->hRead, &this->hWrite, &sa, 0)) {
+    THROW_EXCEPTION(ProcessException,
+                    "process start failed: CreatePipe failed.", GetLastError());
+  }
 
-		STARTUPINFOA si;
-		si.cb = sizeof(STARTUPINFOA);
-		GetStartupInfo(&si);
-		si.hStdError = hWrite;
-		si.hStdOutput = hWrite;
-		si.wShowWindow = SW_HIDE;// SW_SHOW;
-		si.dwFlags = STARTF_USESHOWWINDOW | STARTF_USESTDHANDLES;
-		if (!::CreateProcessA(NULL, (LPSTR) this->command.c_str(),
-			NULL, NULL, TRUE, 0, NULL, this->workDir.empty() ? NULL : this->workDir.c_str(), &si, &this->pi)) {
-			THROW_EXCEPTION(ProcessException, "process start failed: CreateProcess[" + command + "] failed, errcode(" + to_string(GetLastError()) + ").",
-				GetLastError());
-		}
+  std::string cmdLine;
+  for (size_t i = 0; i < args.size(); ++i) {
+    cmdLine += " " + args[i];
+  }
 
-		if (this->asyncRead) {
-			this->readThread = thread(&Process::ProcessImpl::doReadData, this);
-		}
+  LPSTR pAppName = NULL;
+  LPSTR pCmdLine = (LPSTR)this->command.c_str();
+  if (!cmdLine.empty()) {
+    pAppName = (LPSTR)this->command.c_str();
+    pCmdLine = (LPSTR)cmdLine.c_str();
+  }
 
-		this->watchThread = thread(&Process::ProcessImpl::watchTerminated, this);
-	}
+  STARTUPINFOA si;
+  si.cb = sizeof(STARTUPINFOA);
+  GetStartupInfo(&si);
+  si.hStdError = hWrite;
+  si.hStdOutput = hWrite;
+  si.wShowWindow = SW_HIDE;  // SW_SHOW;
+  si.dwFlags = STARTF_USESHOWWINDOW | STARTF_USESTDHANDLES;
+  if (!::CreateProcessA(pAppName, pCmdLine, NULL, NULL, TRUE, 0, NULL,
+                        this->workDir.empty() ? NULL : this->workDir.c_str(),
+                        &si, &this->pi)) {
+    THROW_EXCEPTION(ProcessException,
+                    "process start failed: CreateProcess[" + command +
+                        "] failed, errcode(" + to_string(GetLastError()) + ").",
+                    GetLastError());
+  }
 
-	void Process::ProcessImpl::stop() {
-		if (INVALID_HANDLE_VALUE == this->pi.hProcess)
-			return;
+  if (this->asyncRead) {
+    this->readThread = thread(&Process::ProcessImpl::doReadData, this);
+  }
 
-		::TerminateProcess(this->pi.hProcess, 0);
+  this->watchThread = thread(&Process::ProcessImpl::watchTerminated, this);
+}
 
-		if (this->watchThread.joinable())
-			this->watchThread.join();
+void Process::ProcessImpl::stop() {
+  if (INVALID_HANDLE_VALUE == this->pi.hProcess) return;
 
-		if (this->readThread.joinable())
-			this->readThread.join();
+  ::TerminateProcess(this->pi.hProcess, 0);
 
-		if (INVALID_HANDLE_VALUE != this->hRead) {
-			CloseHandle(this->hRead);
-		}
+  if (this->watchThread.joinable()) this->watchThread.join();
 
-		if (INVALID_HANDLE_VALUE != this->hWrite) {
-			CloseHandle(this->hWrite);
-		}
-		CloseHandle(this->pi.hProcess);
-		memset(&this->pi, 0, sizeof(PROCESS_INFORMATION));
-		this->pi.hProcess = INVALID_HANDLE_VALUE;
-		this->hRead = INVALID_HANDLE_VALUE;
-		this->hWrite = INVALID_HANDLE_VALUE;
-	}
+  if (this->readThread.joinable()) this->readThread.join();
 
-	int Process::ProcessImpl::getExitCode() const {
-		return this->m_exitCode;
-	}
+  if (INVALID_HANDLE_VALUE != this->hRead) {
+    CloseHandle(this->hRead);
+  }
 
-	void Process::ProcessImpl::watchTerminated() {
-		this->waitForFinished();
-		if (INVALID_HANDLE_VALUE != this->hWrite) {
-			CloseHandle(this->hWrite);
-			this->hWrite = INVALID_HANDLE_VALUE;
-		}
-	}
+  if (INVALID_HANDLE_VALUE != this->hWrite) {
+    CloseHandle(this->hWrite);
+  }
+  CloseHandle(this->pi.hProcess);
+  memset(&this->pi, 0, sizeof(PROCESS_INFORMATION));
+  this->pi.hProcess = INVALID_HANDLE_VALUE;
+  this->hRead = INVALID_HANDLE_VALUE;
+  this->hWrite = INVALID_HANDLE_VALUE;
+}
 
-	int Process::ProcessImpl::waitForFinished() {
-		if (INVALID_HANDLE_VALUE == this->pi.hProcess)
-			return -1;
-		::WaitForSingleObject(this->pi.hProcess, INFINITE);
-		DWORD exitCode = -1;
-		GetExitCodeProcess(pi.hProcess, &exitCode);
-		this->m_exitCode = exitCode;
-		return this->m_exitCode;
-	}
+int Process::ProcessImpl::getExitCode() const { return this->m_exitCode; }
 
-	int Process::ProcessImpl::getProcessId() const {
-		return this->pi.dwProcessId;
-	}
+void Process::ProcessImpl::watchTerminated() {
+  this->waitForFinished();
+  if (INVALID_HANDLE_VALUE != this->hWrite) {
+    CloseHandle(this->hWrite);
+    this->hWrite = INVALID_HANDLE_VALUE;
+  }
+}
 
-	int Process::ProcessImpl::readData(char* buf, int bufLen) {
-		if (INVALID_HANDLE_VALUE == this->pi.hProcess
-			|| INVALID_HANDLE_VALUE == this->hRead || this->asyncRead)
-			return -1;
+int Process::ProcessImpl::waitForFinished() {
+  if (INVALID_HANDLE_VALUE == this->pi.hProcess) return -1;
+  ::WaitForSingleObject(this->pi.hProcess, INFINITE);
+  DWORD exitCode = -1;
+  GetExitCodeProcess(pi.hProcess, &exitCode);
+  this->m_exitCode = exitCode;
+  return this->m_exitCode;
+}
 
-		DWORD readBytes = 0;
-		if (ReadFile(this->hRead, buf, bufLen, &readBytes, NULL)) {
-			return readBytes;
-		}
-		return -1;
-	}
+int Process::ProcessImpl::getProcessId() const { return this->pi.dwProcessId; }
 
-	void Process::ProcessImpl::doReadData() {
-		if (INVALID_HANDLE_VALUE == this->pi.hProcess)
-			return;
+int Process::ProcessImpl::readData(char* buf, int bufLen) {
+  if (INVALID_HANDLE_VALUE == this->pi.hProcess ||
+      INVALID_HANDLE_VALUE == this->hRead || this->asyncRead)
+    return -1;
 
-		const DWORD bufLen = 2048;
-		char buf[bufLen];
-		DWORD readBytes = 0;
-		while (ReadFile(this->hRead, buf, bufLen, &readBytes, NULL)) {
-			if (readBytes > 0) {
-				this->_proc->onReadData(buf, readBytes);
-			}
-			else {
-				break;
-			}
-		}
-	}
+  DWORD readBytes = 0;
+  if (ReadFile(this->hRead, buf, bufLen, &readBytes, NULL)) {
+    return readBytes;
+  }
+  return -1;
+}
 
-	int Process::ProcessImpl::GetPid() {
-		return ::GetProcessId(NULL);
-	}
+void Process::ProcessImpl::doReadData() {
+  if (INVALID_HANDLE_VALUE == this->pi.hProcess) return;
 
-	int Process::ProcessImpl::GetPPid() {
-		int pid = Process::ProcessImpl::GetPid();
-		PROCESS_BASIC_INFORMATION pbi = { 0 };
-		HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, pid);
-		if (INVALID_HANDLE_VALUE == hProcess) return -1;
-		F_NtQueryInformationProcess fNtQueryInformationProcess =
-			(F_NtQueryInformationProcess)GetProcAddress(GetModuleHandle("ntdll"), "NtQueryInformationProcess");
-		fNtQueryInformationProcess(hProcess, 0, &pbi, sizeof(PROCESS_BASIC_INFORMATION), NULL);
-		CloseHandle(hProcess);
-		return pbi.InheritedFromUniqueProcessId;
-	}
+  const DWORD bufLen = 2048;
+  char buf[bufLen];
+  DWORD readBytes = 0;
+  while (ReadFile(this->hRead, buf, bufLen, &readBytes, NULL)) {
+    if (readBytes > 0) {
+      this->_proc->onReadData(buf, readBytes);
+    } else {
+      break;
+    }
+  }
+}
 
-	int Process::ProcessImpl::Exec(const std::string& command, bool wait) {
-		PROCESS_INFORMATION pi;
-		STARTUPINFO si;
-		si.cb = sizeof(STARTUPINFO);
-		GetStartupInfo(&si);
-		si.hStdError = NULL;
-		si.hStdOutput = NULL;
-		si.wShowWindow = SW_SHOW;
-		si.dwFlags = STARTF_USESHOWWINDOW | STARTF_USESTDHANDLES;
-		if (!::CreateProcess(NULL, (LPSTR)command.c_str(),
-			NULL, NULL, TRUE, 0, NULL, NULL, &si, &pi)) {
-			THROW_EXCEPTION(ProcessException, "process start failed.",
-				GetLastError());
-		}
+int Process::ProcessImpl::GetPid() { return ::GetProcessId(NULL); }
 
-		if (wait) {
-			::WaitForSingleObject(pi.hProcess, INFINITE);
-		}
+int Process::ProcessImpl::GetPPid() {
+  int pid = Process::ProcessImpl::GetPid();
+  PROCESS_BASIC_INFORMATION pbi = {0};
+  HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, pid);
+  if (INVALID_HANDLE_VALUE == hProcess) return -1;
+  F_NtQueryInformationProcess fNtQueryInformationProcess =
+      (F_NtQueryInformationProcess)GetProcAddress(GetModuleHandle("ntdll"),
+                                                  "NtQueryInformationProcess");
+  fNtQueryInformationProcess(hProcess, 0, &pbi,
+                             sizeof(PROCESS_BASIC_INFORMATION), NULL);
+  CloseHandle(hProcess);
+  return pbi.InheritedFromUniqueProcessId;
+}
 
-		return pi.dwProcessId;
-	}
+int Process::ProcessImpl::Exec(const std::string& command, bool wait) {
+  PROCESS_INFORMATION pi;
+  STARTUPINFO si;
+  si.cb = sizeof(STARTUPINFO);
+  GetStartupInfo(&si);
+  si.hStdError = NULL;
+  si.hStdOutput = NULL;
+  si.wShowWindow = SW_SHOW;
+  si.dwFlags = STARTF_USESHOWWINDOW | STARTF_USESTDHANDLES;
+  if (!::CreateProcess(NULL, (LPSTR)command.c_str(), NULL, NULL, TRUE, 0, NULL,
+                       NULL, &si, &pi)) {
+    THROW_EXCEPTION(ProcessException, "process start failed.", GetLastError());
+  }
 
-	int Process::ProcessImpl::GetPidByName(const std::string& processName) {
-		string procName = ToLowerCopy(processName);
-		HANDLE hProcSnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
-		if (INVALID_HANDLE_VALUE == hProcSnap)
-			return -1;
+  if (wait) {
+    ::WaitForSingleObject(pi.hProcess, INFINITE);
+  }
 
-		PROCESSENTRY32 pe;
-		pe.dwSize = sizeof(PROCESSENTRY32);
-		int pid = -1;
-		if (Process32First(hProcSnap, &pe)) {
-			do {
-				string name = ToLowerCopy(pe.szExeFile);
-				if (name == procName) {
-					pid = pe.th32ProcessID;
-					break;
-				}
-			} while (Process32Next(hProcSnap, &pe));
-		}
+  return pi.dwProcessId;
+}
 
-		CloseHandle(hProcSnap);
-		return pid;
-	}
+int Process::ProcessImpl::GetPidByName(const std::string& processName) {
+  string procName = ToLowerCopy(processName);
+  HANDLE hProcSnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+  if (INVALID_HANDLE_VALUE == hProcSnap) return -1;
 
-	bool Process::ProcessImpl::Kill(int pid, int code) {
-		HANDLE hProcess = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid);
-		if (INVALID_HANDLE_VALUE == hProcess)
-			return false;
-		BOOL re = ::TerminateProcess(hProcess, code);
-		CloseHandle(hProcess);
-		return (TRUE == re);
-	}
+  PROCESSENTRY32 pe;
+  pe.dwSize = sizeof(PROCESSENTRY32);
+  int pid = -1;
+  if (Process32First(hProcSnap, &pe)) {
+    do {
+      string name = ToLowerCopy(pe.szExeFile);
+      if (name == procName) {
+        pid = pe.th32ProcessID;
+        break;
+      }
+    } while (Process32Next(hProcSnap, &pe));
+  }
 
-	bool Process::ProcessImpl::Kill(const std::string& processName, int code) {
-		int pid = Process::GetPidByName(processName);
-		if (pid <= 0)
-			return false;
-		return Process::ProcessImpl::Kill(pid, code);
-	}
+  CloseHandle(hProcSnap);
+  return pid;
+}
 
-	std::map<int, std::string> Process::ProcessImpl::ListProcesses() {
-		std::map<int, std::string> re;
+bool Process::ProcessImpl::Kill(int pid, int code) {
+  HANDLE hProcess = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid);
+  if (INVALID_HANDLE_VALUE == hProcess) return false;
+  BOOL re = ::TerminateProcess(hProcess, code);
+  CloseHandle(hProcess);
+  return (TRUE == re);
+}
 
-		HANDLE hProcSnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
-		if (INVALID_HANDLE_VALUE == hProcSnap)
-			return re;
+bool Process::ProcessImpl::Kill(const std::string& processName, int code) {
+  int pid = Process::GetPidByName(processName);
+  if (pid <= 0) return false;
+  return Process::ProcessImpl::Kill(pid, code);
+}
 
-		PROCESSENTRY32 pe;
-		pe.dwSize = sizeof(PROCESSENTRY32);
-		int pid = -1;
-		if (Process32First(hProcSnap, &pe)) {
-			do {
-				re.insert(make_pair(pe.th32ProcessID, pe.szExeFile));
-			} while (Process32Next(hProcSnap, &pe));
-		}
+std::map<int, std::string> Process::ProcessImpl::ListProcesses() {
+  std::map<int, std::string> re;
 
-		CloseHandle(hProcSnap);
-		return re;
-	}
+  HANDLE hProcSnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+  if (INVALID_HANDLE_VALUE == hProcSnap) return re;
 
-	const std::string& Process::ProcessImpl::getCommand() const {
-		return command;
-	}
+  PROCESSENTRY32 pe;
+  pe.dwSize = sizeof(PROCESSENTRY32);
+  int pid = -1;
+  if (Process32First(hProcSnap, &pe)) {
+    do {
+      re.insert(make_pair(pe.th32ProcessID, pe.szExeFile));
+    } while (Process32Next(hProcSnap, &pe));
+  }
 
-	void Process::ProcessImpl::setCommand(const std::string& command) {
-		this->command = command;
-	}
+  CloseHandle(hProcSnap);
+  return re;
+}
 
-	bool Process::ProcessImpl::isAsyncRead() const {
-		return asyncRead;
-	}
+const std::string& Process::ProcessImpl::getCommand() const { return command; }
 
-	void Process::ProcessImpl::setAsyncRead(bool asyncRead) {
-		if (INVALID_HANDLE_VALUE != this->pi.hProcess) {
-			THROW_EXCEPTION(ProcessException, "process is running.", -1);
-		}
-		this->asyncRead = asyncRead;
-	}
+void Process::ProcessImpl::setCommand(const std::string& command) {
+  this->command = command;
+}
 
-	const std::string& Process::ProcessImpl::getWorkDir() const {
-		return workDir;
-	}
+bool Process::ProcessImpl::isAsyncRead() const { return asyncRead; }
 
-	void Process::ProcessImpl::setWorkDir(const std::string& workDir) {
-		this->workDir = workDir;
-	}
+void Process::ProcessImpl::setAsyncRead(bool asyncRead) {
+  if (INVALID_HANDLE_VALUE != this->pi.hProcess) {
+    THROW_EXCEPTION(ProcessException, "process is running.", -1);
+  }
+  this->asyncRead = asyncRead;
+}
 
-	void Process::ProcessImpl::addParameter(const std::string &arg) {
-		this->args.push_back(arg);
-	}
+const std::string& Process::ProcessImpl::getWorkDir() const { return workDir; }
 
-	const vector<string>& Process::ProcessImpl::getParameters() const {
-		return this->args;
-	}
+void Process::ProcessImpl::setWorkDir(const std::string& workDir) {
+  this->workDir = workDir;
+}
 
-	void Process::ProcessImpl::clearParameter() {
-		this->args.clear();
-	}
+void Process::ProcessImpl::addParameter(const std::string& arg) {
+  this->args.push_back(arg);
+}
+
+const vector<string>& Process::ProcessImpl::getParameters() const {
+  return this->args;
+}
+
+void Process::ProcessImpl::clearParameter() { this->args.clear(); }
 
 NS_FF_END
 

@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 2.8.12)
 project(libff)
 
 # set(BUILD_SHARED_LIBS OFF)
+set(CMAKE_CXX_STANDARD 11)
 
 if("${CMAKE_BUILD_TYPE}" MATCHES "")
 set(CMAKE_BUILD_TYPE Release)

@@ -18,7 +18,7 @@ SHM::SHM()
     : m_data(nullptr)
 #ifdef WIN32
       ,
-      m_hShm(INVALID_HANDLE_VALUE)
+      m_hShm(NULL)
 #else
       ,
       m_key(-1),
@@ -35,7 +35,7 @@ void *SHM::create(const std::string &name, uint32_t size) {
       CreateFileMappingA(INVALID_HANDLE_VALUE, NULL,
                          PAGE_READWRITE | SEC_COMMIT, 0, size, name.c_str());
 
-  if (INVALID_HANDLE_VALUE == m_hShm) return false;
+  if (NULL == m_hShm) return false;
 
   this->m_data = MapViewOfFile(m_hShm, FILE_MAP_READ | FILE_MAP_WRITE, 0, 0, 0);
 #else
@@ -58,12 +58,12 @@ void *SHM::data() { return this->m_data; }
 
 void SHM::destroy() {
 #ifdef WIN32
-  if (INVALID_HANDLE_VALUE != this->m_hShm) {
+  if (NULL != this->m_hShm) {
     UnmapViewOfFile(this->m_data);
     CloseHandle(this->m_hShm);
   }
 
-  this->m_hShm = INVALID_HANDLE_VALUE;
+  this->m_hShm = NULL;
 #else
   shmdt(this->m_data);
   shmctl(this->m_shmId, IPC_RMID, 0);
@@ -88,11 +88,15 @@ bool SHMConnection::open(const std::string &name, uint32_t bufSize,
   this->m_isMaster = isMaster;
   this->m_bufSize = bufSize;
   if (nullptr == this->m_shm.create(name, (m_bufSize + 4) * 2)) return false;
-  this->m_semMasterIn = make_shared<Semaphore>("sem_" + name + "_master_in");
+
+  this->m_semMasterIn =
+      make_shared<Semaphore>("sem_" + name + "_master_in", 0, 1);
   this->m_semMasterOut =
-      make_shared<Semaphore>("sem_" + name + "_master_out", 1);
-  this->m_semSlaveIn = make_shared<Semaphore>("sem_" + name + "_slave_in");
-  this->m_semSlaveOut = make_shared<Semaphore>("sem_" + name + "_slave_out", 1);
+      make_shared<Semaphore>("sem_" + name + "_master_out", 1, 1);
+  this->m_semSlaveIn =
+      make_shared<Semaphore>("sem_" + name + "_slave_in", 0, 1);
+  this->m_semSlaveOut =
+      make_shared<Semaphore>("sem_" + name + "_slave_out", 1, 1);
 
   return true;
 }

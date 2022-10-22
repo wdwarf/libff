@@ -18,25 +18,32 @@ using namespace std;
 
 NS_FF_BEG
 
-Semaphore::Semaphore(int value) : m_named(false) {
+Semaphore::Semaphore(int value, int maxValue) : m_named(false) {
 #ifdef _WIN32
   this->m_previousCount = 0;
-  this->m_sem = ::CreateSemaphore(NULL, 0, value, NULL);
+  this->m_sem = ::CreateSemaphoreA(NULL, value, maxValue, NULL);
+  if (NULL == this->m_sem) {
+    cerr << "CreateSemaphore failed" << endl;
+  }
 #else
   this->m_sem = new sem_t, sem_init(this->m_sem, 0, value);
 #endif
 }
 
-Semaphore::Semaphore(const string& name, int value) : m_named(true) {
+Semaphore::Semaphore(const string& name, int value, int maxValue)
+    : m_named(true) {
+  this->m_name = name;
 #ifdef _WIN32
   this->m_previousCount = 0;
-  this->m_sem = ::CreateSemaphore(NULL, 0, value, name.c_str());
+  this->m_sem = ::CreateSemaphoreA(NULL, value, maxValue, name.c_str());
+  if (NULL == this->m_sem) {
+    cerr << "CreateSemaphore failed" << endl;
+  }
 #else
   this->m_sem = sem_open(name.c_str(), O_CREAT, 0644, value);
   if (nullptr == this->m_sem) {
     cerr << "failed to open sem" << endl;
   }
-  this->m_name = name;
 #endif
 }
 
