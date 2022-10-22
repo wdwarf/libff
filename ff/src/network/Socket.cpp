@@ -375,7 +375,6 @@ bool Socket::bind(uint16_t port, const std::string& ip) {
   SockAddr addr;
   socklen_t addrSize = sizeof(addr);
   auto family = this->getLocalSockAddr().getFamily();
-  cout << "family: " << family << endl;
   addr.setFamily(family);
 
   if (AF_INET == family) {
@@ -531,7 +530,6 @@ SockAddr Socket::getLocalSockAddr() const {
     socklen_t size = sizeof(int);
     ::getsockopt(this->m_socketFd, SOL_SOCKET, SO_PROTOCOL, &family, &size);
     addr.setFamily(family);
-    cout << "family: " << family << endl;
 #endif
   }
 

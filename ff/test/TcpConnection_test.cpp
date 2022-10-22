@@ -27,6 +27,77 @@ using namespace std;
 using namespace std::chrono;
 USE_NS_FF
 
+TEST(TcpConnectionTest, SpeedTest) {
+  mutex m;
+  condition_variable cond;
+  std::unique_lock<mutex> lk(m);
+
+  bool sDone = false;
+  bool rDone = false;
+  const uint32_t sendCnt = 10000000;
+  string endStr = "data_" + to_string(sendCnt);
+
+  TcpConnectionPtr svr = TcpConnection::CreateInstance();
+  TcpConnectionPtr client = TcpConnection::CreateInstance();
+
+  EXPECT_TRUE(svr->listen(5678, "127.0.0.1", AF_INET))
+      << "server listen failed.";
+  TcpConnectionPtr clientConn;
+  svr->onAccept([&](const TcpConnectionPtr& conn) {
+    clientConn = conn;
+    clientConn->onData(
+        [&](const uint8_t* data, uint32_t len, const TcpConnectionPtr& conn) {
+          // conn->send(data, len);
+          // cout << string((const char*)data, len) << endl;
+
+          if (0 == memcmp(data + len - 12, endStr.c_str(), 12)) {
+            rDone = true;
+            cond.notify_one();
+          }
+          // if (string((const char*)data, len).find("data_1000000") !=
+          // string::npos) {
+          //   rDone = true;
+          //   cond.notify_one();
+          // }
+        });
+
+    cond.notify_one();
+  });
+
+  EXPECT_TRUE(client->connect(5678, "127.0.0.1", 5679, "127.0.0.1"));
+  client->onData(
+      [&](const uint8_t* data, uint32_t len, const TcpConnectionPtr& conn) {
+        if (0 == memcmp(data + len - 12, endStr.c_str(), 12)) {
+          sDone = true;
+          cond.notify_one();
+        }
+        // if (string((const char*)data, len).find("data_1000000") !=
+        // string::npos) {
+        //   sDone = true;
+        //   cond.notify_one();
+        // }
+      });
+
+  cond.wait(lk);
+  Tick t;
+
+  for (uint32_t i = 0; i < sendCnt; ++i) {
+    stringstream str;
+    str << "data_" << (i + 1);
+    auto s = str.str();
+    client->send(s.c_str(), s.length());
+    clientConn->send(s.c_str(), s.length());
+  }
+
+  cond.wait(lk, [&] { return (sDone && rDone); });
+
+  LOGD << "tick: " << t.tock();
+
+  client->close();
+  clientConn->close();
+  svr->close();
+}
+
 TEST(TcpConnectionTest, TcpConnectionTest4) {
   bool stoped = false;
   bool exitFlag = false;
@@ -1160,8 +1231,7 @@ TEST(TcpConnectionTest, TcpConnectionTest6) {
   TcpConnectionPtr svr = TcpConnection::CreateInstance();
   TcpConnectionPtr clientPtr = TcpConnection::CreateInstance();
 
-  EXPECT_TRUE(
-      svr->listen(5678, "fe80::aced:719b:c05d:5f5%ens33", AF_INET6))
+  EXPECT_TRUE(svr->listen(5678, "fe80::aced:719b:c05d:5f5%ens33", AF_INET6))
       << "server listen failed.";
 
   set<TcpConnectionPtr> clients;

@@ -32,7 +32,7 @@ int main(int argc, char** argv) {
   cout << mode << " shm opened" << endl;
 
   uint32_t n = 0;
-  uint32_t cnt = 1000000;
+  uint32_t cnt = 10000000;
 
   thread t([&] {
     while (true) {
@@ -55,7 +55,7 @@ int main(int argc, char** argv) {
 
       // this_thread::sleep_for(chrono::seconds(1));
 
-      if(rn % 10000 == 0) cout << mode << " read: " << string(buf, len) << endl;
+      // if(rn % 10000 == 0) cout << mode << " read: " << string(buf, len) << endl;
 
       if(++rn == cnt)   break;
     }

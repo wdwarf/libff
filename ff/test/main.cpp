@@ -26,7 +26,6 @@ static void SigCatch() {
 #if defined(__linux) || defined(unix)
   int sigs[] = {SIGTERM, SIGPIPE};
   for (auto sig : sigs) {
-		cout << sig << endl;
     signal(sig, SigHandler);
   }
 #endif
