@@ -94,10 +94,7 @@ bool EPoll::addEvents(int fd, int events) {
   lock_guard<mutex> lk(this->m_fdInfosMutex);
 
   auto it = this->m_fdInfos.find(fd);
-
-  if (it == this->m_fdInfos.end()) {
-    return false;
-  }
+  if (it == this->m_fdInfos.end()) return false;
 
   it->second.events |= events;
   this->setEvent2Fd(fd, it->second.events);
@@ -138,10 +135,10 @@ bool EPoll::delFdFromPoll(int fd) {
 }
 
 void EPoll::signal() {
-  unique_lock<mutex> lk(this->m_signalMutex, defer_lock);
-  if (!lk.try_lock()) return;
-  char b = true;
-  ::write(this->m_signalPipe[1], &b, 1);
+  // unique_lock<mutex> lk(this->m_signalMutex, defer_lock);
+  // if (!lk.try_lock()) return;
+  // char b = 1;
+  // ::write(this->m_signalPipe[1], &b, 1);
 }
 
 bool EPoll::setEvent2Fd(int fd, int events) {
@@ -154,28 +151,22 @@ bool EPoll::setEvent2Fd(int fd, int events) {
   return (0 == ::epoll_ctl(this->m_epFd, EPOLL_CTL_MOD, fd, &ev));
 }
 
-bool EPoll::doPoll(std::vector<pollfd>& ofds, int timeout) {
+int EPoll::doPoll(int timeout) {
   int fdCnt =
       ::epoll_wait(this->m_epFd, &epollEvents[0], epollEvents.size(), timeout);
 
-  if (fdCnt < 0) return (EINTR == errno);
-
-  for (int i = 0; i < fdCnt; i++) {
-    pollfd pfd;
-    pfd.fd = epollEvents[i].data.fd;
-    pfd.revents = epollEvents[i].events;
-    ofds.push_back(pfd);
-  }
-  return true;
+  if (fdCnt < 0) return (EINTR == errno ? 0 : -1);
+  return fdCnt;
 }
 
 void EPoll::update(int pollTimeout) {
-  vector<pollfd> ofds;
-  if (!doPoll(ofds, pollTimeout)) return;
+  int activeFds;
+  if ((activeFds = doPoll(pollTimeout)) < 0) return;
 
-  for (auto pfd : ofds) {
-    int fd = pfd.fd;
-    int revents = pfd.revents;
+  for (int i = 0; i < activeFds; ++i) {
+    auto& pfd = epollEvents[i];
+    int fd = pfd.data.fd;
+    int revents = pfd.events;
     FdUpdateFunc updateFunc;
     int events = 0;
 
@@ -201,8 +192,7 @@ void EPoll::update(int pollTimeout) {
 void EPoll::onPipeEvents(int fd, int events) {
   if (events & POLLIN) {
     char b;
-    while (read(fd, &b, 1) > 0) {
-    };
+    read(fd, &b, 1);
   }
 }
 

@@ -29,7 +29,7 @@ public:
 	Buffer(const void* data, uint32_t size);
 	Buffer(const Buffer& buffer);
 	Buffer(Buffer&& buffer);
-	virtual ~Buffer();
+	~Buffer();
 
 	Buffer& operator=(const Buffer& buffer);
 	Buffer& operator=(Buffer&& buffer);

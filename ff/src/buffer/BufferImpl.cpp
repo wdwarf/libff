@@ -261,9 +261,9 @@ void Buffer::BufferImpl::resize(uint32_t size) {
 }
 
 void Buffer::BufferImpl::clear() {
-  if (NULL != this->data) {
+  if (nullptr != this->data) {
     delete[] this->data;
-    this->data = NULL;
+    this->data = nullptr;
     this->size = 0;
     this->capacity = 0;
 

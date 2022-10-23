@@ -35,7 +35,7 @@ Buffer::Buffer(const Buffer& buffer) :
 
 Buffer::Buffer(Buffer&& buffer) : impl(nullptr){
 	this->impl = buffer.impl;
-	buffer.impl = nullptr;
+	buffer.impl = new Buffer::BufferImpl();
 }
 
 Buffer& Buffer::operator=(const Buffer& buffer) {
@@ -47,7 +47,7 @@ Buffer& Buffer::operator=(Buffer&& buffer) {
 	if (nullptr != this->impl) 
 	  delete this->impl;
 	this->impl = buffer.impl;
-	buffer.impl = nullptr;
+	buffer.impl = new Buffer::BufferImpl();
 	return *this;
 }
 

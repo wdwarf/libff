@@ -371,6 +371,7 @@ TcpConnection::TcpConnection() : m_isServer(false), m_readBuffer(MAX_BUF_SIZE) {
 TcpConnection::TcpConnection(int sock)
     : m_isServer(false), m_socket(sock), m_readBuffer(MAX_BUF_SIZE) {
   this->m_socket.setUseSelect(false);
+  this->m_socket.setBlocking(ff::SockBlockingType::NonBlocking);
   this->m_ep = &PollMgr::instance().getEPoll();
   this->m_ep->addFd(this->m_socket.getHandle(),
                     Bind(&TcpConnection::onSocketUpdate, this));
@@ -388,6 +389,8 @@ void TcpConnection::resetCallbackFunctions() {
   this->m_onDataFunc = nullptr;
   this->m_onCloseFunc = nullptr;
   this->m_onAcceptFunc = nullptr;
+
+  lock_guard<mutex> lk2(this->m_sendMutex);
   this->m_sendBuffers.clear();
 }
 
@@ -409,6 +412,7 @@ bool TcpConnection::listen(uint16_t port, const std::string& ip,
   }
 
   this->m_isServer = true;
+  this->m_socket.setBlocking(SockBlockingType::NonBlocking);
   this->m_ep->addFd(this->m_socket.getHandle(),
                     Bind(&TcpConnection::onSocketUpdate, this));
   this->m_ep->addEvents(this->m_socket.getHandle(), POLLIN);
@@ -445,6 +449,7 @@ bool TcpConnection::connect(uint16_t remotePort, const std::string& remoteHost,
     return false;
   }
 
+  this->m_socket.setBlocking(SockBlockingType::NonBlocking);
   this->m_ep->addFd(this->m_socket.getHandle(),
                     Bind(&TcpConnection::onSocketUpdate, this));
   this->m_ep->addEvents(this->m_socket.getHandle(), POLLIN);
@@ -476,7 +481,7 @@ void TcpConnection::send(const void* buf, uint32_t bufSize) {
   if (!this->m_socket.isConnected()) return;
 
   lock_guard<mutex> lk(this->m_sendMutex);
-  this->m_sendBuffers.push_back(BufferPtr(new Buffer(buf, bufSize)));
+  this->m_sendBuffers.push_back(make_shared<Buffer>(buf, bufSize));
 
   if (1 == this->m_sendBuffers.size())
     this->m_ep->addEvents(this->m_socket.getHandle(), POLLOUT);

@@ -36,6 +36,7 @@ TEST(TcpConnectionTest, SpeedTest) {
   bool rDone = false;
   const uint32_t sendCnt = 10000000;
   string endStr = "data_" + to_string(sendCnt);
+  auto endStrLen = endStr.length();
 
   TcpConnectionPtr svr = TcpConnection::CreateInstance();
   TcpConnectionPtr client = TcpConnection::CreateInstance();
@@ -51,7 +52,7 @@ TEST(TcpConnectionTest, SpeedTest) {
           // conn->send(data, len);
           // cout << string((const char*)data, len) << endl;
 
-          if (0 == memcmp(data + len - 12, endStr.c_str(), 12)) {
+          if (0 == memcmp(data + len - endStrLen, endStr.c_str(), endStrLen)) {
             rDone = true;
             cond.notify_one();
           }
@@ -63,7 +64,7 @@ TEST(TcpConnectionTest, SpeedTest) {
   EXPECT_TRUE(client->connect(5678, "127.0.0.1", 5679, "127.0.0.1"));
   client->onData(
       [&](const uint8_t* data, uint32_t len, const TcpConnectionPtr& conn) {
-        if (0 == memcmp(data + len - 12, endStr.c_str(), 12)) {
+        if (0 == memcmp(data + len - endStrLen, endStr.c_str(), endStrLen)) {
           sDone = true;
           cond.notify_one();
         }

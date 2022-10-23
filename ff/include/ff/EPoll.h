@@ -63,7 +63,7 @@ class LIBFF_API EPoll {
   bool setEvent2Fd(int fd, int events);
 
   void onPipeEvents(int fd, int events);
-  bool doPoll(std::vector<pollfd>& ofds, int timeout);
+  int doPoll(int timeout);
 };
 
 class LIBFF_API PollMgr {

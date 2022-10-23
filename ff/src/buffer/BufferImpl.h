@@ -19,7 +19,7 @@ public:
 	BufferImpl(uint32_t initSize);
 	BufferImpl(const void* data, uint32_t size);
 	BufferImpl(const BufferImpl& buffer);
-	virtual ~BufferImpl();
+	~BufferImpl();
 
 	BufferImpl& operator=(const BufferImpl& buffer);
 	BufferImpl operator+(const BufferImpl& buffer) const;
