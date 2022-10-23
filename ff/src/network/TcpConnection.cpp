@@ -293,7 +293,7 @@ Socket& TcpConnection::getSocket() { return this->m_socket; }
 void TcpConnection::send(const void* buf, uint32_t bufSize) {
   if (this->m_isServer) return;
 
-  lock_guard<mutex> lk(this->m_sendMutex);
+  // lock_guard<mutex> lk(this->m_sendMutex);
 
   uint32_t sendCnt = bufSize / MAX_BUF_SIZE;
   if (0 != (bufSize % MAX_BUF_SIZE)) ++sendCnt;
@@ -306,8 +306,6 @@ void TcpConnection::send(const void* buf, uint32_t bufSize) {
 
     IoContext* context = new IoContext();
     context->iocpEevent = IocpEvent::Send;
-    // context->buffer.buf = new char[bufSize];
-    // context->buffer.len = bufSize;
     memcpy(context->buffer.buf, p, bytes2Send);
     context->buffer.len = bytes2Send;
     p += bytes2Send;

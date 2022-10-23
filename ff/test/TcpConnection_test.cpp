@@ -44,6 +44,7 @@ TEST(TcpConnectionTest, SpeedTest) {
       << "server listen failed.";
   TcpConnectionPtr clientConn;
   svr->onAccept([&](const TcpConnectionPtr& conn) {
+    LOGD << "client connected";
     clientConn = conn;
     clientConn->onData(
         [&](const uint8_t* data, uint32_t len, const TcpConnectionPtr& conn) {
@@ -54,11 +55,6 @@ TEST(TcpConnectionTest, SpeedTest) {
             rDone = true;
             cond.notify_one();
           }
-          // if (string((const char*)data, len).find("data_1000000") !=
-          // string::npos) {
-          //   rDone = true;
-          //   cond.notify_one();
-          // }
         });
 
     cond.notify_one();
@@ -71,14 +67,9 @@ TEST(TcpConnectionTest, SpeedTest) {
           sDone = true;
           cond.notify_one();
         }
-        // if (string((const char*)data, len).find("data_1000000") !=
-        // string::npos) {
-        //   sDone = true;
-        //   cond.notify_one();
-        // }
       });
 
-  cond.wait(lk);
+  cond.wait(lk, [&clientConn] { return (nullptr != clientConn); });
   Tick t;
 
   for (uint32_t i = 0; i < sendCnt; ++i) {
@@ -88,6 +79,8 @@ TEST(TcpConnectionTest, SpeedTest) {
     client->send(s.c_str(), s.length());
     clientConn->send(s.c_str(), s.length());
   }
+
+  LOGD << "Send finished";
 
   cond.wait(lk, [&] { return (sDone && rDone); });
 
