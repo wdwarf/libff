@@ -21,6 +21,10 @@
 #include <set>
 #include <thread>
 
+#ifndef WIN32
+#include <malloc.h>
+#endif
+
 #include "TestDef.h"
 
 using namespace std;
@@ -90,6 +94,8 @@ TEST(TcpConnectionTest, SpeedTest) {
   client->close();
   clientConn->close();
   svr->close();
+
+  malloc_trim(0);
 }
 
 TEST(TcpConnectionTest, TcpConnectionTest4) {
