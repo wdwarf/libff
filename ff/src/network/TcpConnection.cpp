@@ -478,13 +478,10 @@ Socket& TcpConnection::getSocket() { return this->m_socket; }
 void TcpConnection::send(const void* buf, uint32_t bufSize) {
   if (this->m_isServer) return;
 
-  if (!this->m_socket.isConnected()) return;
-
   lock_guard<mutex> lk(this->m_sendMutex);
-  this->m_sendBuffers.push_back(make_shared<Buffer>(buf, bufSize));
 
-  if (1 == this->m_sendBuffers.size())
-    this->m_ep->addEvents(this->m_socket.getHandle(), POLLOUT);
+  this->m_sendBuffers.push_back(make_shared<Buffer>(buf, bufSize));
+  this->m_ep->addEvents(this->m_socket.getHandle(), POLLOUT);
 }
 
 TcpConnection& TcpConnection::onAccept(const OnAcceptFunc& func) {
@@ -570,19 +567,33 @@ void TcpConnection::onClientSocketUpdate(int fd, int events) {
   }
 
   if (events & POLLOUT) {
-    BufferPtr buffer;
+    std::list<BufferPtr> buffers;
     {
       lock_guard<mutex> lk(this->m_sendMutex);
       if (!this->m_sendBuffers.empty()) {
-        buffer = this->m_sendBuffers.front();
-        this->m_sendBuffers.pop_front();
+        buffers = move(this->m_sendBuffers);
       } else {
         this->m_ep->delEvents(this->m_socket.getHandle(), POLLOUT);
       }
     }
 
-    if (buffer) {
-      this->m_socket.send(buffer->getData(), buffer->getSize());
+    for (auto& buffer : buffers) {
+      const uint8_t* p = (const uint8_t*)buffer->getData();
+      uint32_t size = buffer->getSize();
+      int sendBytes = 0;
+      while (size > 0) {
+        sendBytes = this->m_socket.send(p, size);
+        if (sendBytes <= 0) {
+          if (errno == EINTR || errno == EWOULDBLOCK)
+            continue;
+          else
+            break;
+        }
+        p += sendBytes;
+        size -= sendBytes;
+      }
+
+      // this->m_socket.send(buffer->getData(), buffer->getSize());
     }
   }
 }

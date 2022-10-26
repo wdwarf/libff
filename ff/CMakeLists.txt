@@ -125,7 +125,7 @@ else()
 		set(EXTRA_LIBS
 			pthread
 			z
-			libcurl
+			curl
 			jsoncpp
 			gtest
 			gmock
@@ -151,7 +151,6 @@ ${windows_files}
 	src/app/ApplicationImpl.cpp
 	src/app/CmdLineParser.cpp
 	src/buffer/Buffer.cpp
-	src/buffer/BufferImpl.cpp
 	src/cli/CliPacket.cpp
 	src/cli/CliService.cpp
 	src/data_service/DataService.cpp

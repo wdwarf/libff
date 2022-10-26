@@ -49,7 +49,7 @@ class LIBFF_API EPoll {
     int fd;
     int events;
   };
-  typedef std::map<int, FdInfo> FdInfos;
+  typedef std::map<int, FdInfo*> FdInfos;
   FdInfos m_fdInfos;
 
   std::mutex m_fdInfosMutex;
@@ -58,7 +58,7 @@ class LIBFF_API EPoll {
   bool initSignalPipe();
   void uninitSignalPipe();
 
-  bool addFd2Poll(int fd);
+  bool addFd2Poll(int fd, void* userData);
   bool delFdFromPoll(int fd);
   bool setEvent2Fd(int fd, int events);
 
