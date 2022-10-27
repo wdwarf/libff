@@ -36,6 +36,9 @@ TEST(TcpConnectionTest, SpeedTest) {
   condition_variable cond;
   std::unique_lock<mutex> lk(m);
 
+  bool closed1 = false;
+  bool closed2 = false;
+  bool closed3 = false;
   bool sDone = false;
   bool rDone = false;
   const uint32_t sendCnt = 10000000;
@@ -47,14 +50,29 @@ TEST(TcpConnectionTest, SpeedTest) {
 
   EXPECT_TRUE(svr->listen(5678, "127.0.0.1", AF_INET))
       << "server listen failed.";
+
+  svr->onClose([&closed1, &cond](const TcpConnectionPtr& conn) {
+    cout << "server closed" << endl;
+    closed1 = true;
+    cond.notify_one();
+  });
+
   TcpConnectionPtr clientConn;
   svr->onAccept([&](const TcpConnectionPtr& conn) {
     LOGD << "client connected";
     clientConn = conn;
+
+    clientConn->onClose([&closed2, &cond](const TcpConnectionPtr& conn) {
+      cout << "clientConn closed" << endl;
+      closed2 = true;
+      cond.notify_one();
+    });
+
     clientConn->onData(
         [&](const uint8_t* data, uint32_t len, const TcpConnectionPtr& conn) {
           // conn->send(data, len);
-          // cout << string((const char*)data, len) << endl;
+          // cout << string((const char*)(data + len - endStrLen), endStrLen) <<
+          // endl;
 
           if (0 == memcmp(data + len - endStrLen, endStr.c_str(), endStrLen)) {
             rDone = true;
@@ -66,8 +84,17 @@ TEST(TcpConnectionTest, SpeedTest) {
   });
 
   EXPECT_TRUE(client->connect(5678, "127.0.0.1", 5679, "127.0.0.1"));
+
+  client->onClose([&closed3, &cond](const TcpConnectionPtr& conn) {
+    cout << "client closed" << endl;
+    closed3 = true;
+    cond.notify_one();
+  });
+
   client->onData(
       [&](const uint8_t* data, uint32_t len, const TcpConnectionPtr& conn) {
+        // cout << string((const char*)(data + len - endStrLen), endStrLen) <<
+        // endl;
         if (0 == memcmp(data + len - endStrLen, endStr.c_str(), endStrLen)) {
           sDone = true;
           cond.notify_one();
@@ -94,6 +121,10 @@ TEST(TcpConnectionTest, SpeedTest) {
   client->close();
   clientConn->close();
   svr->close();
+
+  cond.wait(lk, [&closed1, &closed2, &closed3] {
+    return (closed1 && closed2 && closed3);
+  });
 
   malloc_trim(0);
 }
@@ -1156,7 +1187,7 @@ TEST(TcpConnectionTest, TcpConnectionTest) {
     const int cnt = 50;
     const uint32_t clientCnt = 110;
     uint32_t currentClientCnt = clientCnt;
-    for (int i = 0; i < clientCnt; ++i) {
+    for (uint32_t i = 0; i < clientCnt; ++i) {
       thread([&m, &currentClientCnt, cnt]() {
         do {
           Socket sock;

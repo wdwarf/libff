@@ -378,8 +378,8 @@ TcpConnection::TcpConnection(int sock)
 }
 
 TcpConnection::~TcpConnection() {
-  this->m_ep->delFd(this->m_socket.getHandle());
-  this->m_socket.close();
+  // this->m_ep->delFd(this->m_socket.getHandle());
+  // this->m_socket.close();
 }
 
 bool TcpConnection::isServer() const { return this->m_isServer; }
@@ -459,18 +459,18 @@ bool TcpConnection::connect(uint16_t remotePort, const std::string& remoteHost,
 void TcpConnection::close() {
   this->m_socket.shutdown();
 
-  OnCloseFunc func;
-  {
-    lock_guard<mutex> lk(this->m_mutex);
-    func = this->m_onCloseFunc;
-  }
-  if (!func) {
-    this->m_ep->delFd(this->m_socket.getHandle());
-    this->m_socket.close();
-  }
+  // OnCloseFunc func;
+  // {
+  //   lock_guard<mutex> lk(this->m_mutex);
+  //   func = this->m_onCloseFunc;
+  // }
+  // if (!func) {
+  //   this->m_ep->delFd(this->m_socket.getHandle());
+  //   this->m_socket.close();
+  // }
 
-  lock_guard<mutex> lk(this->m_sendMutex);
-  this->m_sendBuffers.clear();
+  // lock_guard<mutex> lk(this->m_sendMutex);
+  // this->m_sendBuffers.clear();
 }
 
 Socket& TcpConnection::getSocket() { return this->m_socket; }
@@ -567,32 +567,42 @@ void TcpConnection::onClientSocketUpdate(int fd, int events) {
   }
 
   if (events & POLLOUT) {
-    std::list<BufferPtr> buffers;
-    {
+    if (m_currSendBuffers.empty()) {
+      m_currSendSize = 0;
+      m_currSendBytes = 0;
       lock_guard<mutex> lk(this->m_sendMutex);
       if (!this->m_sendBuffers.empty()) {
-        buffers = move(this->m_sendBuffers);
+        m_currSendBuffers = move(this->m_sendBuffers);
       } else {
         this->m_ep->delEvents(this->m_socket.getHandle(), POLLOUT);
       }
     }
 
-    for (auto& buffer : buffers) {
-      const uint8_t* p = (const uint8_t*)buffer->getData();
-      uint32_t size = buffer->getSize();
-      int sendBytes = 0;
-      while (size > 0) {
-        sendBytes = this->m_socket.send(p, size);
-        if (sendBytes <= 0) {
-          if (errno == EINTR || errno == EWOULDBLOCK)
-            continue;
-          else
-            break;
-        }
-        p += sendBytes;
-        size -= sendBytes;
-      }
+    bool intr = false;
+    while (!m_currSendBuffers.empty()) {
+      auto buffer = m_currSendBuffers.front();
 
+      const uint8_t* p = (const uint8_t*)buffer->getData();
+      m_currSendSize = m_currSendSize > 0 ? m_currSendSize : buffer->getSize();
+      m_currSendBytes = m_currSendBytes > 0 ? m_currSendBytes : 0;
+      p += buffer->getSize() - m_currSendSize;
+
+      while (m_currSendSize > 0) {
+        m_currSendBytes = this->m_socket.send(p, m_currSendSize);
+        if (m_currSendBytes <= 0) {
+          intr = true;
+          break;
+        }
+        p += m_currSendBytes;
+        m_currSendSize -= m_currSendBytes;
+      }
+      if (intr) {
+        this->m_ep->addEvents(this->m_socket.getHandle(), POLLOUT);
+        break;
+      }
+      m_currSendSize = 0;
+      m_currSendBytes = 0;
+      m_currSendBuffers.pop_front();
       // this->m_socket.send(buffer->getData(), buffer->getSize());
     }
   }

@@ -5,12 +5,12 @@ project(libff)
 # set(BUILD_SHARED_LIBS OFF)
 set(CMAKE_CXX_STANDARD 11)
 
-if("${CMAKE_BUILD_TYPE}" MATCHES "")
+if(NOT DEFINED CMAKE_BUILD_TYPE)
 set(CMAKE_BUILD_TYPE Release)
 endif()
 
 MESSAGE(STATUS "CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}")
-	
+
 if(WIN32)
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/build/lib)
@@ -35,8 +35,8 @@ include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/ff/third_party/zlib-1.2.11
 )
 
-add_subdirectory(ff/third_party/curl-7.77.0)
-add_subdirectory(ff/third_party/googletest)
-add_subdirectory(ff/third_party/zlib-1.2.11)
-add_subdirectory(ff/third_party/jsoncpp)
+#add_subdirectory(ff/third_party/curl-7.77.0)
+#add_subdirectory(ff/third_party/googletest)
+#add_subdirectory(ff/third_party/zlib-1.2.11)
+#add_subdirectory(ff/third_party/jsoncpp)
 add_subdirectory(ff)

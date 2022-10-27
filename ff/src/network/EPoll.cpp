@@ -29,10 +29,10 @@ EPoll::EPoll(uint32_t maxEpollEvents)
       epollEvents(maxEpollEvents)
 // m_fdChanged(false)
 {
-  this->initSignalPipe();
+  // this->initSignalPipe();
 
-  this->addFd(this->m_signalPipe[0], Bind(&EPoll::onPipeEvents, this));
-  this->addEvents(this->m_signalPipe[0], POLLIN);
+  // this->addFd(this->m_signalPipe[0], Bind(&EPoll::onPipeEvents, this));
+  // this->addEvents(this->m_signalPipe[0], POLLIN);
 }
 
 EPoll::~EPoll() {
@@ -52,7 +52,7 @@ bool EPoll::initSignalPipe() {
 }
 
 bool EPoll::addFd(int fd, const FdUpdateFunc& updateFunc) {
-  if (fd < 0) return false;
+  if (fd <= 0) return false;
 
   FdInfo* fdInfo = new FdInfo;
   fdInfo->fd = fd;
@@ -84,7 +84,9 @@ bool EPoll::delFd(int fd) {
   delete it->second;
   this->m_fdInfos.erase(it);
 
-  this->delFdFromPoll(fd);
+  if (!this->delFdFromPoll(fd)) {
+    cerr << "del fd[" << fd << "] failed" << endl;
+  }
 
   // m_fdChanged = true;
   this->signal();
@@ -124,12 +126,9 @@ bool EPoll::delEvents(int fd, int events) {
 
 bool EPoll::addFd2Poll(int fd, void* userData) {
   struct epoll_event ev;
-  // bzero(&ev, sizeof(ev));
-
   ev.events = 0;
   // ev.data.fd = fd;
   ev.data.ptr = userData;
-  // cout << "userData: " << userData << endl;
 
   return (0 == ::epoll_ctl(this->m_epFd, EPOLL_CTL_ADD, fd, &ev));
 }
@@ -171,18 +170,12 @@ void EPoll::update(int pollTimeout) {
     auto& pfd = epollEvents[i];
     FdInfo* fdInfo = (FdInfo*)pfd.data.ptr;
     assert(nullptr != fdInfo);
-    int fd = fdInfo->fd;
-    int revents = pfd.events;
-    FdUpdateFunc updateFunc;
-    int events = 0;
 
-    if (0 == revents) continue;
+    if (0 == pfd.events) continue;
 
-    updateFunc = fdInfo->updateFunc;
-    events = fdInfo->events;
-
-    if (updateFunc)
-      updateFunc(fd, revents & (events | POLLERR | POLLHUP | POLLNVAL));
+    if (fdInfo->updateFunc)
+      fdInfo->updateFunc(fdInfo->fd, pfd.events & (fdInfo->events | POLLERR |
+                                                   POLLHUP | POLLNVAL));
   }
 }
 

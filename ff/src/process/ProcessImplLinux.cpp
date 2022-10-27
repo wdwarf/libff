@@ -29,7 +29,7 @@ using namespace std;
 NS_FF_BEG
 
 Process::ProcessImpl::ProcessImpl(Process *proc, const std::string &command)
-    : _proc(proc), pid(0), asyncRead(true), m_exitCode(-1) {
+    : _proc(proc), pid(0), m_exitCode(-1), asyncRead(true) {
   memset(this->pipeFd, 0, sizeof(this->pipeFd));
   this->command = command;
 }

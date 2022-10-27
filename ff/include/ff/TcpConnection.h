@@ -90,6 +90,9 @@ private:
 	Socket m_socket;
 	Buffer m_readBuffer;
 	std::list<BufferPtr> m_sendBuffers;
+	std::list<BufferPtr> m_currSendBuffers;
+	uint32_t m_currSendSize;
+	int m_currSendBytes;
 	OnDataFunc m_onDataFunc;
 	OnCloseFunc m_onCloseFunc;
 	OnAcceptFunc m_onAcceptFunc;
