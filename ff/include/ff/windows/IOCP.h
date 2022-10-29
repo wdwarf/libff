@@ -11,32 +11,33 @@
 #include <ff/Singleton.h>
 #include <ff/ff_config.h>
 
+#include <atomic>
 #include <functional>
 #include <map>
 #include <mutex>
 #include <thread>
 #include <vector>
-#include <atomic>
 
 NS_FF_BEG
 
-using IocpEventFunc = std::function<void (DWORD numberOfBytesTransferred,
-                       ULONG_PTR completionKey, LPOVERLAPPED lpOverlapped)>;
-                       
+using IocpEventFunc =
+    std::function<void(DWORD numberOfBytesTransferred, ULONG_PTR completionKey,
+                       LPOVERLAPPED lpOverlapped)>;
+
 struct LIBFF_API IocpContext {
-    HANDLE handle;
-    IocpEventFunc eventFunc;
+  HANDLE handle;
+  IocpEventFunc eventFunc;
 };
 
 using PIocpContext = IocpContext*;
 
 class LIBFF_API IOCP {
  public:
-  IOCP(DWORD concurrentThreads = 8);
+  IOCP(DWORD numberOfConcurrentThreads = 0);
   ~IOCP();
 
   void close();
-  bool create(DWORD numberOfConcurrentThreads);
+  bool create(DWORD numberOfConcurrentThreads = 0);
   bool connect(PIocpContext context);
   operator HANDLE() const;
   operator bool() const;
@@ -52,9 +53,8 @@ class LIBFF_API IOCP {
 
  private:
   HANDLE m_handle;
-  std::mutex m_mutex;
   std::vector<std::thread> m_workThreads;
-  std::atomic_uint16_t m_activeWorkThreadCnt;;
+  std::atomic_uint16_t m_activeWorkThreadCnt;
 };
 
 using IOCPPtr = std::shared_ptr<IOCP>;

@@ -7,6 +7,7 @@
 
 #include <ff/windows/IOCP.h>
 
+#include <cassert>
 #include <cstring>
 #include <iostream>
 
@@ -14,9 +15,10 @@ using namespace std;
 
 NS_FF_BEG
 
-IOCP::IOCP(DWORD concurrentThreads) : m_handle(NULL), m_activeWorkThreadCnt(0) {
-  if (concurrentThreads > 0) {
-    this->create(concurrentThreads);
+IOCP::IOCP(DWORD numberOfConcurrentThreads)
+    : m_handle(NULL), m_activeWorkThreadCnt(0) {
+  if (!this->create(numberOfConcurrentThreads)) {
+    cerr << "failed to create iocp port" << endl;
   }
 }
 
@@ -31,13 +33,19 @@ uint16_t IOCP::activeWorkThreadCnt() const {
 }
 
 bool IOCP::create(DWORD numberOfConcurrentThreads) {
-  if (numberOfConcurrentThreads <= 0) return false;
+  if (-1 == numberOfConcurrentThreads) return false;
 
   this->close();
 
   this->m_handle = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, NULL,
                                           numberOfConcurrentThreads);
   if ((NULL == this->m_handle)) return false;
+
+  if (0 == numberOfConcurrentThreads) {
+    SYSTEM_INFO SysemInfo;
+    GetSystemInfo(&SysemInfo);
+    numberOfConcurrentThreads = SysemInfo.dwNumberOfProcessors + 2;
+  }
 
   this->m_workThreads = std::vector<std::thread>(numberOfConcurrentThreads);
   for (DWORD i = 0; i < numberOfConcurrentThreads; ++i) {
@@ -48,14 +56,16 @@ bool IOCP::create(DWORD numberOfConcurrentThreads) {
         ULONG_PTR completionKey = 0;
         LPOVERLAPPED lpOverlapped = nullptr;
 
-        if (!this->getQueuedCompletionStatus(
-                &numberOfBytesTransferred, &completionKey, &lpOverlapped, -1)) {
+        if (!this->getQueuedCompletionStatus(&numberOfBytesTransferred,
+                                             &completionKey, &lpOverlapped,
+                                             INFINITE)) {
           continue;
         }
 
         if ((0 == completionKey && nullptr == lpOverlapped)) break;
 
         PIocpContext context = (PIocpContext)completionKey;
+        assert(nullptr != context);
         if (!context->eventFunc) {
           continue;
         }
