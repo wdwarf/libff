@@ -35,8 +35,8 @@ include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/ff/third_party/zlib-1.2.11
 )
 
-#add_subdirectory(ff/third_party/curl-7.77.0)
-#add_subdirectory(ff/third_party/googletest)
-#add_subdirectory(ff/third_party/zlib-1.2.11)
-#add_subdirectory(ff/third_party/jsoncpp)
+add_subdirectory(ff/third_party/curl-7.77.0)
+add_subdirectory(ff/third_party/googletest)
+add_subdirectory(ff/third_party/zlib-1.2.11)
+add_subdirectory(ff/third_party/jsoncpp)
 add_subdirectory(ff)

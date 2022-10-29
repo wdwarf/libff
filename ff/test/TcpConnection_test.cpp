@@ -126,7 +126,9 @@ TEST(TcpConnectionTest, SpeedTest) {
     return (closed1 && closed2 && closed3);
   });
 
+#ifndef WIN32
   malloc_trim(0);
+#endif
 }
 
 TEST(TcpConnectionTest, TcpConnectionTest4) {

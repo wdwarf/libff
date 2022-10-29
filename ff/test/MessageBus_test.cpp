@@ -101,7 +101,7 @@ TEST(MessageBusTest, MessageBusTest) {
       } else {
         LOGE << "response timeout";
       }
-    } while (n++ < 100);
+    } while (n++ < 10000);
   });
 
   auto t2 = thread([&client3, &client2, &client1]() {
@@ -116,7 +116,7 @@ TEST(MessageBusTest, MessageBusTest) {
       } else {
         LOGE << "response timeout";
       }
-    } while (n++ < 1000);
+    } while (n++ < 10000);
   });
 
   auto t3 = thread([&client3, &client2, &client1]() {
@@ -131,7 +131,7 @@ TEST(MessageBusTest, MessageBusTest) {
       } else {
         LOGE << "response timeout";
       }
-    } while (n++ < 100);
+    } while (n++ < 10000);
   });
 
   t1.join();
