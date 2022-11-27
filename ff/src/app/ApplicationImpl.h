@@ -46,6 +46,7 @@ class Application::ApplicationImpl {
   static std::string GetApplicationDir();
   static std::string GetApplicationName();
   static std::string GetCurrentWorkDir();
+  static std::string GetHomePath();
 
  private:
   Application* m_app;

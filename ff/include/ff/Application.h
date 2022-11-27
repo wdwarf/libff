@@ -50,6 +50,7 @@ class LIBFF_API Application : public Settings {
   static std::string GetApplicationPath();
   static std::string GetApplicationDir();
   static std::string GetCurrentWorkDir();
+  static std::string GetHomePath();
 
  private:
   class ApplicationImpl;

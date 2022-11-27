@@ -25,4 +25,5 @@ TEST(ApplicationTest, ApplicationTest) {
   EXPECT_EQ("test_env_value", Application::GetEnv("test_env"));
   Application::UnsetEnv("test_env");
   LOGD << "env $test_env: " << Application::GetEnv("test_env");
+  LOGD << "home path: " << Application::GetHomePath();
 }

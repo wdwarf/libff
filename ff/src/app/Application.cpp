@@ -92,4 +92,8 @@ std::string Application::GetCurrentWorkDir() {
   return Application::ApplicationImpl::GetCurrentWorkDir();
 }
 
+std::string Application::GetHomePath(){
+  return Application::ApplicationImpl::GetHomePath();
+}
+
 NS_FF_END /* namespace NS_FF */

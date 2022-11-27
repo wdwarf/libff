@@ -147,4 +147,17 @@ std::string Application::ApplicationImpl::GetCurrentWorkDir() {
   return _getcwd_(NULL, 0);
 }
 
+std::string Application::ApplicationImpl::GetHomePath() {
+  string homePath;
+#ifdef _WIN32
+  homePath = GetEnv("USERPROFILE");
+  if(homePath.empty()){
+    homePath = GetEnv("HOMEDRIVE") + GetEnv("HOMEPATH");
+  }
+#else
+  homePath = GetEnv("HOME");
+#endif
+  return homePath;
+}
+
 NS_FF_END /* namespace NS_FF */
