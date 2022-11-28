@@ -91,28 +91,6 @@ int Application::ApplicationImpl::getCommandLineCount() const {
   return this->m_cmdLines.size();
 }
 
-std::string Application::ApplicationImpl::GetEnv(const std::string& varName) {
-  auto env = getenv((char*)varName.c_str());
-  return (nullptr == env) ? "" : env;
-}
-
-bool Application::ApplicationImpl::SetEnv(const std::string& varName,
-                                          const std::string& varValue) {
-#ifdef _WIN32
-  return (0 == putenv((char*)(varName + "=" + varValue).c_str()));
-#else
-  return (0 == setenv(varName.c_str(), varValue.c_str(), 1));
-#endif
-}
-
-bool Application::ApplicationImpl::UnsetEnv(const std::string& varName) {
-#ifdef _WIN32
-  return (0 == putenv((char*)(varName + "=").c_str()));
-#else
-  return (0 == unsetenv(varName.c_str()));
-#endif
-}
-
 std::string Application::ApplicationImpl::GetApplicationPath() {
 #ifdef _WIN32
   TCHAR cPath[1024] = {0};
@@ -145,19 +123,6 @@ std::string Application::ApplicationImpl::GetApplicationName() {
 
 std::string Application::ApplicationImpl::GetCurrentWorkDir() {
   return _getcwd_(NULL, 0);
-}
-
-std::string Application::ApplicationImpl::GetHomePath() {
-  string homePath;
-#ifdef _WIN32
-  homePath = GetEnv("USERPROFILE");
-  if(homePath.empty()){
-    homePath = GetEnv("HOMEDRIVE") + GetEnv("HOMEPATH");
-  }
-#else
-  homePath = GetEnv("HOME");
-#endif
-  return homePath;
 }
 
 NS_FF_END /* namespace NS_FF */

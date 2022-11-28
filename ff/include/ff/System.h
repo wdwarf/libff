@@ -107,6 +107,10 @@ class LIBFF_API System {
   static ff::MemoryStatus MemoryStatus();
   static ff::CpuInfo CpuInfo();
   static std::string Username();
+  static std::string GetEnv(const std::string& varName);
+  static bool SetEnv(const std::string& varName, const std::string& varValue);
+  static bool RemoveEnv(const std::string& varName);
+  static std::string GetHomePath();
 };
 
 NS_FF_END

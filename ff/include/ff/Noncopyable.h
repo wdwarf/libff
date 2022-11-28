@@ -13,13 +13,13 @@
 NS_FF_BEG
 
 class LIBFF_API Noncopyable {
-public:
-	Noncopyable() = default;
-	virtual ~Noncopyable() = default;
+ public:
+  Noncopyable() = default;
+  ~Noncopyable() = default;
 
-private:
-	Noncopyable(const Noncopyable&) = delete;
-	Noncopyable& operator=(const Noncopyable&) = delete;
+ private:
+  Noncopyable(const Noncopyable&) = delete;
+  Noncopyable& operator=(const Noncopyable&) = delete;
 };
 
 NS_FF_END

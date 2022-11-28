@@ -431,4 +431,39 @@ std::string System::Username() {
 #endif  // _WIN32
 }
 
+std::string System::GetEnv(const std::string& varName) {
+  auto env = getenv((char*)varName.c_str());
+  return (nullptr == env) ? "" : env;
+}
+
+bool System::SetEnv(const std::string& varName,
+                                          const std::string& varValue) {
+#ifdef _WIN32
+  return (0 == putenv((char*)(varName + "=" + varValue).c_str()));
+#else
+  return (0 == setenv(varName.c_str(), varValue.c_str(), 1));
+#endif
+}
+
+bool System::RemoveEnv(const std::string& varName) {
+#ifdef _WIN32
+  return (0 == putenv((char*)(varName + "=").c_str()));
+#else
+  return (0 == unsetenv(varName.c_str()));
+#endif
+}
+
+std::string System::GetHomePath() {
+  string homePath;
+#ifdef _WIN32
+  homePath = GetEnv("USERPROFILE");
+  if(homePath.empty()){
+    homePath = GetEnv("HOMEDRIVE") + GetEnv("HOMEPATH");
+  }
+#else
+  homePath = GetEnv("HOME");
+#endif
+  return homePath;
+}
+
 NS_FF_END

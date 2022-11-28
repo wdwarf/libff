@@ -39,14 +39,10 @@ class Application::ApplicationImpl {
   const std::string& getCommandLine(int index) const;
   int getCommandLineCount() const;
 
-  static std::string GetEnv(const std::string& varName);
-  static bool SetEnv(const std::string& varName, const std::string& varValue);
-  static bool UnsetEnv(const std::string& varName);
   static std::string GetApplicationPath();
   static std::string GetApplicationDir();
   static std::string GetApplicationName();
   static std::string GetCurrentWorkDir();
-  static std::string GetHomePath();
 
  private:
   Application* m_app;
