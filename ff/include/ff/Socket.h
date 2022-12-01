@@ -131,7 +131,7 @@ class LIBFF_API Socket {
   SockType getSocketType() const;
 
   int getSockOpt(int level, int optName, void* optVal, socklen_t* optLen);
-  int setsockOpt(int level, int optName, const void* optVal, socklen_t optLen);
+  int setSockOpt(int level, int optName, const void* optVal, socklen_t optLen);
   bool setNoDelay(bool nodelay);
   bool setKeepAlive(bool keepAlive, uint32_t idle = 10, uint32_t interval = 10,
                     uint32_t count = 9);
@@ -161,6 +161,7 @@ class LIBFF_API Socket {
   int recvFrom(char* buf, socklen_t readBytes, std::string& ip, int& port,
                int timeoutMs = -1);
   void enableUdpBroadcast(bool enable = true);
+  bool enableMulticast(const std::string& multiAddr, const std::string interfaceAddr = "0.0.0.0");
 
   static bool SetBlocking(SocketFd sockFd, SockBlockingType blockingType);
   static bool IsNonBlocking(SocketFd sockFd);

@@ -18,7 +18,7 @@ class __ScopeGuard : private Noncopyable {
  public:
   __ScopeGuard(Func&& func) : m_func(std::move(func)) {}
   __ScopeGuard(const Func& func) : m_func(func) {}
-  __ScopeGuard(__ScopeGuard&& s) { m_func = std::move(s.m_func); }
+  __ScopeGuard(__ScopeGuard<Func>&& s) : m_func(std::move(s.m_func)) {}
   ~__ScopeGuard() { m_func(); }
 
  private:
@@ -27,7 +27,8 @@ class __ScopeGuard : private Noncopyable {
 
 template <class Func>
 __ScopeGuard<typename std::decay<Func>::type> ScopeGuard(Func&& func) {
-  return __ScopeGuard<typename std::decay<Func>::type>(std::forward<Func>(func));
+  return __ScopeGuard<typename std::decay<Func>::type>(
+      std::forward<Func>(func));
 }
 
 NS_FF_END

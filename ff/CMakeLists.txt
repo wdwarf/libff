@@ -125,7 +125,7 @@ else()
 		set(EXTRA_LIBS
 			pthread
 			z
-			curl
+			libcurl
 			jsoncpp
 			gtest
 			gmock

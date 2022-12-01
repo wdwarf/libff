@@ -387,7 +387,7 @@ bool Socket::bind(uint16_t port, const std::string& ip) {
 
   if (AF_INET6 == family) {
     int32_t flag = 1;
-    if (this->setsockOpt(IPPROTO_IPV6, IPV6_V6ONLY, &flag, sizeof(flag)) < 0)
+    if (this->setSockOpt(IPPROTO_IPV6, IPV6_V6ONLY, &flag, sizeof(flag)) < 0)
       return false;
 
     if (!ip.empty()) {
@@ -595,7 +595,7 @@ int Socket::getSockOpt(int level, int optName, void* optVal,
   return ::getsockopt(this->m_socketFd, level, optName, (char*)optVal, optLen);
 }
 
-int Socket::setsockOpt(int level, int optName, const void* optVal,
+int Socket::setSockOpt(int level, int optName, const void* optVal,
                        socklen_t optLen) {
   return ::setsockopt(this->m_socketFd, level, optName, (const char*)optVal,
                       optLen);
@@ -654,7 +654,16 @@ int Socket::recvFrom(char* buf, socklen_t readBytes, string& ip, int& port,
 
 void Socket::enableUdpBroadcast(bool enable) {
   const int on = enable ? 1 : 0;
-  this->setsockOpt(SOL_SOCKET, SO_BROADCAST, &on, sizeof(on));
+  this->setSockOpt(SOL_SOCKET, SO_BROADCAST, &on, sizeof(on));
+}
+
+bool Socket::enableMulticast(const std::string& multiAddr, 
+  const std::string interfaceAddr){
+    struct ip_mreq mc;
+    memset(&mc, 0, sizeof(mc));
+    inet_pton(AF_INET, multiAddr.c_str(), &mc.imr_multiaddr.s_addr);
+    inet_pton(AF_INET, interfaceAddr.c_str(), &mc.imr_interface.s_addr);
+    return (0 == this->setSockOpt(IPPROTO_IP, IP_ADD_MEMBERSHIP, &mc, sizeof(mc)));
 }
 
 bool Socket::SetBlocking(SocketFd m_socketFd, SockBlockingType blockingType) {
@@ -708,7 +717,7 @@ bool Socket::setKeepAlive(bool keepAlive, uint32_t idle, uint32_t interval,
                           uint32_t count) {
   if (keepAlive) {
     int32_t val = 1;
-    if (this->setsockOpt(SOL_SOCKET, SO_KEEPALIVE,
+    if (this->setSockOpt(SOL_SOCKET, SO_KEEPALIVE,
                          reinterpret_cast<const char*>(&val), sizeof(val)) != 0)
       return false;
 
@@ -723,7 +732,7 @@ bool Socket::setKeepAlive(bool keepAlive, uint32_t idle, uint32_t interval,
 
 #if defined(SOL_TCP) && defined(TCP_KEEPINTVL)
     val = interval;
-    if (this->setsockOpt(SOL_TCP, TCP_KEEPINTVL, &val, sizeof(val)) != 0)
+    if (this->setSockOpt(SOL_TCP, TCP_KEEPINTVL, &val, sizeof(val)) != 0)
       return false;
 #else
     (void)interval;
@@ -731,14 +740,14 @@ bool Socket::setKeepAlive(bool keepAlive, uint32_t idle, uint32_t interval,
 
 #if defined(SOL_TCP) && defined(TCP_KEEPCNT)
     val = count;
-    if (this->setsockOpt(SOL_TCP, TCP_KEEPCNT, &val, sizeof(val)) != 0)
+    if (this->setSockOpt(SOL_TCP, TCP_KEEPCNT, &val, sizeof(val)) != 0)
       return false;
 #else
     (void)count;
 #endif
   } else {
     int32_t val = 0;
-    if (this->setsockOpt(SOL_SOCKET, SO_KEEPALIVE,
+    if (this->setSockOpt(SOL_SOCKET, SO_KEEPALIVE,
                          reinterpret_cast<const char*>(&val), sizeof(val)) != 0)
       return false;
   }

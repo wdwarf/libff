@@ -84,3 +84,35 @@ TEST(SocketTest, TestSocketPair) {
   LOGD << "s0 read: " << buf;
   LOGD << "s0 readable: " << s0.getReadableBytes();
 }
+
+TEST(SocketTest, MulticastTest) {
+  thread svrThread([] {
+    Socket sock;
+    sock.createUdp();
+    sock.bind(6565);
+
+    sock.enableMulticast("239.0.0.88");
+
+    char buf[1024] = {0};
+    int recvBytes = 0;
+    sockaddr_in addr;
+    while ((recvBytes = sock.recvFrom(buf, 1024, addr, 300)) > 0) {
+      cout << string(buf, recvBytes) << endl;
+    }
+  });
+
+  thread clientThread([] {
+    Socket sock;
+    sock.createUdp();
+
+    const char buf[] = "hello";
+    int n = 0;
+    while (++n <= 10) {
+      sock.sendTo(buf, sizeof(buf), "239.0.0.88", 6565);
+      this_thread::sleep_for(chrono::milliseconds(100));
+    }
+  });
+
+  clientThread.join();
+  svrThread.join();
+}
