@@ -105,7 +105,7 @@ TEST(TestString, TestString){
 	// cout << "GbkToUtf8: " << GbkToUtf8(gbkStr.str()) << endl;
 
 	// char aa[] = {0X6d, 0X4b, 0X8b, 0Xd5, 0X77, 0Xed, 0X4f, 0Xe1, 0X4e, 0X00};
-	char aa[] = {0X4b, 0X6d, 0Xd5, 0X8b, 0Xed, 0X77, 0Xe1, 0X4f, 0X00,0X4e, 0x00, 0x00};
+	uint8_t aa[] = {0X4b, 0X6d, 0Xd5, 0X8b, 0Xed, 0X77, 0Xe1, 0X4f, 0X00,0X4e, 0x00, 0x00};
 	cout << ToMbs((const wchar_t*)aa) << endl;
 
 

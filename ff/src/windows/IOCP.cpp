@@ -101,10 +101,10 @@ void IOCP::close() {
   this->m_handle = NULL;
 }
 
-bool IOCP::getQueuedCompletionStatus(__out LPDWORD lpNumberOfBytesTransferred,
-                                     __out PULONG_PTR lpCompletionKey,
-                                     __out LPOVERLAPPED* lpOverlapped,
-                                     __in DWORD dwMilliseconds) {
+bool IOCP::getQueuedCompletionStatus(LPDWORD lpNumberOfBytesTransferred,
+                                     PULONG_PTR lpCompletionKey,
+                                     LPOVERLAPPED* lpOverlapped,
+                                     DWORD dwMilliseconds) {
   return (TRUE == ::GetQueuedCompletionStatus(
                       this->m_handle, lpNumberOfBytesTransferred,
                       lpCompletionKey, lpOverlapped, dwMilliseconds));

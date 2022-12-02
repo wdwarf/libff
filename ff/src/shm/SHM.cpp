@@ -35,7 +35,7 @@ void *SHM::create(const std::string &name, uint32_t size) {
       CreateFileMappingA(INVALID_HANDLE_VALUE, NULL,
                          PAGE_READWRITE | SEC_COMMIT, 0, size, name.c_str());
 
-  if (NULL == m_hShm) return false;
+  if (NULL == m_hShm) return nullptr;
 
   this->m_data = MapViewOfFile(m_hShm, FILE_MAP_READ | FILE_MAP_WRITE, 0, 0, 0);
 #else

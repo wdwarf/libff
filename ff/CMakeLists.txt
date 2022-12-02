@@ -20,6 +20,7 @@ include_directories(
 	third_party/zlib-1.2.11
 	third_party/zlib-1.2.11/contrib
 	third_party/zlib-1.2.11/contrib/minizip
+	third_party/curl-7.77.0/include
 )
 
 add_definitions(
@@ -34,6 +35,24 @@ link_directories(
 IF (MINGW)
 	MESSAGE(STATUS "Now is MinGW")
 	file(GLOB windows_files "src/windows/*.cpp")
+
+	include_directories(
+		third_party/curl-7.77.0/include
+		third_party/googletest/googletest/include
+	)
+	
+	set(EXTRA_LIBS
+	${EXTRA_LIBS}
+		libcurl
+		zlib
+		gtest
+  	gmock
+		jsoncpp
+		ws2_32
+		winmm
+		wldap32
+		IPHlpApi
+	)
 
 ELSEIF (WIN32)
 	MESSAGE(STATUS "Now is windows")
@@ -68,7 +87,6 @@ ELSEIF (WIN32)
 	
 	set(EXTRA_LIBS
 	${EXTRA_LIBS}
-	libvcruntime
 		libcurl
 		zlib
 		gtest

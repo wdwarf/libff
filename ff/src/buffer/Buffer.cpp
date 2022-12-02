@@ -18,7 +18,12 @@ using namespace std;
 
 NS_FF_BEG
 
-#define BUF_INC_RATIO 1.2
+static inline uint32_t CapcityAdj(uint32_t bufSize){
+  if(0 == bufSize) return 0;
+  if(bufSize <= 32) return (bufSize + 4);
+  if(bufSize <= 4096) return (bufSize * 2);
+  return (bufSize + 4096);
+}
 
 Buffer::Buffer() : data(nullptr), size(0), capacity(0), readPos(0) {}
 
@@ -102,7 +107,7 @@ void Buffer::append(const void* data, uint32_t size) {
     return;
   }
 
-  uint32_t cap = (this->size + size) * BUF_INC_RATIO;
+  uint32_t cap = CapcityAdj(this->size + size);
   auto newData = new unsigned char[cap];
   if (nullptr == newData) {
     throw MK_EXCEPTION(BufferException, "Alloc buffer failed", size);
@@ -152,7 +157,7 @@ void Buffer::resize(uint32_t size) {
     return;
   }
 
-  uint32_t cap = size * BUF_INC_RATIO;
+  uint32_t cap = CapcityAdj(size);
   auto newData = new unsigned char[cap];
   if (nullptr == newData) {
     throw MK_EXCEPTION(BufferException, "Alloc buffer failed", size);
@@ -181,7 +186,7 @@ bool Buffer::isEmpty() const { return (NULL == this->data); }
 void Buffer::setData(const void* data, uint32_t size) {
   auto oldData = this->data;
   if ((nullptr != data) && (size > 0)) {
-    uint32_t cap = size * BUF_INC_RATIO;
+    uint32_t cap = CapcityAdj(size);
     auto newData = new unsigned char[cap];
     if (nullptr == newData) {
       throw MK_EXCEPTION(BufferException, "Alloc buffer failed", size);
@@ -264,7 +269,7 @@ void Buffer::alloc(uint32_t size) {
 
   this->clear();
 
-  uint32_t cap = size * BUF_INC_RATIO;
+  uint32_t cap = CapcityAdj(size);
   auto newData = new unsigned char[cap];
   if (nullptr == newData) {
     throw MK_EXCEPTION(BufferException, "Alloc buffer failed", size);

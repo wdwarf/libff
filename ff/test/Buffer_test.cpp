@@ -32,5 +32,23 @@ TEST(BufferTest, BufferTest){
 	Buffer buf3;
 	buf3.fromHexString(s);
 	LOGD << buf3.toHexString();
+}
+
+TEST(BufferTest, CapcityTest){
+	Buffer buf;
+	LOGD << "cap: " << buf.getCapacity();
+	EXPECT_EQ(0, buf.getCapacity());
+
+	buf << uint32_t(0x1234);
+	LOGD << "cap: " << buf.getCapacity();
+	EXPECT_EQ(8, buf.getCapacity());
+
+	buf << uint32_t(0x1234) << uint32_t(0x1234) << uint32_t(0x1234) 
+		<< uint32_t(0x1234) << uint32_t(0x1234) << uint32_t(0x1234) << uint32_t(0x1234);
+	LOGD << "cap: " << buf.getCapacity();
+	EXPECT_EQ(32, buf.getCapacity());
+	buf << uint32_t(0x1234);
+	LOGD << "cap: " << buf.getCapacity();
+	EXPECT_EQ(72, buf.getCapacity());
 
 }

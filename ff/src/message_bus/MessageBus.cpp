@@ -31,7 +31,7 @@ uint32_t MsgBusPkgHeader::generateChecksum() const {
  *
  */
 
-atomic_uint32_t MsgBusPackage::g_id(0);
+atomic<uint32_t> MsgBusPackage::g_id(0);
 
 bool MsgBusPackage::parse(const void* data, uint32_t len) {
   if (len < sizeof(MsgBusPkgHeader)) return false;

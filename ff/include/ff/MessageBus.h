@@ -68,7 +68,7 @@ class LIBFF_API MsgBusPackage : public Buffer {
   uint32_t dataSize() const;
 
  private:
-  static std::atomic_uint32_t g_id;
+  static std::atomic<uint32_t> g_id;
 };
 
 using MsgBusPackagePtr = std::shared_ptr<MsgBusPackage>;
@@ -192,7 +192,7 @@ class LIBFF_API MessageBusClient {
   uint32_t m_clientId;
   std::mutex m_mutex;
   std::condition_variable m_cond;
-  std::atomic_uint m_heartbeatLossCnt;
+  std::atomic<uint32_t> m_heartbeatLossCnt;
   MsgBusPackageHelper m_pkgHelper;
   TcpConnectionPtr m_conn;
   std::atomic_bool m_connected;

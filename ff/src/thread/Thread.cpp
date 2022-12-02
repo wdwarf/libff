@@ -27,7 +27,7 @@ ThreadIdT Thread::id() {
   if (!this->m_thread.joinable()) return 0;
   auto nativeHandle = this->m_thread.native_handle();
 #ifdef _WIN32
-  return ::GetThreadId(nativeHandle);
+  return ::GetThreadId((HANDLE)nativeHandle);
 #else
   union {
     pthread_t pid;
