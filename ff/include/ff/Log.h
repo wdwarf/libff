@@ -29,7 +29,8 @@ class LIBFF_API Log : public Noncopyable {
   virtual ~Log();
 
   static LoggerPtr CreateLogger(const std::string& module,
-                                LogLevel logLevel = LogLevel::Info);
+                                LogLevel logLevel = LogLevel::Info,
+                                bool threading = false);
   static bool HasLogger(const std::string& module);
   static LoggerPtr GetLogger(const std::string& module);
   static void RemoveLogger(const std::string& module);

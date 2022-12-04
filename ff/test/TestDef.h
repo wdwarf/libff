@@ -19,5 +19,6 @@
 #define LOGI MKLOGFUNC(Info)
 #define LOGD MKLOGFUNC(Debug)
 #define LOGE MKLOGFUNC(Error)
+#define LOGFLUSH NS_FF::Log::GetLogger(TEST_LOG_MODULE)->flush
 
 #endif /* TEST_TESTDEF_H_ */

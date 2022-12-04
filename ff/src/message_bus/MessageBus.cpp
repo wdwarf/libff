@@ -196,10 +196,7 @@ MessageBusServer::MessageBusServer() {
       .onClose(Bind(&MessageBusServer::onClose, this));
 }
 
-MessageBusServer::~MessageBusServer(){
-  unique_lock<mutex> lk(this->m_stopMutex);
-  if(this->m_running) this->m_stopCond.wait(lk);
-}
+MessageBusServer::~MessageBusServer() {}
 
 bool MessageBusServer::start(uint16_t port, const std::string& host) {
   this->m_running = this->m_conn->listen(port, host);
@@ -208,6 +205,16 @@ bool MessageBusServer::start(uint16_t port, const std::string& host) {
 
 bool MessageBusServer::stop() {
   this->m_conn->close();
+  while (true) {
+    {
+      lock_guard<mutex> lk(this->m_clientsMutex);
+      if (this->m_clients.empty()) break;
+    }
+    std::this_thread::yield();
+  }
+
+  unique_lock<mutex> lk(this->m_stopMutex);
+  if (this->m_running) this->m_stopCond.wait(lk);
   return true;
 }
 
