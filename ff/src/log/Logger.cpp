@@ -15,15 +15,18 @@ Logger::Logger(const std::string& module, LogLevel logLevel, bool threading)
     : m_module(module),
       m_logLevel(logLevel),
       m_threading(threading),
-      m_stoped(false) {}
+      m_stoped(true) {}
 
 void Logger::start() {
   if (!this->m_threading) return;
+
+  this->m_stoped = false;
   this->m_logThread = thread([this] {
     while (!this->m_stoped) {
       std::list<ff::LogInfo> logInfos;
       {
         unique_lock<mutex> lk(this->m_mutexLog);
+        if (m_stoped) break;
         if (this->m_logInfos.empty()) {
           this->m_cond.wait(lk);
           if (m_stoped) break;
@@ -36,19 +39,20 @@ void Logger::start() {
       if (logInfos.empty()) continue;
 
       lock_guard<mutex> lkA(this->m_mutexAppender);
-      for (auto& logInfo : logInfos) {
-        for (auto& appender : this->m_appenders) {
-          appender->log(logInfo);
-        }
+      for (auto& appender : this->m_appenders) {
+        appender->log(logInfos);
       }
     }
   });
 }
 
 void Logger::stop() {
-  if (this->m_stoped) return;
-  this->m_stoped = true;
-  this->m_cond.notify_one();
+  {
+    lock_guard<mutex> lk(this->m_mutexLog);
+    if (this->m_stoped) return;
+    this->m_stoped = true;
+    this->m_cond.notify_one();
+  }
   if (this->m_logThread.joinable()) this->m_logThread.join();
 }
 
@@ -84,10 +88,8 @@ void Logger::log(const LogInfo& logInfo) {
 void Logger::flush() {
   lock_guard<mutex> lkL(this->m_mutexLog);
   lock_guard<mutex> lkA(this->m_mutexAppender);
-  for (auto& logInfo : this->m_logInfos) {
-    for (auto& appender : this->m_appenders) {
-      appender->log(logInfo);
-    }
+  for (auto& appender : this->m_appenders) {
+    appender->log(m_logInfos);
   }
   this->m_logInfos.clear();
 }

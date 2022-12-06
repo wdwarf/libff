@@ -18,7 +18,8 @@ public:
 	StdoutAppender();
 	virtual ~StdoutAppender();
 
-	virtual void log(const LogInfo& logInfo) override;
+	void log(const LogInfo& logInfo) override;
+	void log(const std::list<LogInfo>& logInfos) override;
 };
 
 NS_FF_END

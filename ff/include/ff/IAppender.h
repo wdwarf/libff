@@ -8,19 +8,27 @@
 #ifndef FF_IAPPENDER_H_
 #define FF_IAPPENDER_H_
 
-#include <memory>
-#include <ff/ff_config.h>
+#include <ff/LogInfo.h>
 #include <ff/Object.h>
+#include <ff/ff_config.h>
+
+#include <list>
+#include <memory>
 
 NS_FF_BEG
 
-class LogInfo;
-class LIBFF_API IAppender : public NS_FF::Object {
-public:
-	IAppender() = default;
-	virtual ~IAppender() = default;
+class LIBFF_API IAppender {
+ public:
+  IAppender() = default;
+  virtual ~IAppender() = default;
 
-	virtual void log(const LogInfo& logInfo) = 0;
+  virtual void log(const LogInfo& logInfo) = 0;
+
+  virtual void log(const std::list<LogInfo>& logInfos) {
+    for (auto& logInfo : logInfos) {
+      this->log(logInfo);
+    }
+  }
 };
 
 typedef std::shared_ptr<IAppender> AppenderPtr;

@@ -8,6 +8,7 @@
 #include <ff/StdoutAppender.h>
 #include <ff/LogInfo.h>
 #include <iostream>
+#include <sstream>
 
 using namespace std;
 
@@ -25,6 +26,14 @@ void StdoutAppender::log(const LogInfo &logInfo) {
 		o = &cerr;
 
 	(*o) << logInfo.toLogString() << endl;
+}
+
+void StdoutAppender::log(const std::list<LogInfo>& logInfos){
+	stringstream str;
+	for(auto& logInfo : logInfos){
+		str << logInfo.toLogString() << endl;
+	}
+	cout << str.str();
 }
 
 NS_FF_END
