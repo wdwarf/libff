@@ -12,6 +12,7 @@
 #include <ff/StringEncoding.h>
 
 #include <ostream>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -46,6 +47,16 @@ LIBFF_API std::string ReplaceAllCopy(const std::string& src,
                                      const std::string& find,
                                      const std::string& replace,
                                      bool ignoreCase = false);
+
+template <class T>
+std::string Join(const T& strings, const std::string& delimiter) {
+  std::stringstream s;
+  for (auto& str : strings) {
+    s << str << delimiter;
+  }
+  auto rt = s.str();
+  return rt.substr(0, rt.length() - delimiter.length());
+}
 
 LIBFF_API int IndexOf(const std::string& src, const std::string& find,
                       bool ignoreCase = false);
