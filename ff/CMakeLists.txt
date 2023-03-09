@@ -213,6 +213,7 @@ ${windows_files}
 	src/system/FileSystem.cpp
 	src/system/System.cpp
 	src/timer/Timer.cpp
+	src/thread/Delayable.cpp
 	src/thread/Runnable.cpp
 	src/thread/Semaphore.cpp
 	src/thread/Synchronizable.cpp

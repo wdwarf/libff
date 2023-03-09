@@ -5,7 +5,9 @@
  *      Author: root
  */
 
+#include <ff/Delayable.h>
 #include <ff/Thread.h>
+#include <ff/Tick.h>
 #include <gtest/gtest.h>
 
 #include <iostream>
@@ -49,4 +51,27 @@ TEST(TestThread, TestThread) {
   //	Thread(MakeRunnable(threadFunc)).start();
 
   LOGD << "test end";
+}
+
+TEST(TestThread, TestDelayable) {
+  Delayable delay;
+  Tick tick;
+  tick.tick();
+  int i = 0;
+  atomic_bool end = false;
+  thread t([&delay, &end] {
+    this_thread::sleep_for(chrono::seconds(7));
+    while (!end) {
+      delay.cancel();
+      this_thread::sleep_for(chrono::milliseconds(100));
+    }
+  });
+  while (++i <= 10) {
+    Tick t;
+    delay.delay(3000);
+    LOGD << i << ": " << t.tock();
+  }
+  end = true;
+  t.join();
+  LOGD << "TestDelayable tock: " << tick.tock();
 }
