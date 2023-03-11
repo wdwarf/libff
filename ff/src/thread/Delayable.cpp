@@ -20,13 +20,13 @@ bool Delayable::delay(int64_t delayMs) {
   auto waitMs = delayMs;
   Tick tick;
   tick.tick();
-  while (delayMs > 0) {
+  while (waitMs > 0) {
     std::unique_lock<std::mutex> lk(m_mutex);
     if (std::cv_status::timeout ==
         m_cond.wait_for(lk, std::chrono::milliseconds(waitMs)))
       break;
     if (m_canceled) return false;
-    delayMs -= tick.tock();
+    waitMs = delayMs - tick.tock();
   }
   return true;
 }
