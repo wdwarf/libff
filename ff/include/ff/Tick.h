@@ -13,21 +13,21 @@
 
 NS_FF_BEG
 
-EXCEPTION_DEF(TickException);
 typedef long long tick_t;
 
 class LIBFF_API Tick {
 public:
 	Tick();
-	virtual ~Tick();
+	~Tick();
 
-	tick_t tick() _throws(TickException);
-	tick_t tock() const _throws(TickException);
+	tick_t tick();
+	tick_t tock() const;
 
-	static tick_t GetTickCount() _throws(TickException);
+	static tick_t GetTickCount();
 
 private:
-	tick_t m_tick;
+	class TickImpl;
+	TickImpl* m_impl;
 };
 
 NS_FF_END

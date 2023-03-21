@@ -58,7 +58,7 @@ TEST(TestThread, TestDelayable) {
   Tick tick;
   tick.tick();
   int i = 0;
-  atomic_bool end = false;
+  atomic_bool end{false};
   thread t([&delay, &end] {
     this_thread::sleep_for(chrono::seconds(7));
     while (!end) {
