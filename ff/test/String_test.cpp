@@ -158,3 +158,63 @@ TEST(TestString, TestJoin) {
   s = Join(set<const char*>{"1", "2", "3"}, "--");
   LOGD << s;
 }
+
+TEST(TestString, TestNumeric) {
+  String s = "100";
+  bool ok = false;
+  
+  LOGD << s << " toInt=======";
+  LOGD << s.toInt(8, &ok);
+  LOGD << "ok: " << ok;
+  LOGD << s.toInt(10, &ok);
+  LOGD << "ok: " << ok;
+  LOGD << s.toInt(16, &ok);
+  LOGD << "ok: " << ok;
+
+LOGD << s << " toLongLong=======";
+  LOGD << s.toLongLong(8, &ok);
+  LOGD << "ok: " << ok;
+  LOGD << s.toLongLong(10, &ok);
+  LOGD << "ok: " << ok;
+  LOGD << s.toLongLong(16, &ok);
+  LOGD << "ok: " << ok;
+  
+LOGD << s << " toUInt=======";
+  LOGD << s.toUInt(8, &ok);
+  LOGD << "ok: " << ok;
+  LOGD << s.toUInt(10, &ok);
+  LOGD << "ok: " << ok;
+  LOGD << s.toUInt(16, &ok);
+  LOGD << "ok: " << ok;
+
+  LOGD << s << " toULongLong=======";
+  LOGD << s.toULongLong(8, &ok);
+  LOGD << "ok: " << ok;
+  LOGD << s.toULongLong(10, &ok);
+  LOGD << "ok: " << ok;
+  LOGD << s.toULongLong(16, &ok);
+  LOGD << "ok: " << ok;
+
+  s = "3.141592653";
+  LOGD << s << " toFloat=======";
+  LOGD << s.toFloat(&ok);
+  LOGD << s << " toDouble=======";
+  LOGD << "ok: " << ok;
+  LOGD << s.toDouble(&ok);
+  LOGD << s << " toLongDouble=======";
+  LOGD << "ok: " << ok;
+  LOGD << s.toLongDouble(&ok);
+  LOGD << "ok: " << ok;
+
+  s = "xyz";
+  LOGD << s << " toInt=======";
+  LOGD << s.toInt(10, &ok);
+  LOGD << "ok: " << ok;
+  LOGD << s << " toDouble=======";
+  LOGD << s.toDouble(&ok);
+  LOGD << "ok: " << ok;
+
+  LOGD << "number: " << String::number(1024, 8, 8);
+  LOGD << "number: " << String::number(1024, 8, 10);
+  LOGD << "number: " << String::number(1024, 8, 16, '-');
+}

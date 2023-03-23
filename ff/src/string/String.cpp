@@ -31,6 +31,8 @@ inline int _isspace_(int c) {
   return re;
 }
 
+inline int _not_space_(int c) { return _isspace_(c); }
+
 string& ToLower(string& str) {
   std::transform(str.begin(), str.end(), str.begin(), ::tolower);
   return str;
@@ -54,8 +56,7 @@ string ToUpperCopy(const string& str) {
 }
 
 string& TrimLeft(string& str) {
-  string::iterator p =
-      find_if(str.begin(), str.end(), not1(ptr_fun<int, int>(_isspace_)));
+  string::iterator p = find_if(str.begin(), str.end(), _not_space_);
   str.erase(str.begin(), p);
   return str;
 }
@@ -66,8 +67,7 @@ string TrimLeftCopy(const string& str) {
 }
 
 string& TrimRight(string& str) {
-  string::reverse_iterator p =
-      find_if(str.rbegin(), str.rend(), not1(ptr_fun<int, int>(_isspace_)));
+  string::reverse_iterator p = find_if(str.rbegin(), str.rend(), _not_space_);
   str.erase(p.base(), str.end());
   return str;
 }
@@ -344,6 +344,99 @@ std::vector<String> String::split(const IDelimiter& delimiterChecker,
     break;
   }
   return texts;
+}
+
+int String::toInt(int base, bool* ok) const {
+  const char* str = this->c_str();
+  char* endP = nullptr;
+  int r = strtol(str, &endP, base);
+  if (nullptr != ok) {
+    *ok = (endP == (str + this->length()));
+  }
+  return r;
+}
+
+long long String::toLongLong(int base, bool* ok) const {
+  const char* str = this->c_str();
+  char* endP = nullptr;
+  long long r = strtoll(str, &endP, base);
+  if (nullptr != ok) {
+    *ok = (endP == (str + this->length()));
+  }
+  return r;
+}
+
+unsigned int String::toUInt(int base, bool* ok) const {
+  const char* str = this->c_str();
+  char* endP = nullptr;
+  unsigned int r = strtoul(str, &endP, base);
+  if (nullptr != ok) {
+    *ok = (endP == (str + this->length()));
+  }
+  return r;
+}
+
+unsigned long long String::toULongLong(int base, bool* ok) const {
+  const char* str = this->c_str();
+  char* endP = nullptr;
+  unsigned long long r = strtoull(str, &endP, base);
+  if (nullptr != ok) {
+    *ok = (endP == (str + this->length()));
+  }
+  return r;
+}
+
+float String::toFloat(bool* ok) const {
+  const char* str = this->c_str();
+  char* endP = nullptr;
+  float r = strtof(str, &endP);
+  if (nullptr != ok) {
+    *ok = (endP == (str + this->length()));
+  }
+  return r;
+}
+
+double String::toDouble(bool* ok) const {
+  const char* str = this->c_str();
+  char* endP = nullptr;
+  double r = strtod(str, &endP);
+  if (nullptr != ok) {
+    *ok = (endP == (str + this->length()));
+  }
+  return r;
+}
+
+long double String::toLongDouble(bool* ok) const {
+  const char* str = this->c_str();
+  char* endP = nullptr;
+  long double r = strtold(str, &endP);
+  if (nullptr != ok) {
+    *ok = (endP == (str + this->length()));
+  }
+  return r;
+}
+
+String String::number(long long value, int width, int base, char fillChar) {
+  stringstream str;
+
+  switch (base) {
+    case 8:
+      str >> oct;
+      break;
+    case 16:
+      str >> hex;
+      break;
+    default:
+      str >> dec;
+      break;
+  }
+  if (width > 0) str.width(width);
+  str.fill(fillChar);
+
+  str << value;
+  string s;
+  str >> s;
+  return s;
 }
 
 NS_FF_END

@@ -136,6 +136,16 @@ class LIBFF_API String : public std::string {
 
   std::vector<String> split(const IDelimiter& delimiterChecker,
                             StringCompressType compressType = WithEmptyString);
+
+  int toInt(int base = 10, bool* ok = nullptr) const;
+  long long toLongLong(int base = 10, bool* ok = nullptr) const;
+  unsigned int toUInt(int base = 10, bool* ok = nullptr) const;
+  unsigned long long toULongLong(int base = 10, bool* ok = nullptr) const;
+  float toFloat(bool* ok = nullptr) const;
+  double toDouble(bool* ok = nullptr) const;
+  long double toLongDouble(bool* ok = nullptr) const;
+
+  static String number(long long value, int width = 0, int base = 10, char fillChar = '0');
 };
 
 NS_FF_END
