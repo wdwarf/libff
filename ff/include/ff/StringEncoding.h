@@ -20,6 +20,8 @@ LIBFF_API std::string Utf8ToGbk(const std::string& str);
 LIBFF_API std::string GbkToUtf8(const std::string& str);
 LIBFF_API std::wstring ToWs(const std::string& str);
 LIBFF_API std::string ToMbs(const std::wstring& str);
+LIBFF_API std::wstring Utf8ToUtf16(const std::string& str);
+LIBFF_API std::string Utf16ToUtf8(const std::wstring& str);
 
 NS_FF_END
 

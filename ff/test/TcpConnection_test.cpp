@@ -145,7 +145,7 @@ TEST(TcpConnectionTest, TcpConnectionTest4) {
   TcpConnectionPtr svr = TcpConnection::CreateInstance();
   TcpConnectionPtr clientPtr = TcpConnection::CreateInstance();
 
-  EXPECT_TRUE(svr->listen(5678, "127.0.0.1", AF_INET))
+  EXPECT_TRUE(svr->listen(5600, "127.0.0.1", AF_INET))
       << "server listen failed.";
   set<TcpConnectionPtr> clients;
   svr->onAccept([&](const TcpConnectionPtr& tcpSock) {
@@ -180,7 +180,9 @@ TEST(TcpConnectionTest, TcpConnectionTest4) {
     cond.notify_one();
   });
 
-  EXPECT_TRUE(clientPtr->connect(5678, "127.0.0.1", 5679, "127.0.0.1"));
+  this_thread::sleep_for(chrono::seconds(2));
+
+  EXPECT_TRUE(clientPtr->connect(5600, "127.0.0.1", 5601, "127.0.0.1"));
   clientPtr->onData([&clientPtr, &dataRecved](const uint8_t* data, uint32_t len,
                                               const TcpConnectionPtr& conn) {
     dataRecved = true;

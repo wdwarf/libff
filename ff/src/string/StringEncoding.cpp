@@ -1,7 +1,9 @@
 #include <ff/Exception.h>
 #include <ff/StringEncoding.h>
 
+#include <codecvt>
 #include <cstring>
+#include <locale>
 #include <vector>
 
 #ifdef _WIN32
@@ -18,7 +20,9 @@ using namespace std;
 
 NS_FF_BEG
 
-unsigned int HexAToI(char x) {
+using Utf8Utf16Cvt = std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>>;
+
+LIBFF_API unsigned int HexAToI(char x) {
   if ((x >= 48) && (x <= 57))
     x -= 48; /* 0-9 */
   else if ((x >= 97) && (x <= 102))
@@ -33,7 +37,7 @@ unsigned int HexAToI(char x) {
   return x;
 }
 
-char IToHexA(unsigned int x) {
+LIBFF_API char IToHexA(unsigned int x) {
   if (x >= 0 && x <= 9) {
     x += 48;
   }
@@ -98,7 +102,7 @@ Encode Utf8EncodeDetect(const std::string& str) {
   return Utf8EncodeDetect(str.c_str(), str.length());
 }
 
-Encode EncodeOf(const char* str, size_t size) {
+LIBFF_API Encode EncodeOf(const char* str, size_t size) {
   const uint8_t* data = (const uint8_t*)str;
 
   if (size > 2 && data[0] == 0xFF && data[1] == 0xFE) {
@@ -116,17 +120,19 @@ Encode EncodeOf(const char* str, size_t size) {
   return Utf8EncodeDetect(str, size);
 }
 
-Encode EncodeOf(const std::string& str) {
+LIBFF_API Encode EncodeOf(const std::string& str) {
   return EncodeOf(str.c_str(), str.length());
 }
 
 #ifdef WIN32
 
-std::string Utf8ToGbk(const std::string& srcStr) {
-  int wszLen = MultiByteToWideChar(CP_UTF8, 0, srcStr.c_str(), srcStr.length(), NULL, 0);
+LIBFF_API std::string Utf8ToGbk(const std::string& srcStr) {
+  int wszLen =
+      MultiByteToWideChar(CP_UTF8, 0, srcStr.c_str(), srcStr.length(), NULL, 0);
   wchar_t* wszGBK = new wchar_t[wszLen + 1];
   memset(wszGBK, 0, wszLen * 2 + 2);
-  MultiByteToWideChar(CP_UTF8, 0, srcStr.c_str(), srcStr.length(), wszGBK, wszLen);
+  MultiByteToWideChar(CP_UTF8, 0, srcStr.c_str(), srcStr.length(), wszGBK,
+                      wszLen);
   int len = WideCharToMultiByte(CP_ACP, 0, wszGBK, wszLen, NULL, 0, NULL, NULL);
   char* szGBK = new char[len + 1];
   memset(szGBK, 0, len + 1);
@@ -137,8 +143,9 @@ std::string Utf8ToGbk(const std::string& srcStr) {
   return strTemp;
 }
 
-std::string GbkToUtf8(const std::string& strSrc) {
-  int wszLen = MultiByteToWideChar(CP_ACP, 0, strSrc.c_str(), strSrc.length(), NULL, 0);
+LIBFF_API std::string GbkToUtf8(const std::string& strSrc) {
+  int wszLen =
+      MultiByteToWideChar(CP_ACP, 0, strSrc.c_str(), strSrc.length(), NULL, 0);
   wchar_t* wstr = new wchar_t[wszLen + 1];
   memset(wstr, 0, wszLen + 1);
   MultiByteToWideChar(CP_ACP, 0, strSrc.c_str(), strSrc.length(), wstr, wszLen);
@@ -154,7 +161,7 @@ std::string GbkToUtf8(const std::string& strSrc) {
 
 #else
 
-string GbkToUtf8(const std::string& srcStr) {
+LIBFF_API std::string GbkToUtf8(const std::string& srcStr) {
   iconv_t cd = iconv_open("utf8", "gbk");
   if (nullptr == cd) return "";
 
@@ -172,7 +179,7 @@ string GbkToUtf8(const std::string& srcStr) {
   return string(&outBuf[0]);
 }
 
-string Utf8ToGbk(const std::string& srcStr) {
+LIBFF_API std::string Utf8ToGbk(const std::string& srcStr) {
   iconv_t cd = iconv_open("gbk", "utf8");
   if (nullptr == cd) return "";
 
@@ -187,29 +194,37 @@ string Utf8ToGbk(const std::string& srcStr) {
   iconv(cd, pin, &srcLen, &pout, &bufSize);
   iconv_close(cd);
 
-  return string(&outBuf[0]);
+  return std::string(&outBuf[0]);
 }
 
 #endif
 
-std::wstring ToWs(const std::string& str) {
+LIBFF_API std::wstring ToWs(const std::string& str) {
   char* oldLocale = setlocale(LC_ALL, "");
   auto len = str.length();
-  vector<wchar_t> buf(len + 1);
+  std::vector<wchar_t> buf(len + 1);
   std::fill(buf.begin(), buf.end(), 0);
   mbstowcs(&buf[0], str.c_str(), len);
   setlocale(LC_ALL, oldLocale);
   return wstring(&buf[0]);
 }
 
-std::string ToMbs(const std::wstring& str) {
+LIBFF_API std::string ToMbs(const std::wstring& str) {
   auto len = str.length() * 3;
-  vector<char> buf(len + 1);
+  std::vector<char> buf(len + 1);
   std::fill(buf.begin(), buf.end(), 0);
   char* oldLocale = setlocale(LC_ALL, "");
   wcstombs(&buf[0], str.c_str(), len);
   setlocale(LC_ALL, oldLocale);
   return string(&buf[0]);
+}
+
+LIBFF_API std::wstring Utf8ToUtf16(const std::string& str) {
+  return Utf8Utf16Cvt().from_bytes(str);
+}
+
+LIBFF_API std::string Utf16ToUtf8(const std::wstring& str) {
+  return Utf8Utf16Cvt().to_bytes(str);
 }
 
 NS_FF_END
