@@ -21,17 +21,17 @@ TEST(TimerTest, TimerTest) {
   Timer tm;
   Tick t;
 
-  auto intervalTaskId = tm.setInterval([t] { cout << "interval exec " << t.tock() << endl; }, 1000);
+  auto intervalTaskId = tm.setInterval([&t] { cout << "interval exec " << t.tock() << endl; }, 1000);
   cout << "id1: " << intervalTaskId << endl;
 
-  cout << "id2: " << tm.setTimeout([t] { cout << "timeout exec2 " << t.tock() << endl; }, 5000) << endl;
+  cout << "id2: " << tm.setTimeout([&t] { cout << "timeout exec2 " << t.tock() << endl; }, 5000) << endl;
 
   cout << "id3: " << tm.setTimeout(
-      [t, &tm] {
+      [&t, &tm] {
         this_thread::sleep_for(chrono::milliseconds(5000));
         cout << "timeout exec3 " << t.tock() << endl;
 
-        cout << "id5: " << tm.setTimeout([t] { cout << "timeout exec5 " << t.tock() << endl; },
+        cout << "id5: " << tm.setTimeout([&t] { cout << "timeout exec5 " << t.tock() << endl; },
                       6000) << endl;
       },
       500) << endl;
@@ -49,7 +49,7 @@ TEST(TimerTest, TimerTest) {
 
       cout << "=================" << endl;
 
-  while (n < 50) {
+  while (n < 55) {
     this_thread::sleep_for(chrono::seconds(1));
   }
 }

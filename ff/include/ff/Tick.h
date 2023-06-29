@@ -10,12 +10,13 @@
 
 #include <ff/Object.h>
 #include <ff/Exception.h>
+#include <ff/Noncopyable.h>
 
 NS_FF_BEG
 
 typedef long long tick_t;
 
-class LIBFF_API Tick {
+class LIBFF_API Tick : private Noncopyable {
 public:
 	Tick();
 	~Tick();
