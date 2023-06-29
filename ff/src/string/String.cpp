@@ -31,7 +31,7 @@ inline int _isspace_(int c) {
   return re;
 }
 
-inline int _not_space_(int c) { return _isspace_(c); }
+inline int _not_space_(int c) { return (0 == _isspace_(c)); }
 
 string& ToLower(string& str) {
   std::transform(str.begin(), str.end(), str.begin(), ::tolower);

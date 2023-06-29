@@ -2,7 +2,7 @@
  * @file CmdLineParser_test.cpp
  * @auth DuckyLi
  * @date 2022-07-04 11:34:29
- * @description 
+ * @description
  */
 
 #include <ff/CmdLineParser.h>
@@ -19,14 +19,8 @@ using namespace std;
 USE_NS_FF
 
 TEST(CmdLineParserTest, CmdLineParserTest) {
-  const char* argv[] = {
-    "",
-    "--count=10",
-    "--help",
-    "-n=DuckyLi",
-    "d:\\image1.jpg",
-    "image2.jpg"
-  };
+  const char* argv[] = {"",           "--count=10",     "--help",
+                        "-n=DuckyLi", "d:\\image1.jpg", "image2.jpg"};
 
   CmdLineParser parser({{"help", "", "show usage info"},
                         {"count,c", "", "calc count"},
@@ -55,7 +49,7 @@ TEST(CmdLineParserTest, CmdLineParserTest) {
   LOGD << "count: " << (int)parser2.get("count");
   LOGD << "path: " << parser2.get("path").toString();
   LOGD << "path2: " << parser2.get("path2").toString();
-  
+
   LOGD << "name: " << store.getValue("name").toString();
   LOGD << "count: " << (int)store.getValue("count");
   LOGD << "path: " << store.getValue("path").toString();

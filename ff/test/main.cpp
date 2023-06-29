@@ -55,7 +55,7 @@ int main(int argc, char** argv) try {
 }
 
 void init() {
-  auto logger = Log::CreateLogger(TEST_LOG_MODULE, LogLevel::Debug, true);
+  auto logger = Log::CreateLogger(TEST_LOG_MODULE, LogLevel::Debug, false);
   logger->addAppender(make_shared<StdoutAppender>());
 }
 
