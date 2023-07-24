@@ -33,6 +33,7 @@ public:
 	const std::string& getCommand() const;
 	void setCommand(const std::string &command);
 	int readData(char *buf, int bufLen);
+	int writeData(const char *buf, int bufLen);
 	bool isAsyncRead() const;
 	void setAsyncRead(bool asyncRead);
 	const std::string& getWorkDir() const;

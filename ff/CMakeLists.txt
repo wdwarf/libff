@@ -28,10 +28,6 @@ add_definitions(
 	-DBUILDING_LIBCURL
 )
 
-link_directories(
-	${CMAKE_SOURCE_DIR}/build/lib/${CMAKE_BUILD_TYPE}
-)
-
 IF (MINGW)
 	MESSAGE(STATUS "Now is MinGW")
 	file(GLOB windows_files "src/windows/*.cpp")
@@ -231,7 +227,11 @@ add_library(ff
 	${lib_srcs}
 )
 
-target_link_libraries(ff
+target_link_directories(ff PRIVATE
+	${CMAKE_SOURCE_DIR}/build/lib/${CMAKE_BUILD_TYPE}
+)
+
+target_link_libraries(ff PRIVATE
 	# STATIC
 	${EXTRA_LIBS}
 )
@@ -243,7 +243,11 @@ add_executable(ff_test
 	${test_files}
 )
 
-target_link_libraries(ff_test 
+target_link_directories(ff_test PRIVATE
+	${CMAKE_SOURCE_DIR}/build/lib/${CMAKE_BUILD_TYPE}
+)
+
+target_link_libraries(ff_test  PRIVATE
 	ff
 	${EXTRA_LIBS}
 )

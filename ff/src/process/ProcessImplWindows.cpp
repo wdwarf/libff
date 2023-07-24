@@ -9,7 +9,6 @@
 #include "ProcessImplWindows.h"
 
 #include <Tlhelp32.h>
-#include <Windows.h>
 #include <ff/String.h>
 
 #include <cstdio>
@@ -41,14 +40,14 @@ typedef struct {
 }  // namespace
 
 Process::ProcessImpl::ProcessImpl(Process* proc, const std::string& command)
-    : _proc(proc),
-      asyncRead(true),
-      m_exitCode(-1),
-      hRead(INVALID_HANDLE_VALUE),
-      hWrite(INVALID_HANDLE_VALUE) {
+    : _proc(proc), asyncRead(true), m_exitCode(-1) {
   this->command = command;
   memset(&this->pi, 0, sizeof(PROCESS_INFORMATION));
   this->pi.hProcess = INVALID_HANDLE_VALUE;
+  m_readPipe[0] = INVALID_HANDLE_VALUE;
+  m_readPipe[1] = INVALID_HANDLE_VALUE;
+  m_writePipe[0] = INVALID_HANDLE_VALUE;
+  m_writePipe[1] = INVALID_HANDLE_VALUE;
 }
 
 Process::ProcessImpl::~ProcessImpl() {
@@ -65,7 +64,12 @@ void Process::ProcessImpl::start() {
   sa.nLength = sizeof(SECURITY_ATTRIBUTES);
   sa.lpSecurityDescriptor = NULL;
   sa.bInheritHandle = TRUE;
-  if (!::CreatePipe(&this->hRead, &this->hWrite, &sa, 0)) {
+  if (!::CreatePipe(&this->m_readPipe[0], &this->m_readPipe[1], &sa, 0)) {
+    THROW_EXCEPTION(ProcessException,
+                    "process start failed: CreatePipe failed.", GetLastError());
+  }
+
+  if (!::CreatePipe(&this->m_writePipe[1], &this->m_writePipe[0], &sa, 0)) {
     THROW_EXCEPTION(ProcessException,
                     "process start failed: CreatePipe failed.", GetLastError());
   }
@@ -85,8 +89,9 @@ void Process::ProcessImpl::start() {
   STARTUPINFOA si;
   si.cb = sizeof(STARTUPINFOA);
   GetStartupInfo(&si);
-  si.hStdError = hWrite;
-  si.hStdOutput = hWrite;
+  si.hStdError = m_readPipe[1];
+  si.hStdOutput = m_readPipe[1];
+  si.hStdInput = m_writePipe[1];
   si.wShowWindow = SW_HIDE;  // SW_SHOW;
   si.dwFlags = STARTF_USESHOWWINDOW | STARTF_USESTDHANDLES;
   if (!::CreateProcessA(pAppName, pCmdLine, NULL, NULL, TRUE, 0, NULL,
@@ -97,6 +102,11 @@ void Process::ProcessImpl::start() {
                         "] failed, errcode(" + to_string(GetLastError()) + ").",
                     GetLastError());
   }
+
+  CloseHandle(m_readPipe[1]);
+  m_readPipe[1] = INVALID_HANDLE_VALUE;
+  CloseHandle(m_writePipe[1]);
+  m_writePipe[1] = INVALID_HANDLE_VALUE;
 
   if (this->asyncRead) {
     this->readThread = thread(&Process::ProcessImpl::doReadData, this);
@@ -114,29 +124,34 @@ void Process::ProcessImpl::stop() {
 
   if (this->readThread.joinable()) this->readThread.join();
 
-  if (INVALID_HANDLE_VALUE != this->hRead) {
-    CloseHandle(this->hRead);
+  if (INVALID_HANDLE_VALUE != this->m_readPipe[0]) {
+    CloseHandle(this->m_readPipe[0]);
+    this->m_readPipe[0] = INVALID_HANDLE_VALUE;
   }
 
-  if (INVALID_HANDLE_VALUE != this->hWrite) {
-    CloseHandle(this->hWrite);
+  if (INVALID_HANDLE_VALUE != this->m_readPipe[1]) {
+    CloseHandle(this->m_readPipe[1]);
+    this->m_readPipe[1] = INVALID_HANDLE_VALUE;
   }
+
+  if (INVALID_HANDLE_VALUE != this->m_writePipe[0]) {
+    CloseHandle(this->m_writePipe[0]);
+    this->m_writePipe[0] = INVALID_HANDLE_VALUE;
+  }
+
+  if (INVALID_HANDLE_VALUE != this->m_writePipe[1]) {
+    CloseHandle(this->m_writePipe[1]);
+    this->m_writePipe[1] = INVALID_HANDLE_VALUE;
+  }
+
   CloseHandle(this->pi.hProcess);
   memset(&this->pi, 0, sizeof(PROCESS_INFORMATION));
   this->pi.hProcess = INVALID_HANDLE_VALUE;
-  this->hRead = INVALID_HANDLE_VALUE;
-  this->hWrite = INVALID_HANDLE_VALUE;
 }
 
 int Process::ProcessImpl::getExitCode() const { return this->m_exitCode; }
 
-void Process::ProcessImpl::watchTerminated() {
-  this->waitForFinished();
-  if (INVALID_HANDLE_VALUE != this->hWrite) {
-    CloseHandle(this->hWrite);
-    this->hWrite = INVALID_HANDLE_VALUE;
-  }
-}
+void Process::ProcessImpl::watchTerminated() { this->waitForFinished(); }
 
 int Process::ProcessImpl::waitForFinished() {
   if (INVALID_HANDLE_VALUE == this->pi.hProcess) return -1;
@@ -151,11 +166,23 @@ int Process::ProcessImpl::getProcessId() const { return this->pi.dwProcessId; }
 
 int Process::ProcessImpl::readData(char* buf, int bufLen) {
   if (INVALID_HANDLE_VALUE == this->pi.hProcess ||
-      INVALID_HANDLE_VALUE == this->hRead || this->asyncRead)
+      INVALID_HANDLE_VALUE == this->m_readPipe[0] || this->asyncRead)
     return -1;
 
   DWORD readBytes = 0;
-  if (ReadFile(this->hRead, buf, bufLen, &readBytes, NULL)) {
+  if (ReadFile(this->m_readPipe[0], buf, bufLen, &readBytes, NULL)) {
+    return readBytes;
+  }
+  return -1;
+}
+
+int Process::ProcessImpl::writeData(const char* buf, int bufLen) {
+  if (INVALID_HANDLE_VALUE == this->pi.hProcess ||
+      INVALID_HANDLE_VALUE == this->m_writePipe[0])
+    return -1;
+
+  DWORD readBytes = 0;
+  if (WriteFile(this->m_writePipe[0], buf, bufLen, &readBytes, NULL)) {
     return readBytes;
   }
   return -1;
@@ -167,7 +194,7 @@ void Process::ProcessImpl::doReadData() {
   const DWORD bufLen = 2048;
   char buf[bufLen];
   DWORD readBytes = 0;
-  while (ReadFile(this->hRead, buf, bufLen, &readBytes, NULL)) {
+  while (ReadFile(this->m_readPipe[0], buf, bufLen, &readBytes, NULL)) {
     if (readBytes > 0) {
       this->_proc->onReadData(buf, readBytes);
     } else {

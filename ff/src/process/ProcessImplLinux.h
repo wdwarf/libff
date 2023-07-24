@@ -35,6 +35,7 @@ public:
 	const std::string& getCommand() const;
 	void setCommand(const std::string& command);
 	int readData(char* buf, int bufLen);
+	int writeData(const char* buf, int bufLen);
 	bool isAsyncRead() const;
 	void setAsyncRead(bool asyncRead);
 	const std::string& getWorkDir() const;
@@ -55,7 +56,8 @@ private:
 	void doReadData();
 	Process* _proc;
 	std::string command;
-	int pipeFd[2];
+	int pipeFdRead[2];
+	int pipeFdWrite[2];
 	int pid;
 	int m_exitCode;
 	bool asyncRead;

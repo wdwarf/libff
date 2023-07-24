@@ -10,6 +10,9 @@
 
 #include <ff/ff_config.h>
 
+#include <cmath>
+#include <limits>
+
 NS_FF_BEG
 
 template <typename T>

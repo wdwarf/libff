@@ -75,6 +75,10 @@ int Process::readData(char* buf, int bufLen) {
 	return this->impl->readData(buf, bufLen);
 }
 
+int Process::writeData(const char* buf, int bufLen) {
+	return this->impl->writeData(buf, bufLen);
+}
+
 bool Process::isAsyncRead() const {
 	return this->impl->isAsyncRead();
 }

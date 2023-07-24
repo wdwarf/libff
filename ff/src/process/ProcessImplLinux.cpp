@@ -30,7 +30,8 @@ NS_FF_BEG
 
 Process::ProcessImpl::ProcessImpl(Process *proc, const std::string &command)
     : _proc(proc), pid(0), m_exitCode(-1), asyncRead(true) {
-  memset(this->pipeFd, 0, sizeof(this->pipeFd));
+  memset(this->pipeFdRead, 0, sizeof(this->pipeFdRead));
+  memset(this->pipeFdWrite, 0, sizeof(this->pipeFdWrite));
   this->command = command;
 }
 
@@ -44,7 +45,11 @@ Process::ProcessImpl::~ProcessImpl() {
 void Process::ProcessImpl::start() {
   this->stop();
 
-  if (pipe(this->pipeFd) < 0) {
+  if (pipe(this->pipeFdRead) < 0) {
+    THROW_EXCEPTION(ProcessException, "process start failed.", errno);
+  }
+
+  if (pipe(this->pipeFdWrite) < 0) {
     THROW_EXCEPTION(ProcessException, "process start failed.", errno);
   }
 
@@ -55,10 +60,14 @@ void Process::ProcessImpl::start() {
       chdir(this->workDir.c_str());
     }
 
-    close(this->pipeFd[0]);
-    dup2(this->pipeFd[1], STDOUT_FILENO);
-    dup2(this->pipeFd[1], STDERR_FILENO);
-    close(this->pipeFd[1]);
+    close(this->pipeFdRead[0]);
+    dup2(this->pipeFdRead[1], STDOUT_FILENO);
+    dup2(this->pipeFdRead[1], STDERR_FILENO);
+    close(this->pipeFdRead[1]);
+
+    close(this->pipeFdWrite[1]);
+    dup2(this->pipeFdWrite[0], STDIN_FILENO);
+    close(this->pipeFdWrite[0]);
 
     char **argv = new char *[args.size() + 2];
     for (size_t i = 0; i < args.size(); ++i) {
@@ -69,7 +78,8 @@ void Process::ProcessImpl::start() {
     int re = execvp(command.c_str(), argv);
     exit(re);
   } else {
-    close(this->pipeFd[1]);
+    close(this->pipeFdRead[1]);
+    close(this->pipeFdWrite[0]);
     if (this->asyncRead) {
       this->readThread = thread(bind(&Process::ProcessImpl::doReadData, this));
     }
@@ -83,9 +93,11 @@ void Process::ProcessImpl::stop() {
 
   if (this->readThread.joinable()) this->readThread.join();
 
-  close(this->pipeFd[0]);
+  close(this->pipeFdRead[0]);
+  close(this->pipeFdWrite[1]);
   this->pid = 0;
-  memset(this->pipeFd, 0, sizeof(this->pipeFd));
+  memset(this->pipeFdRead, 0, sizeof(this->pipeFdRead));
+  memset(this->pipeFdWrite, 0, sizeof(this->pipeFdWrite));
 }
 
 int Process::ProcessImpl::getExitCode() const { return this->m_exitCode; }
@@ -102,9 +114,15 @@ int Process::ProcessImpl::waitForFinished() {
 int Process::ProcessImpl::getProcessId() const { return this->pid; }
 
 int Process::ProcessImpl::readData(char *buf, int bufLen) {
-  if (0 == this->pid || 0 == this->pipeFd[0] || this->asyncRead) return -1;
+  if (0 == this->pid || 0 == this->pipeFdRead[0] || this->asyncRead) return -1;
 
-  return read(this->pipeFd[0], buf, bufLen);
+  return read(this->pipeFdRead[0], buf, bufLen);
+}
+
+int Process::ProcessImpl::writeData(const char *buf, int bufLen) {
+  if (0 == this->pid || 0 == this->pipeFdWrite[1]) return -1;
+
+  return write(this->pipeFdWrite[1], buf, bufLen);
 }
 
 void Process::ProcessImpl::doReadData() {
@@ -113,7 +131,7 @@ void Process::ProcessImpl::doReadData() {
   const int bufLen = 2048;
   char buf[bufLen];
   int readBytes = 0;
-  while ((readBytes = read(this->pipeFd[0], buf, bufLen)) > 0) {
+  while ((readBytes = read(this->pipeFdRead[0], buf, bufLen)) > 0) {
     this->_proc->onReadData(buf, readBytes);
   }
 }
