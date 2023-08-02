@@ -69,10 +69,14 @@ void Process::ProcessImpl::start() {
                     "process start failed: CreatePipe failed.", GetLastError());
   }
 
+  SetHandleInformation(m_readPipe[0], HANDLE_FLAG_INHERIT, 0);
+
   if (!::CreatePipe(&this->m_writePipe[1], &this->m_writePipe[0], &sa, 0)) {
     THROW_EXCEPTION(ProcessException,
                     "process start failed: CreatePipe failed.", GetLastError());
   }
+
+  SetHandleInformation(m_writePipe[0], HANDLE_FLAG_INHERIT, 0);
 
   std::string cmdLine;
   for (size_t i = 0; i < args.size(); ++i) {

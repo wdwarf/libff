@@ -26,13 +26,22 @@ TEST(ProcessTest, ProcessTest) {
 
   string cmd = "dir\r\n";
   process.writeData(cmd.c_str(), cmd.length());
+
   cmd = "exit\r\n";
   process.writeData(cmd.c_str(), cmd.length());
 
   process.waitForFinished();
   LOGD << process.getExitCode();
-  char buf[1024]{0};
-  process.readData(buf, 1024);
+
+  stringstream stream;
+  stream << endl;
+  char buf[10240]{0};
+  int readBytes = 0;
+  while ((readBytes = process.readData(buf, 10240)) > 0) {
+    stream.write(buf, readBytes);
+    memset(buf, 0, sizeof(buf));
+  }
+  LOGD << stream.str();
 
 #else
 
@@ -47,10 +56,16 @@ TEST(ProcessTest, ProcessTest) {
 
   process.waitForFinished();
   LOGD << process.getExitCode();
-  char buf[1024]{0};
-  process.readData(buf, 1024);
+
+  stringstream stream;
+  stream << endl;
+  char buf[10240]{0};
+  int readBytes = 0;
+  while ((readBytes = process.readData(buf, 10240)) > 0) {
+    stream.write(buf, readBytes);
+    memset(buf, 0, sizeof(buf));
+  }
+  LOGD << stream.str();
 
 #endif
-
-  LOGD << "buf: " << buf;
 }
