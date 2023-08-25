@@ -4,13 +4,22 @@
  * @date 2023-08-10 08:06:39
  * @description
  */
+#include <fcntl.h>
+#include <ff/File.h>
 #include <ff/NamedPipe.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+
+#ifndef _WIN32
+#include <sys/select.h>
+#include <unistd.h>
+#endif
 
 NS_FF_BEG
 
 NamedPipe::NamedPipe(/* args */) {}
 
-NamedPipe::~NamedPipe() {}
+NamedPipe::~NamedPipe() { this->close(); }
 
 bool NamedPipe::create(const std::string& pipeName) {
   this->close();
@@ -28,16 +37,31 @@ bool NamedPipe::create(const std::string& pipeName) {
 
   return true;
 #else
-  //
+  File pipeFile(pipeName);
+  if (pipeFile.isExists()) {
+    struct stat64 buf;
+    if (0 != stat64(pipeName.c_str(), &buf)) return false;
+
+    if (S_ISFIFO(buf.st_mode)) {
+      return true;
+    }
+  }
+
+  m_pipeFd = mkfifo(pipeName.c_str(), 0777);
+  return (m_pipeFd >= 0);
 #endif
 }
 
 bool NamedPipe::open(const std::string& pipeName, uint32_t timeoutMs) {
-  this->close();
+  // this->close();
 
   m_pipeName = pipeName;
 
 #ifdef _WIN32
+  if (INVALID_HANDLE_VALUE != m_handle) {
+    return true;
+  }
+
   if (!WaitNamedPipeA(m_pipeName.c_str(), timeoutMs)) {
     return false;
   }
@@ -51,7 +75,10 @@ bool NamedPipe::open(const std::string& pipeName, uint32_t timeoutMs) {
   return true;
 
 #else
-  //
+  if (m_pipeFd >= 0) return true;
+
+  m_pipeFd = ::open(pipeName.c_str(), O_NONBLOCK | O_RDWR);
+  return (m_pipeFd >= 0);
 #endif
 }
 
@@ -64,7 +91,11 @@ void NamedPipe::close() {
   m_handle = INVALID_HANDLE_VALUE;
 
 #else
-  //
+  if (m_pipeFd < 0) return;
+  ::close(m_pipeFd);
+  m_pipeFd = -1;
+
+  File(m_pipeName).remove();
 #endif
 }
 
@@ -89,7 +120,7 @@ bool NamedPipe::connect(uint32_t timeoutMs) {
   CloseHandle(op.hEvent);
   return true;
 #else
-  //
+  return (m_pipeFd >= 0);
 #endif
 }
 
@@ -119,7 +150,19 @@ int NamedPipe::write(const void* buf, int bufSize, uint32_t timeoutMs) {
 
   return writeBytes;
 #else
-  //
+  if (m_pipeFd < 0) return -1;
+  fd_set fs_read;
+  timeval tv;
+  tv.tv_sec = timeoutMs / 1000;
+  tv.tv_usec = (timeoutMs % 1000) * 1000;
+  FD_ZERO(&fs_read);
+  FD_SET(this->m_pipeFd, &fs_read);
+  int re =
+      ::select(this->m_pipeFd + 1, 0, &fs_read, 0, (-1 == timeoutMs ? 0 : &tv));
+  if (re <= 0) {
+    return -1;
+  }
+  return ::write(this->m_pipeFd, buf, bufSize);
 #endif
 }
 
@@ -148,7 +191,19 @@ int NamedPipe::read(void* buf, int bufSize, uint32_t timeoutMs) {
 
   return readBytes;
 #else
-  //
+  if (m_pipeFd < 0) return -1;
+  fd_set fs_read;
+  timeval tv;
+  tv.tv_sec = timeoutMs / 1000;
+  tv.tv_usec = (timeoutMs % 1000) * 1000;
+  FD_ZERO(&fs_read);
+  FD_SET(this->m_pipeFd, &fs_read);
+  int re =
+      ::select(this->m_pipeFd + 1, &fs_read, 0, 0, (-1 == timeoutMs ? 0 : &tv));
+  if (re <= 0) {
+    return -1;
+  }
+  return ::read(this->m_pipeFd, buf, bufSize);
 #endif
 }
 

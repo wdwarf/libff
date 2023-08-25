@@ -14,7 +14,7 @@
 
 NS_FF_BEG
 
-class NamedPipe {
+class LIBFF_API NamedPipe {
  public:
   NamedPipe(/* args */);
   ~NamedPipe();
@@ -39,7 +39,7 @@ class NamedPipe {
   HANDLE m_hWriteEvent = INVALID_HANDLE_VALUE;
   HANDLE m_hReadEvent = INVALID_HANDLE_VALUE;
 #else
-  int m_pipeFd;
+  int m_pipeFd = -1;
 #endif
 };
 
