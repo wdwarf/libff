@@ -59,6 +59,7 @@ bool IOCP::create(DWORD numberOfConcurrentThreads) {
         if (!this->getQueuedCompletionStatus(&numberOfBytesTransferred,
                                              &completionKey, &lpOverlapped,
                                              INFINITE)) {
+          if(0 == completionKey && nullptr == lpOverlapped) break;
           continue;
         }
 

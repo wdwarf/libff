@@ -17,9 +17,20 @@
 
 NS_FF_BEG
 
-NamedPipe::NamedPipe(/* args */) {}
+NamedPipe::NamedPipe() {
+#ifdef _WIN32
+  m_hWriteEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+  m_hReadEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+#endif
+}
 
-NamedPipe::~NamedPipe() { this->close(); }
+NamedPipe::~NamedPipe() {
+  this->close();
+#ifdef _WIN32
+  CloseHandle(m_hReadEvent);
+  CloseHandle(m_hWriteEvent);
+#endif
+}
 
 bool NamedPipe::create(const std::string& pipeName) {
   this->close();
@@ -27,10 +38,10 @@ bool NamedPipe::create(const std::string& pipeName) {
   m_pipeName = pipeName;
 
 #ifdef _WIN32
-  m_handle = CreateNamedPipeA(m_pipeName.c_str(),
-                              PIPE_ACCESS_DUPLEX | FILE_FLAG_OVERLAPPED,
-                              PIPE_TYPE_MESSAGE, 1, 1024 * 1024, 1024 * 1024,
-                              NMPWAIT_WAIT_FOREVER, NULL);
+  m_handle = CreateNamedPipeA(
+      m_pipeName.c_str(), PIPE_ACCESS_DUPLEX | FILE_FLAG_OVERLAPPED,
+      PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE, 1, 1024 * 1024, 1024 * 1024,
+      NMPWAIT_WAIT_FOREVER, NULL);
   if (INVALID_HANDLE_VALUE == m_handle) {
     return false;
   }
@@ -67,8 +78,14 @@ bool NamedPipe::open(const std::string& pipeName, uint32_t timeoutMs) {
   }
 
   m_handle = CreateFileA(m_pipeName.c_str(), GENERIC_READ | GENERIC_WRITE, 0,
-                         NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+                         NULL, OPEN_EXISTING,
+                         FILE_ATTRIBUTE_NORMAL | FILE_FLAG_OVERLAPPED, NULL);
   if (INVALID_HANDLE_VALUE == m_handle) {
+    return false;
+  }
+
+  DWORD mode = PIPE_READMODE_MESSAGE;
+  if (!SetNamedPipeHandleState(m_handle, &mode, NULL, NULL)) {
     return false;
   }
 
@@ -95,7 +112,7 @@ void NamedPipe::close() {
   ::close(m_pipeFd);
   m_pipeFd = -1;
 
-  File(m_pipeName).remove();
+  unlink(m_pipeName.c_str());
 #endif
 }
 
@@ -107,7 +124,8 @@ bool NamedPipe::connect(uint32_t timeoutMs) {
   ZeroMemory(&op, sizeof(OVERLAPPED));
   op.hEvent = CreateEventA(NULL, TRUE, FALSE, NULL);
 
-  if (ConnectNamedPipe(m_handle, &op)) {
+  if (ConnectNamedPipe(m_handle, &op) ||
+      ERROR_PIPE_CONNECTED == GetLastError()) {
     CloseHandle(op.hEvent);
     return true;
   }
