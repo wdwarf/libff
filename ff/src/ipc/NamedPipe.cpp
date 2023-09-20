@@ -158,9 +158,9 @@ int NamedPipe::write(const void* buf, int bufSize, uint32_t timeoutMs) {
 
     auto waitRt = WaitForSingleObject(m_hWriteEvent, timeoutMs);
     if (WAIT_OBJECT_0 != waitRt) {
+      CancelIoEx(m_handle, &op);
       return -1;
     }
-    ResetEvent(m_hWriteEvent);
 
     GetOverlappedResult(m_handle, &op, &writeBytes, FALSE);
     FlushFileBuffers(m_handle);
@@ -194,17 +194,22 @@ int NamedPipe::read(void* buf, int bufSize, uint32_t timeoutMs) {
 
   DWORD readBytes = 0;
   if (FALSE == ReadFile(m_handle, buf, bufSize, &readBytes, &op)) {
+    if (ERROR_MORE_DATA == GetLastError()) return bufSize;
+
     if (ERROR_IO_PENDING != GetLastError()) {
       return -1;
     }
 
     auto waitRt = WaitForSingleObject(m_hReadEvent, timeoutMs);
     if (WAIT_OBJECT_0 != waitRt) {
+      CancelIoEx(m_handle, &op);
       return -1;
     }
-    ResetEvent(m_hReadEvent);
 
-    GetOverlappedResult(m_handle, &op, &readBytes, FALSE);
+    if (!GetOverlappedResult(m_handle, &op, &readBytes, FALSE)) {
+      if (ERROR_MORE_DATA == GetLastError()) return bufSize;
+      return -1;
+    }
   }
 
   return readBytes;
