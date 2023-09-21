@@ -162,7 +162,7 @@ int NamedPipe::write(const void* buf, int bufSize, uint32_t timeoutMs) {
       return -1;
     }
 
-    GetOverlappedResult(m_handle, &op, &writeBytes, FALSE);
+    if (!GetOverlappedResult(m_handle, &op, &writeBytes, FALSE)) return -1;
     FlushFileBuffers(m_handle);
   }
 

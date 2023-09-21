@@ -107,7 +107,10 @@ int Serial::read(char* buf, int len, int msTimeout) {
     WaitForSingleObject(this->m_overLappedRead.hEvent, msTimeout);
     if (EV_RXCHAR == (EV_RXCHAR & evMask)) {
       if (!ReadFile(this->m_fd, buf, len, &readBytes, &m_overLappedRead)) {
-        if (GetLastError() != ERROR_IO_PENDING) return -1;
+        if (GetLastError() != ERROR_IO_PENDING) {
+          CancelIoEx(this->m_fd, &m_overLappedRead);
+          return -1;
+        }
         if (!GetOverlappedResult(this->m_fd, &m_overLappedRead, &readBytes,
                                  TRUE))
           return -1;
@@ -127,7 +130,10 @@ int Serial::send(const void* buf, int len) {
     DWORD sendBytes = 0;
     if (!WriteFile(this->m_fd, (p + writeBytes), len - writeBytes, &sendBytes,
                    &m_overLappedWrite)) {
-      if (GetLastError() != ERROR_IO_PENDING) return -1;
+      if (GetLastError() != ERROR_IO_PENDING) {
+        CancelIoEx(this->m_fd, &m_overLappedWrite);
+        return -1;
+      }
       if (!GetOverlappedResult(this->m_fd, &m_overLappedWrite, &sendBytes,
                                TRUE))
         return -1;

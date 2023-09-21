@@ -31,6 +31,12 @@
 #pragma warning(disable : 4275)
 #pragma warning(disable : 4819)
 
+#define ThreadLocalVal __declspec(thread)
+
+#else
+
+#define ThreadLocalVal __thread
+
 #endif
 
 #ifndef LIBFF_API
