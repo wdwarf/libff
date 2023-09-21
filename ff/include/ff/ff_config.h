@@ -164,4 +164,11 @@ NS_FF_END
   private:\
   char m_##name[size]
 
+#define MEMBER_DEF_BYTEARR(name, size) public:\
+  uint8_t (&name())[size]{ return this->m_##name; }\
+  const uint8_t (&name() const)[size]{ return this->m_##name; }\
+  void name(const uint8_t(&val)[size]){ memcpy(this->m_##name, val, size); }\
+  private:\
+  uint8_t m_##name[size]
+
 #endif /* FF_FF_CONFIG_H_ */
