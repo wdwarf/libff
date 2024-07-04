@@ -41,7 +41,7 @@ class __Init__ {
   __Init__() {
 #ifdef WIN32
     WSADATA wsaData;
-    WSAStartup(MAKEWORD(2, 0), &wsaData);
+    WSAStartup(MAKEWORD(2, 2), &wsaData);
 #endif
   }
 };
@@ -110,11 +110,11 @@ void SockAddr::setPort(uint16_t port) {
 std::string SockAddr::getIp() const {
   char addr[INET6_ADDRSTRLEN] = {0};
   if (AF_INET == this->getFamily()) {
-    inet_ntop(AF_INET, &this->v4()->sin_addr, addr, INET6_ADDRSTRLEN);
+    inet_ntop(AF_INET, (void*)&this->v4()->sin_addr, addr, INET6_ADDRSTRLEN);
   }
 
   if (AF_INET6 == this->getFamily()) {
-    inet_ntop(AF_INET6, &this->v6()->sin6_addr, addr, INET6_ADDRSTRLEN);
+    inet_ntop(AF_INET6, (void*)&this->v6()->sin6_addr, addr, INET6_ADDRSTRLEN);
   }
 
   return addr;

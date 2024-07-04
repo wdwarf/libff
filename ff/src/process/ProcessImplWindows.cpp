@@ -92,7 +92,7 @@ void Process::ProcessImpl::start() {
 
   STARTUPINFOA si;
   si.cb = sizeof(STARTUPINFOA);
-  GetStartupInfo(&si);
+  GetStartupInfoA(&si);
   si.hStdError = m_readPipe[1];
   si.hStdOutput = m_readPipe[1];
   si.hStdInput = m_writePipe[1];
