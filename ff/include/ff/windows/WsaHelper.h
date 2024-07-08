@@ -92,7 +92,7 @@ struct WsaFuncs {
   LPFN_DISCONNECTEX disconnectEx = nullptr;
 };
 
-WsaFuncs GetWsaFuncs();
+LIBFF_API WsaFuncs GetWsaFuncs();
 
 NS_FF_END
 

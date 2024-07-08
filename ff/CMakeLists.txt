@@ -48,6 +48,9 @@ IF (MINGW)
 		winmm
 		wldap32
 		IPHlpApi
+		psapi
+		dbghelp
+		version
 	)
 
 ELSEIF (WIN32)
