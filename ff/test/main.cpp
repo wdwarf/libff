@@ -9,6 +9,10 @@
 #include <ff/StdoutAppender.h>
 #include <gtest/gtest.h>
 
+#ifdef WIN32
+#include <ff/windows/CrashDump.h>
+#endif
+
 #include <iostream>
 
 #include "TestDef.h"
@@ -26,7 +30,9 @@ static void SigHandler(int sig) {
 }
 
 static void SigCatch() {
-#if defined(__linux) || defined(unix)
+#ifdef WIN32
+  CrashDumpInit();
+#else
   int sigs[] = {SIGTERM, SIGPIPE};
   for (auto sig : sigs) {
     signal(sig, SigHandler);
@@ -36,7 +42,7 @@ static void SigCatch() {
 
 int main(int argc, char** argv) try {
   SigCatch();
-
+  
   testing::InitGoogleTest(&argc, argv);
 
   init();
