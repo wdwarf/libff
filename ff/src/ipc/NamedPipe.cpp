@@ -67,6 +67,10 @@ bool NamedPipe::create(const std::string& pipeName) {
 #endif
 }
 
+/**
+ * windows 跨主机访问命名管道需要用以下命令先建立一个IPC连接
+ * net use \\192.168.1.10\ipc$ /USER:username password
+*/
 bool NamedPipe::open(const std::string& pipeName, uint32_t timeoutMs) {
   // this->close();
 
