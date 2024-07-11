@@ -69,14 +69,32 @@ bool NamedPipeServer::start(const std::string& pipeName,
   m_onDataFunc = onDataFunc;
 
   m_acceptThread = std::thread([this] {
-    cout << "started" << endl;
     HANDLE handle = INVALID_HANDLE_VALUE;
     while (!m_stoped) {
       if (INVALID_HANDLE_VALUE == handle) {
+        SECURITY_ATTRIBUTES sa;
+        SECURITY_DESCRIPTOR sd;
+        InitializeSecurityDescriptor(&sd, SECURITY_DESCRIPTOR_REVISION);
+        if (!SetSecurityDescriptorDacl(&sd, TRUE, NULL, FALSE)) {
+          cerr << "SetSecurityDescriptorDacl failed: " << GetLastError()
+               << endl;
+        }
+        sa.nLength = sizeof(SECURITY_ATTRIBUTES);
+        sa.bInheritHandle = TRUE;
+        sa.lpSecurityDescriptor = &sd;
+
         handle = CreateNamedPipeA(
-            m_pipeName.c_str(), PIPE_ACCESS_DUPLEX | FILE_FLAG_OVERLAPPED,
-            PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE, PIPE_UNLIMITED_INSTANCES,
-            1024 * 1024, 1024 * 1024, NMPWAIT_NOWAIT, NULL);
+            m_pipeName.c_str(),                         // lpName
+            PIPE_ACCESS_DUPLEX | FILE_FLAG_OVERLAPPED,  // dwOpenMode
+            PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE |
+                PIPE_ACCEPT_REMOTE_CLIENTS,  // dwPipeMode
+            PIPE_UNLIMITED_INSTANCES,        // nMaxInstances
+            1 * 1024 * 1024,                 // nOutBufferSize
+            1 * 1024 * 1024,                 // nInBufferSize
+            0,                               // nDefaultTimeOut
+            &sa                              // lpSecurityAttributes
+        );
+
         if (INVALID_HANDLE_VALUE == handle) {
           std::this_thread::sleep_for(std::chrono::milliseconds(50));
           continue;
@@ -127,7 +145,6 @@ bool NamedPipeServer::start(const std::string& pipeName,
       }
     }
 
-    cout << "pipe server stoped" << endl;
   });
 
   return true;

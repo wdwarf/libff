@@ -9,10 +9,12 @@
 #define _CRASHDUMP_H
 
 #include <ff/ff_config.h>
+#include <functional>
 
 NS_FF_BEG
 
-LIBFF_API void CrashDumpInit();
+using CrashDumpHandler = std::function<void(const std::string& dumpStr)>;
+LIBFF_API void CrashDumpInit(CrashDumpHandler handler);
 
 NS_FF_END
 

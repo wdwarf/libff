@@ -10,10 +10,14 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
+#include <iostream>
+
 #ifndef _WIN32
 #include <sys/select.h>
 #include <unistd.h>
 #endif
+
+using namespace std;
 
 NS_FF_BEG
 
@@ -77,9 +81,25 @@ bool NamedPipe::open(const std::string& pipeName, uint32_t timeoutMs) {
     return false;
   }
 
-  m_handle = CreateFileA(m_pipeName.c_str(), GENERIC_READ | GENERIC_WRITE, 0,
-                         NULL, OPEN_EXISTING,
-                         FILE_ATTRIBUTE_NORMAL | FILE_FLAG_OVERLAPPED, NULL);
+  SECURITY_ATTRIBUTES sa;
+  SECURITY_DESCRIPTOR sd;
+  InitializeSecurityDescriptor(&sd, SECURITY_DESCRIPTOR_REVISION);
+  if (!SetSecurityDescriptorDacl(&sd, TRUE, NULL, FALSE)) {
+    cerr << "SetSecurityDescriptorDacl failed: " << GetLastError() << endl;
+  }
+  sa.nLength = sizeof(SECURITY_ATTRIBUTES);
+  sa.bInheritHandle = TRUE;
+  sa.lpSecurityDescriptor = &sd;
+
+  m_handle = CreateFileA(
+      m_pipeName.c_str(),                            // lpFileName
+      GENERIC_READ | GENERIC_WRITE,                  // dwDesiredAccess
+      0,                                             // dwShareMode
+      &sa,                                           // lpSecurityAttributes
+      OPEN_EXISTING,                                 // dwCreationDisposition
+      FILE_ATTRIBUTE_NORMAL | FILE_FLAG_OVERLAPPED,  // dwFlagsAndAttributes
+      NULL                                           // hTemplateFile
+  );
   if (INVALID_HANDLE_VALUE == m_handle) {
     return false;
   }

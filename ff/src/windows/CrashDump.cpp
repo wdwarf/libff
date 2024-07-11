@@ -4,13 +4,16 @@
  * @date 2024-07-08 17:18:44
  * @description
  */
-
-#include <dbghelp.h>
 #include <ff/String.h>
 #include <ff/windows/CrashDump.h>
+
+#if 1  // Make the file formater not to change the position of this line
+#include <windows.h>
+#endif
+
+#include <dbghelp.h>
 #include <psapi.h>
 #include <tlhelp32.h>
-#include <windows.h>
 
 #include <iostream>
 #include <sstream>
@@ -26,8 +29,23 @@ using namespace std;
 NS_FF_BEG
 
 namespace {
+CrashDumpHandler g_crashDumpHandler;
 
-std::vector<DWORD64> ObtainStackTrace(LPEXCEPTION_POINTERS info) {
+struct SymbolInfo {
+  DWORD64 address = 0;
+  std::string moduleName;
+  std::string functionName;
+  std::string fileName;
+  int lineNumber = 0;
+
+  static std::string GetFileName(const std::string &filePath) {
+    auto pos = filePath.find_last_of('\\');
+    if (std::string::npos == pos) return filePath;
+    return filePath.substr(pos + 1);
+  }
+};
+
+std::vector<SymbolInfo> ObtainStackTrace(LPEXCEPTION_POINTERS info) {
   DWORD machine_type{IMAGE_FILE_MACHINE_I386};
   STACKFRAME64 frame{};
   frame.AddrPC.Mode = AddrModeFlat;
@@ -62,10 +80,32 @@ std::vector<DWORD64> ObtainStackTrace(LPEXCEPTION_POINTERS info) {
   HANDLE process = GetCurrentProcess();
   HANDLE thread = GetCurrentThread();
   SymInitialize(process, NULL, TRUE);
-  std::vector<DWORD64> stackTrace;
+  std::vector<SymbolInfo> stackTrace;
   while (StackWalk64(machine_type, process, thread, &frame, context, NULL,
                      SymFunctionTableAccess64, SymGetModuleBase64, NULL)) {
-    stackTrace.push_back(frame.AddrPC.Offset);
+    if (0 == frame.AddrPC.Offset) break;
+
+    const auto bufSize = sizeof(SYMBOL_INFO) + MAX_SYM_NAME * sizeof(TCHAR);
+    ULONG64 symBuf[bufSize]{0};
+    PSYMBOL_INFO pSymInfo = (PSYMBOL_INFO)symBuf;
+    pSymInfo->SizeOfStruct = sizeof(SYMBOL_INFO);
+    pSymInfo->MaxNameLen = MAX_SYM_NAME;
+    SymbolInfo symInfo;
+    symInfo.address = frame.AddrPC.Offset;
+
+    DWORD64 moduleBase = SymGetModuleBase64(process, frame.AddrPC.Offset);
+    char ModuleName[MAX_PATH]{0};
+    if (moduleBase &&
+        GetModuleFileNameA((HINSTANCE)moduleBase, ModuleName, MAX_PATH)) {
+      symInfo.moduleName = ModuleName;
+    }
+
+    DWORD64 symDisplacement = 0;
+    if (SymFromAddr(process, frame.AddrPC.Offset, &symDisplacement, pSymInfo)) {
+      symInfo.functionName = pSymInfo->Name;
+    }
+
+    stackTrace.push_back(symInfo);
   }
   SymCleanup(process);
   return stackTrace;
@@ -102,11 +142,12 @@ std::string GetCallStack(PEXCEPTION_POINTERS pException) {
   char buffer[512] = {0};
   std::stringstream str;
 
-  std::vector<DWORD64> bt = ObtainStackTrace(pException);
-  for (DWORD64 addr : bt) {
+  auto symInfos = ObtainStackTrace(pException);
+  for (auto &symInfo : symInfos) {
     DWORD offsetAddr{0};
     PBYTE Module_Addr_1{0};
 
+    auto addr = symInfo.address;
     auto moduleName =
         GetModuleByRetAddr((PBYTE)addr, Module_Addr_1, offsetAddr);
 
@@ -118,10 +159,13 @@ std::string GetCallStack(PEXCEPTION_POINTERS pException) {
 #endif
     str << (buffer);
 
-    if (!moduleName.empty()) {
-      str << ("  ");
-      str << (moduleName);
-    }
+    if (!symInfo.moduleName.empty()) {
+      str << "  ";
+      str << symInfo.moduleName;
+      if (!symInfo.functionName.empty())
+        str << "(" << symInfo.functionName << ")";
+    } else
+      str << "<unknown>";
   }
 
   return str.str();
@@ -299,7 +343,7 @@ std::string getAppVersion() {
 
 std::string getBuildDateTime() { return ""; }
 
-std::string GetExceptionInfo(PEXCEPTION_POINTERS pException) {
+std::string GetCrashInfo(PEXCEPTION_POINTERS pException) {
   std::string workingSet = GetWorkingSet();
   std::string virtualSize = GetVirtualSize();
 
@@ -482,8 +526,11 @@ std::string GetExceptionInfo(PEXCEPTION_POINTERS pException) {
 }
 
 long __stdcall _UnhandledExceptionFilter(_EXCEPTION_POINTERS *excep) {
-  auto sCrashInfo = GetExceptionInfo(excep);
-  cout << sCrashInfo << endl;
+  auto crashInfo = GetCrashInfo(excep);
+  if (g_crashDumpHandler) {
+    g_crashDumpHandler(crashInfo);
+  } else
+    cout << crashInfo << endl;
 
   return EXCEPTION_EXECUTE_HANDLER;
 }
@@ -501,7 +548,9 @@ void _Terminate() {
 
 }  // namespace
 
-LIBFF_API void CrashDumpInit() {
+LIBFF_API void CrashDumpInit(CrashDumpHandler handler) {
+  g_crashDumpHandler = handler;
+
   SetUnhandledExceptionFilter(_UnhandledExceptionFilter);
   // CRT
   _set_invalid_parameter_handler(_InvalidParameterHandler);

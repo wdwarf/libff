@@ -31,7 +31,8 @@ static void SigHandler(int sig) {
 
 static void SigCatch() {
 #ifdef WIN32
-  CrashDumpInit();
+  CrashDumpInit(
+      [](const std::string& crashInfo) { cerr << crashInfo << endl; });
 #else
   int sigs[] = {SIGTERM, SIGPIPE};
   for (auto sig : sigs) {
@@ -42,7 +43,7 @@ static void SigCatch() {
 
 int main(int argc, char** argv) try {
   SigCatch();
-  
+
   testing::InitGoogleTest(&argc, argv);
 
   init();
