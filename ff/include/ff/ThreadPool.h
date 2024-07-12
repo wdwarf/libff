@@ -59,7 +59,7 @@ class LIBFF_API ThreadPool : public Noncopyable {
 
 typedef std::shared_ptr<ThreadPool> ThreadPoolPtr;
 
-class SimpleThreadPool {
+class LIBFF_API SimpleThreadPool {
  public:
   using TaskFunc = std::function<void()>;
 
