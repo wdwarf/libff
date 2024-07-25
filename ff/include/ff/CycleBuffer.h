@@ -15,10 +15,6 @@
 
 NS_FF_BEG
 
-#ifndef min
-#define min std::min
-#endif
-
 template <typename T>
 class CycleBuffer {
  public:
@@ -59,7 +55,7 @@ class CycleBuffer {
 
   SizeType read(T* o, SizeType size) {
     if (isEmpty()) return 0;
-    auto size2Read = min(size, m_size);
+    auto size2Read = (std::min)(size, m_size);
 
     for (uint32_t i = 0; i < size2Read; ++i) {
       auto tmpPos = (m_pos + i) % m_capacity;
@@ -84,6 +80,7 @@ class CycleBuffer {
 
 using CharCycleBuffer = CycleBuffer<char>;
 using ByteCycleBuffer = CycleBuffer<uint8_t>;
+
 
 NS_FF_END
 
