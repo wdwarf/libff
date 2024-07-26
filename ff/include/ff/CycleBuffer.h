@@ -10,8 +10,8 @@
 
 #include <ff/ff_config.h>
 
-#include <vector>
 #include <algorithm>
+#include <vector>
 
 NS_FF_BEG
 
@@ -68,6 +68,21 @@ class CycleBuffer {
     return size2Read;
   }
 
+  SizeType write(const T* o, SizeType size) {
+    auto size2Write = (std::min)(size, (m_capacity - m_size));
+    if (size2Write <= 0) return 0;
+
+    auto tailPos = tail();
+    for (uint32_t i = 0; i < size2Write; ++i) {
+      m_buf[tailPos] = o[i];
+      tailPos = (tailPos + 1) % m_capacity;
+    }
+
+    m_size += size2Write;
+
+    return size2Write;
+  }
+
   SizeType pos() const { return m_pos; }
 
  private:
@@ -80,7 +95,6 @@ class CycleBuffer {
 
 using CharCycleBuffer = CycleBuffer<char>;
 using ByteCycleBuffer = CycleBuffer<uint8_t>;
-
 
 NS_FF_END
 

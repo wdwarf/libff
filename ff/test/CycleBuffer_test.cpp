@@ -10,8 +10,8 @@
 #include <gtest/gtest.h>
 
 #include <iostream>
-#include <vector>
 #include <string>
+#include <vector>
 
 #include "TestDef.h"
 
@@ -36,12 +36,8 @@ TEST(CycleBufferTest, CycleBufferTest) {
 
   LOGD << "==============================";
 
-  buf.put(1);
-  buf.put(2);
-  buf.put(3);
-  buf.put(4);
-  buf.put(5);
-  buf.put(6);
+  uint8_t data[] = {1, 2, 3, 4, 5, 6};
+  buf.write(data, 6);
   LOGD << "size: " << buf.size();
   LOGD << "pos: " << buf.pos();
   LOGD << "==============================";
@@ -72,7 +68,7 @@ TEST(CycleBufferTest, CycleBufferTest_int) {
   int val = 0;
   buf.get(val);
   LOGD << "val: " << val;
-	ASSERT_EQ(val, -1);
+  ASSERT_EQ(val, -1);
 }
 
 TEST(CycleBufferTest, CycleBufferTest_double) {
@@ -84,7 +80,7 @@ TEST(CycleBufferTest, CycleBufferTest_double) {
   double val = 0;
   buf.get(val);
   LOGD << "val: " << val;
-	ASSERT_EQ(val, 3.14159);
+  ASSERT_EQ(val, 3.14159);
 }
 
 TEST(CycleBufferTest, CycleBufferTest_str) {
@@ -96,5 +92,5 @@ TEST(CycleBufferTest, CycleBufferTest_str) {
   string val;
   buf.get(val);
   LOGD << "val: " << val;
-	ASSERT_EQ(val, "str value");
+  ASSERT_EQ(val, "str value");
 }
