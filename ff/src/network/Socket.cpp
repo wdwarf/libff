@@ -401,6 +401,12 @@ bool Socket::bind(uint16_t port, const std::string& ip) {
 
   sockopt_flat_t flag = 1;
   setsockopt(this->m_socketFd, SOL_SOCKET, SO_REUSEADDR, &flag, sizeof(flag));
+
+  linger l;
+  l.l_onoff = 1;
+  l.l_linger = 0;
+  setsockopt(this->m_socketFd, SOL_SOCKET, SO_LINGER, (const char*)&l,
+             sizeof(l));
   return (0 == ::bind(this->m_socketFd, addr, addrSize));
 }
 
@@ -657,13 +663,14 @@ void Socket::enableUdpBroadcast(bool enable) {
   this->setSockOpt(SOL_SOCKET, SO_BROADCAST, &on, sizeof(on));
 }
 
-bool Socket::enableMulticast(const std::string& multiAddr, 
-  const std::string interfaceAddr){
-    struct ip_mreq mc;
-    memset(&mc, 0, sizeof(mc));
-    inet_pton(AF_INET, multiAddr.c_str(), &mc.imr_multiaddr.s_addr);
-    inet_pton(AF_INET, interfaceAddr.c_str(), &mc.imr_interface.s_addr);
-    return (0 == this->setSockOpt(IPPROTO_IP, IP_ADD_MEMBERSHIP, &mc, sizeof(mc)));
+bool Socket::enableMulticast(const std::string& multiAddr,
+                             const std::string interfaceAddr) {
+  struct ip_mreq mc;
+  memset(&mc, 0, sizeof(mc));
+  inet_pton(AF_INET, multiAddr.c_str(), &mc.imr_multiaddr.s_addr);
+  inet_pton(AF_INET, interfaceAddr.c_str(), &mc.imr_interface.s_addr);
+  return (0 ==
+          this->setSockOpt(IPPROTO_IP, IP_ADD_MEMBERSHIP, &mc, sizeof(mc)));
 }
 
 bool Socket::SetBlocking(SocketFd m_socketFd, SockBlockingType blockingType) {
