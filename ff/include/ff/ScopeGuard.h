@@ -9,26 +9,36 @@
 #define _FF_SCOPEGUARD_H_
 
 #include <ff/Noncopyable.h>
-#include <ff/ff_config.h>
+#include <ff/Utility.h>
 
 NS_FF_BEG
+template <typename F>
+class __ScopeGuard;
 
-template <class Func>
+template <typename F>
+__ScopeGuard<typename std::decay<F>::type> ScopeGuard(F func);
+
+template <typename F>
 class __ScopeGuard : private Noncopyable {
  public:
-  __ScopeGuard(Func&& func) : m_func(std::move(func)) {}
-  __ScopeGuard(const Func& func) : m_func(func) {}
-  __ScopeGuard(__ScopeGuard<Func>&& s) : m_func(std::move(s.m_func)) {}
-  ~__ScopeGuard() { m_func(); }
+  __ScopeGuard(__ScopeGuard<F>&& s)
+      : m_func(std::move(s.m_func)),
+        m_invoke(ff::Utility::Exchange(s.m_invoke, false)) {}
+
+  ~__ScopeGuard() {
+    if (m_invoke) m_func();
+  }
 
  private:
-  Func m_func;
+  bool m_invoke = true;
+  F m_func;
+  __ScopeGuard(F&& func) : m_func(std::move(func)) {}
+  friend __ScopeGuard<typename std::decay<F>::type> ScopeGuard<F>(F);
 };
 
-template <class Func>
-__ScopeGuard<typename std::decay<Func>::type> ScopeGuard(Func&& func) {
-  return __ScopeGuard<typename std::decay<Func>::type>(
-      std::forward<Func>(func));
+template <typename F>
+__ScopeGuard<typename std::decay<F>::type> ScopeGuard(F func) {
+  return __ScopeGuard<typename std::decay<F>::type>(std::forward<F>(func));
 }
 
 NS_FF_END

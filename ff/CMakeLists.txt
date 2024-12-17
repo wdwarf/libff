@@ -226,6 +226,7 @@ ${windows_files}
 	src/compress/Zip.cpp
 	src/compress/ZipEntry.cpp
 	src/compress/Unzip.cpp
+	src/Utility.cpp
 )
 
 add_library(ff 
