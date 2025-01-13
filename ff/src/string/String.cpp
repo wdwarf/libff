@@ -416,7 +416,7 @@ long double String::toLongDouble(bool* ok) const {
   return r;
 }
 
-String String::number(long long value, int width, int base, char fillChar) {
+String String::number(uint64_t value, int width, int base, char fillChar) {
   stringstream str;
 
   switch (base) {

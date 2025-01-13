@@ -145,7 +145,8 @@ class LIBFF_API String : public std::string {
   double toDouble(bool* ok = nullptr) const;
   long double toLongDouble(bool* ok = nullptr) const;
 
-  static String number(long long value, int width = 0, int base = 10, char fillChar = '0');
+  static String number(uint64_t value, int width = 0, int base = 10,
+                       char fillChar = '0');
 };
 
 NS_FF_END

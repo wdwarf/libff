@@ -192,6 +192,7 @@ ${windows_files}
 	src/log/StdoutAppender.cpp
 	src/log/FileAppender.cpp
 	src/message_bus/MessageBus.cpp
+	src/numeric/HexNumberFormater.cpp
 	src/numeric/Numeric.cpp
 	src/network/EPoll.cpp
 	src/network/IP.cpp
