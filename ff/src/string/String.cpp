@@ -150,14 +150,22 @@ string ReplaceAllCopy(const string& src, const string& find,
   return ReplaceAll(str, find, replace, ignoreCase);
 }
 
+int Compare(const std::string& s1, const std::string& s2, bool ignoreCase) {
+  if (!ignoreCase) {
+    return s1 > s2 ? 1 : s1 < s2 ? -1 : 0;
+  }
+
+  auto s1l = ToLowerCopy(s1);
+  auto s2l = ToLowerCopy(s2);
+  return s1l > s2l ? 1 : s1l < s2l ? -1 : 0;
+}
+
 int IndexOf(const string& src, const string& find, bool ignoreCase) {
   int re = -1;
   string::size_type pos = string::npos;
   if (ignoreCase) {
-    string s = src;
-    string f = find;
-    ToLower(s);
-    ToLower(f);
+    string s = ToLowerCopy(src);
+    string f = ToLowerCopy(find);
     pos = s.find(f);
   } else {
     pos = src.find(find);
@@ -437,6 +445,33 @@ String String::number(uint64_t value, int width, int base, char fillChar) {
   string s;
   str >> s;
   return s;
+}
+
+String StringList::join(const String& separator) const {
+  std::stringstream str;
+  auto it = this->begin();
+  while (it != this->end()) {
+    str << *it;
+    ++it;
+    if (it != this->end()) str << separator;
+  }
+  return str.str();
+}
+
+StringList::size_type StringList::indexOf(const String& str,
+                                          bool ignoreCase) const {
+  if (!ignoreCase) return List<String>::indexOf(str);
+
+  auto lowerStr = str.toLower();
+  for (size_type i = 0; i < size(); ++i) {
+    if (lowerStr == at(i).toLower()) return i;
+  }
+
+  return static_cast<size_type>(-1);
+}
+
+bool StringList::contains(const String& str, bool ignoreCase) const {
+  return static_cast<size_type>(-1) != indexOf(str, ignoreCase);
 }
 
 NS_FF_END

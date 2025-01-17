@@ -18,10 +18,10 @@ using namespace std;
 
 NS_FF_BEG
 
-static inline uint32_t CapcityAdj(uint32_t bufSize){
-  if(0 == bufSize) return 0;
-  if(bufSize <= 32) return (bufSize + 4);
-  if(bufSize <= 4096) return (bufSize * 2);
+static inline uint32_t CapcityAdj(uint32_t bufSize) {
+  if (0 == bufSize) return 0;
+  if (bufSize <= 32) return (bufSize + 4);
+  if (bufSize <= 4096) return (bufSize * 2);
   return (bufSize + 4096);
 }
 
@@ -354,14 +354,15 @@ void Buffer::ReverseBytes(void* buf, int size) {
   }
 }
 
-String Buffer::ToHexString(const void* buf, int size) {
+String Buffer::ToHexString(const void* buf, int size,
+                           const std::string& separator) {
   stringstream strBuf;
   if (buf && size > 0) {
     const unsigned char* data = static_cast<const unsigned char*>(buf);
 
     strBuf.fill('0');
     for (int i = 0; i < size; ++i) {
-      strBuf << setw(2) << hex << static_cast<int>(data[i]) << " ";
+      strBuf << setw(2) << hex << static_cast<int>(data[i]) << separator;
     }
   }
 

@@ -170,6 +170,7 @@ ${windows_files}
 	src/buffer/Buffer.cpp
 	src/cli/CliPacket.cpp
 	src/cli/CliService.cpp
+	src/container/List.cpp
 	src/data_service/DataService.cpp
 	src/datetime/DateTime.cpp
 	src/datetime/Tick.cpp

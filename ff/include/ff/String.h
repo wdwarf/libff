@@ -8,9 +8,11 @@
 #ifndef FF_STRING_H_
 #define FF_STRING_H_
 
+#include <ff/List.h>
 #include <ff/Object.h>
 #include <ff/StringEncoding.h>
 
+#include <list>
 #include <ostream>
 #include <sstream>
 #include <string>
@@ -47,6 +49,9 @@ LIBFF_API std::string ReplaceAllCopy(const std::string& src,
                                      const std::string& find,
                                      const std::string& replace,
                                      bool ignoreCase = false);
+
+LIBFF_API int Compare(const std::string& s1, const std::string& s2,
+                      bool ignoreCase = false);
 
 template <class T>
 std::string Join(const T& strings, const std::string& delimiter) {
@@ -147,6 +152,15 @@ class LIBFF_API String : public std::string {
 
   static String number(uint64_t value, int width = 0, int base = 10,
                        char fillChar = '0');
+};
+
+class LIBFF_API StringList : public List<String> {
+ public:
+  using List<String>::List;
+
+  String join(const String& separator) const;
+  size_type indexOf(const String& str, bool ignoreCase = false) const;
+  bool contains(const String& str, bool ignoreCase = false) const;
 };
 
 NS_FF_END

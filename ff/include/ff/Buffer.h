@@ -101,7 +101,8 @@ class LIBFF_API Buffer {
   friend LIBFF_API std::ostream& operator<<(std::ostream& o,
                                             const Buffer& buffer);
   static void ReverseBytes(void* buf, int size);
-  static String ToHexString(const void* buf, int size);
+  static String ToHexString(const void* buf, int size,
+                            const std::string& separator = " ");
 
  private:
   unsigned char* data;

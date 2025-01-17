@@ -12,8 +12,10 @@
  */
 
 #include <ff/HexNumberFormater.h>
+#include <ff/String.h>
 #include <gtest/gtest.h>
 
+#include <algorithm>
 #include <fstream>
 #include <iostream>
 #include <vector>
