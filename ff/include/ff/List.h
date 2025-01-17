@@ -10,6 +10,8 @@
 
 #include <ff/ff_config.h>
 
+#include <algorithm>
+#include <initializer_list>
 #include <vector>
 
 NS_FF_BEG
@@ -184,6 +186,9 @@ class List {
   inline List(const List<T>& l) {
     for (auto& o : l) this->push_back(o);
   }
+  inline List(const std::initializer_list<T>& l) {
+    for (auto& o : l) this->push_back(o);
+  }
   inline List(List<T>&& l) { m_d = std::move(l.m_d); }
   template <typename Iterator>
   inline List(Iterator first, Iterator last) {
@@ -192,6 +197,7 @@ class List {
   inline ~List() {
     for (auto& o : m_d) delete o;
   }
+
   inline List& operator=(const List<T>& l) {
     m_d.clear();
     for (auto& o : l) this->push_back(o);
@@ -199,6 +205,11 @@ class List {
   }
   inline List& operator=(List<T>&& l) {
     m_d = std::move(l.m_d);
+    return *this;
+  }
+  inline List& operator=(const std::initializer_list<T>& l) {
+    m_d.clear();
+    for (auto& o : l) this->push_back(o);
     return *this;
   }
 
@@ -303,7 +314,14 @@ class List {
     return const_reverse_iterator(begin());
   }
   inline iterator insert(iterator before, const T& t) {
-    m_d.insert(before.it, new T(t));
+    auto o = new T(t);
+    auto it = m_d.insert(before.it, o);
+    if (it == m_d.end()) delete o;
+    return it;
+  }
+  inline iterator insert(size_type before, const T& t) {
+    if (before < 0 || before >= size()) return end();
+    return insert(m_d.begin() + before, t);
   }
   inline iterator erase(const_iterator it) {
     auto o = *it.it;
@@ -344,6 +362,11 @@ class List {
     auto tmp = m_d[i];
     m_d[i] = m_d[j];
     m_d[j] = tmp;
+  }
+  inline void sort() { std::sort(begin(), end()); }
+  template <typename _Compare>
+  inline void sort(_Compare c) {
+    std::sort(begin(), end(), c);
   }
 
  private:
