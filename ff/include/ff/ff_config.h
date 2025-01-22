@@ -210,4 +210,16 @@ NS_FF_END
  private:                                                                     \
   uint8_t m_##name[size]
 
+NS_FF_BEG
+
+extern void ff_assert(const char* assertion, const char* file,
+                      int line) noexcept;
+
+NS_FF_END
+
+#if !defined(FF_ASSERT)
+#define FF_ASSERT(cond) \
+  ((cond) ? static_cast<void>(0) : ff::ff_assert(#cond, __FILE__, __LINE__))
+#endif
+
 #endif /* FF_FF_CONFIG_H_ */

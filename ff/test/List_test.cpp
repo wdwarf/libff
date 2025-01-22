@@ -66,4 +66,11 @@ TEST(ListTest, ListTest) {
   }
   ASSERT_TRUE(strList == (List<std::string>{"str3", "inserted", "str2", "str1",
                                             "inserted2"}));
+
+  LOGD << "==============";
+  List<std::string> sl(std::move(strList));
+  ASSERT_TRUE(strList.empty());
+  ASSERT_TRUE(sl == (List<std::string>{"str3", "inserted", "str2", "str1",
+                                       "inserted2"}));
+  ASSERT_EQ(1, sl.indexOf("inserted"));
 }
