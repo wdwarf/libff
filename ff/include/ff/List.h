@@ -34,7 +34,7 @@ class List {
 
     inline iterator(const typename VT::iterator& it) noexcept { this->it = it; }
     inline iterator(const iterator& it) noexcept { this->it = it.it; }
-    inline T& operator*() { return **it; }
+    inline T& operator*() const { return *(*it); }
     inline bool operator==(const iterator& o) const noexcept {
       return it == o.it;
     }
@@ -248,7 +248,8 @@ class List {
   inline void pop_front() {
     auto o = m_d.front();
     delete o;
-    m_d.pop_front();
+    // m_d.pop_front();
+    m_d.erase(m_d.begin());
   }
   inline void pop_back() {
     auto o = m_d.back();

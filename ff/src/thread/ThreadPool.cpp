@@ -164,10 +164,8 @@ void ThreadPool::waitAll() {
 
 //////////////////////////////////////////
 
-static DWORD DefaultThreadNum() {
-  SYSTEM_INFO info;
-  GetSystemInfo(&info);
-  return (info.dwNumberOfProcessors + 2);
+static uint32_t DefaultThreadNum() {
+  return std::thread::hardware_concurrency() + 2;
 }
 
 class SimpleThreadPool::Impl {
@@ -198,7 +196,9 @@ bool SimpleThreadPool::Impl::start(uint32_t threadCnt) {
 
   for (uint32_t i = 0; i < threadCnt; ++i) {
     m_threads.push_back(std::thread([this] {
+#ifdef _WIN32
       SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_HIGHEST);
+#endif
       this->run();
     }));
   }
