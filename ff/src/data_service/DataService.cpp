@@ -180,7 +180,8 @@ bool JsonStrDataEntityLoader::load(std::vector<DataEntityInfo>& entities) {
 uint16_t DataServicePacket::HashData(const void* data, uint32_t size) {
   if (nullptr == data || 0 == size) return 0;
 
-  CrcCalculator crc(CrcAlgorithm::Crc16Xmodem);
+  CrcCalculator crc(
+      CrcParameter::Create(16, 0x8005, 0x0000, true, true, 0x0000));
   return crc.calc(data, size);
 }
 

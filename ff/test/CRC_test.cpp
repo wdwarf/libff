@@ -20,13 +20,10 @@ USE_NS_FF
 TEST(CrcTest, CrcTest) {
   const char buf[] = "crc calulator test";
 
-  for (CrcAlgorithm a = CrcAlgorithm::Crc8; a <= CrcAlgorithm::Crc15Mpt1327;) {
-    CrcCalculator crc(a);
-    auto re = crc.calc(buf, strlen(buf));
+  CrcCalculator crc(
+      CrcParameter::Create(16, 0x8005, 0x0000, true, true, 0x0000));
 
-    cout << CrcParams::instance().getCrcParamInfo(a)->getName() << ": 0x" << hex << uppercase
-         << re << endl;
-
-    a = (CrcAlgorithm)(uint32_t(a) + 1);
-  }
+  auto re = crc.calc(buf, strlen(buf));
+  cout << "crc16-ibm: 0x" << hex << uppercase << re << dec << endl;
+  EXPECT_EQ(re, 0xD0B3);
 }

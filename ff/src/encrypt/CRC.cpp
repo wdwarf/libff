@@ -50,8 +50,9 @@ uint64_t ReflectBits(uint64_t data, uint8_t width) {
   return reflection;
 }
 
-Parameter::Parameter(uint8_t width, uint64_t polynomial, uint64_t initValue,
-                     bool reflectIn, bool reflectOut, uint64_t xorOut)
+CrcParameter::CrcParameter(uint8_t width, uint64_t polynomial,
+                           uint64_t initValue, bool reflectIn, bool reflectOut,
+                           uint64_t xorOut)
     : m_width(width),
       m_polynomial(polynomial),
       m_initialValue(initValue),
@@ -63,7 +64,14 @@ Parameter::Parameter(uint8_t width, uint64_t polynomial, uint64_t initValue,
   this->updateTable();
 }
 
-void Parameter::updateTable() {
+CrcParameterPtr CrcParameter::Create(uint8_t width, uint64_t polynomial,
+                                     uint64_t initValue, bool reflectIn,
+                                     bool reflectOut, uint64_t xorOut) {
+  return std::make_shared<CrcParameter>(width, polynomial, initValue, reflectIn,
+                                        reflectOut, xorOut);
+}
+
+void CrcParameter::updateTable() {
   uint64_t crc = 0;
   int shift = m_width - 8;
   for (uint64_t i = 0; i < 256; i++) {
@@ -79,44 +87,45 @@ void Parameter::updateTable() {
   }
 }
 
-uint64_t Parameter::polynomial() const { return m_polynomial; }
+uint64_t CrcParameter::polynomial() const { return m_polynomial; }
 
-uint64_t Parameter::initialValue() const { return m_initialValue; }
+uint64_t CrcParameter::initialValue() const { return m_initialValue; }
 
-bool Parameter::reflectInput() const { return m_reflectInput; }
+bool CrcParameter::reflectInput() const { return m_reflectInput; }
 
-bool Parameter::reflectOutput() const { return m_reflectOutput; }
+bool CrcParameter::reflectOutput() const { return m_reflectOutput; }
 
-uint64_t Parameter::xorOutput() const { return m_xorOutput; }
+uint64_t CrcParameter::xorOutput() const { return m_xorOutput; }
 
-uint8_t Parameter::width() const { return m_width; }
+uint8_t CrcParameter::width() const { return m_width; }
 
-uint64_t Parameter::mask() const { return m_mask; }
+uint64_t CrcParameter::mask() const { return m_mask; }
 
-uint64_t Parameter::highBit() const { return m_highBit; }
+uint64_t CrcParameter::highBit() const { return m_highBit; }
 
-uint64_t Parameter::eflectBit(uint8_t v) const {
+uint64_t CrcParameter::eflectBit(uint8_t v) const {
   return m_eflectBitOrderTable[v];
 }
 
-Calculator::Calculator(const ParameterPtr& param) : m_param(param) {
+CrcCalculator::CrcCalculator(const CrcParameterPtr& param) : m_param(param) {
   m_currentValue = m_param->initialValue() & m_param->mask();
 }
 
-Calculator::Calculator(uint8_t width, uint64_t polynomial, uint64_t initValue,
-                       bool reflectIn, bool reflectOut, uint64_t xorOut)
-    : m_param(std::make_shared<Parameter>(width, polynomial, initValue,
-                                          reflectIn, reflectOut, xorOut)) {
+CrcCalculator::CrcCalculator(uint8_t width, uint64_t polynomial,
+                             uint64_t initValue, bool reflectIn,
+                             bool reflectOut, uint64_t xorOut)
+    : m_param(std::make_shared<CrcParameter>(width, polynomial, initValue,
+                                             reflectIn, reflectOut, xorOut)) {
   m_currentValue = m_param->initialValue() & m_param->mask();
 }
 
-void Calculator::reset() {
+void CrcCalculator::reset() {
   m_currentValue = m_param->initialValue() & m_param->mask();
 }
 
-ParameterPtr Calculator::parameter() const { return m_param; }
+CrcParameterPtr CrcCalculator::parameter() const { return m_param; }
 
-uint64_t Calculator::calc(const void* data, uint64_t length) {
+uint64_t CrcCalculator::calc(const void* data, uint64_t length) {
   this->reset();
   this->update(data, length);
   uint64_t crc = this->finalize();
@@ -124,8 +133,8 @@ uint64_t Calculator::calc(const void* data, uint64_t length) {
   return crc;
 }
 
-uint64_t Calculator::calc(const void* data, uint64_t length,
-                          uint64_t prevResult) {
+uint64_t CrcCalculator::calc(const void* data, uint64_t length,
+                             uint64_t prevResult) {
   prevResult &= m_param->mask();
   prevResult ^= m_param->xorOutput();
   if (m_param->reflectOutput()) {
@@ -141,7 +150,7 @@ uint64_t Calculator::calc(const void* data, uint64_t length,
   return crc;
 }
 
-void Calculator::update(const void* data, uint64_t length) {
+void CrcCalculator::update(const void* data, uint64_t length) {
   uint64_t crc = m_currentValue;
   const uint8_t* p = static_cast<const uint8_t*>(data);
 
@@ -158,7 +167,7 @@ void Calculator::update(const void* data, uint64_t length) {
   m_currentValue = crc;
 }
 
-uint64_t Calculator::finalize() {
+uint64_t CrcCalculator::finalize() {
   auto crc = m_currentValue;
   if (m_param->reflectOutput()) {
     crc = ReflectBits(crc, m_param->width());

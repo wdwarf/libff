@@ -18,10 +18,17 @@
 
 NS_FF_BEG
 
-class Parameter {
+class CrcParameter;
+using CrcParameterPtr = std::shared_ptr<CrcParameter>;
+
+class CrcParameter {
  public:
-  Parameter(uint8_t width, uint64_t polynomial, uint64_t initValue,
-            bool reflectIn, bool reflectOut, uint64_t xorOut);
+  CrcParameter(uint8_t width, uint64_t polynomial, uint64_t initValue,
+               bool reflectIn, bool reflectOut, uint64_t xorOut);
+
+  static CrcParameterPtr Create(uint8_t width, uint64_t polynomial,
+                                uint64_t initValue, bool reflectIn,
+                                bool reflectOut, uint64_t xorOut);
 
   uint64_t polynomial() const;
   uint64_t initialValue() const;
@@ -47,23 +54,21 @@ class Parameter {
   void updateTable();
 };
 
-using ParameterPtr = std::shared_ptr<Parameter>;
-
-class Calculator {
+class CrcCalculator {
  public:
-  Calculator(const ParameterPtr& param);
-  Calculator(uint8_t width, uint64_t polynomial, uint64_t initValue,
-             bool reflectIn, bool reflectOut, uint64_t xorOut);
+  CrcCalculator(const CrcParameterPtr& param);
+  CrcCalculator(uint8_t width, uint64_t polynomial, uint64_t initValue,
+                bool reflectIn, bool reflectOut, uint64_t xorOut);
 
   uint64_t calc(const void* data, uint64_t length);
   uint64_t calc(const void* data, uint64_t length, uint64_t prevResult);
   void update(const void* data, uint64_t length);
   uint64_t finalize();
   void reset();
-  ParameterPtr parameter() const;
+  CrcParameterPtr parameter() const;
 
  private:
-  ParameterPtr m_param;
+  CrcParameterPtr m_param;
   uint64_t m_currentValue = 0;
 };
 
