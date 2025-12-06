@@ -9,6 +9,7 @@
 #include <ff/CRC.h>
 
 #include <iostream>
+#include <mutex>
 
 using namespace std;
 
@@ -50,25 +51,29 @@ uint64_t ReflectBits(uint64_t data, uint8_t width) {
   return reflection;
 }
 
-CrcParameter::CrcParameter(uint8_t width, uint64_t polynomial,
-                           uint64_t initValue, bool reflectIn, bool reflectOut,
-                           uint64_t xorOut)
-    : m_width(width),
+CrcParameter::CrcParameter(const std::string& name, uint8_t width,
+                           uint64_t polynomial, uint64_t initValue,
+                           bool reflectIn, bool reflectOut, uint64_t xorOut,
+                           uint64_t check)
+    : m_name(name),
+      m_width(width),
       m_polynomial(polynomial),
       m_initialValue(initValue),
       m_reflectInput(reflectIn),
       m_reflectOutput(reflectOut),
-      m_xorOutput(xorOut) {
+      m_xorOutput(xorOut),
+      m_check(check) {
   m_mask = (1ull << m_width) - 1;
   m_highBit = 1ull << (m_width - 1);
   this->updateTable();
 }
 
-CrcParameterPtr CrcParameter::Create(uint8_t width, uint64_t polynomial,
-                                     uint64_t initValue, bool reflectIn,
-                                     bool reflectOut, uint64_t xorOut) {
-  return std::make_shared<CrcParameter>(width, polynomial, initValue, reflectIn,
-                                        reflectOut, xorOut);
+CrcParameterPtr CrcParameter::Create(const std::string& name, uint8_t width,
+                                     uint64_t polynomial, uint64_t initValue,
+                                     bool reflectIn, bool reflectOut,
+                                     uint64_t xorOut, uint64_t check) {
+  return std::make_shared<CrcParameter>(name, width, polynomial, initValue,
+                                        reflectIn, reflectOut, xorOut, check);
 }
 
 void CrcParameter::updateTable() {
@@ -87,6 +92,8 @@ void CrcParameter::updateTable() {
   }
 }
 
+std::string CrcParameter::name() const { return m_name; }
+
 uint64_t CrcParameter::polynomial() const { return m_polynomial; }
 
 uint64_t CrcParameter::initialValue() const { return m_initialValue; }
@@ -99,12 +106,230 @@ uint64_t CrcParameter::xorOutput() const { return m_xorOutput; }
 
 uint8_t CrcParameter::width() const { return m_width; }
 
+uint64_t CrcParameter::check() const { return m_check; }
+
 uint64_t CrcParameter::mask() const { return m_mask; }
 
 uint64_t CrcParameter::highBit() const { return m_highBit; }
 
 uint64_t CrcParameter::eflectBit(uint8_t v) const {
   return m_eflectBitOrderTable[v];
+}
+
+CrcParameterPtr CrcParameter::Create(CrcAlgorithm algo) {
+  static std::map<CrcAlgorithm, CrcParameterPtr> algos;
+  static std::once_flag flag;
+  std::call_once(flag, []() {
+    algos = std::map<CrcAlgorithm, CrcParameterPtr>{
+        // CRC-8
+        {CrcAlgorithm::Crc8,
+         CrcParameter::Create("CRC-8", 8, 0x7, 0x0, false, false, 0x0, 0xF4)},
+        {CrcAlgorithm::Crc8Cdma2000,
+         CrcParameter::Create("CRC-8/CDMA2000", 8, 0x9B, 0xFF, false, false,
+                              0x0, 0xDA)},
+        {CrcAlgorithm::Crc8Darc,
+         CrcParameter::Create("CRC-8/DARC", 8, 0x39, 0x0, true, true, 0x0,
+                              0x15)},
+        {CrcAlgorithm::Crc8DvbS2,
+         CrcParameter::Create("CRC-8/DVB-S2", 8, 0xD5, 0x0, false, false, 0x0,
+                              0xBC)},
+        {CrcAlgorithm::Crc8Ebu, CrcParameter::Create("CRC-8/EBU", 8, 0x1D, 0xFF,
+                                                     true, true, 0x0, 0x97)},
+        {CrcAlgorithm::Crc8ICode,
+         CrcParameter::Create("CRC-8/I-CODE", 8, 0x1D, 0xFD, false, false, 0x0,
+                              0x7E)},
+        {CrcAlgorithm::Crc8Itu, CrcParameter::Create("CRC-8/ITU", 8, 0x7, 0x0,
+                                                     false, false, 0x55, 0xA1)},
+        {CrcAlgorithm::Crc8Maxim,
+         CrcParameter::Create("CRC-8/MAXIM", 8, 0x31, 0x0, true, true, 0x0,
+                              0xA1)},
+        {CrcAlgorithm::Crc8Rohc,
+         CrcParameter::Create("CRC-8/ROHC", 8, 0x7, 0xFF, true, true, 0x0,
+                              0xD0)},
+        {CrcAlgorithm::Crc8Wcdma,
+         CrcParameter::Create("CRC-8/WCDMA", 8, 0x9B, 0x0, true, true, 0x0,
+                              0x25)},
+
+        // CRC-10
+        {CrcAlgorithm::Crc10, CrcParameter::Create("CRC-10", 10, 0x233, 0x0,
+                                                   false, false, 0x0, 0x199)},
+        {CrcAlgorithm::Crc10Cdma2000,
+         CrcParameter::Create("CRC-10/CDMA2000", 10, 0x3D9, 0x3FF, false, false,
+                              0x0, 0x233)},
+
+        // CRC-11
+        {CrcAlgorithm::Crc11, CrcParameter::Create("CRC-11", 11, 0x385, 0x1A,
+                                                   false, false, 0x0, 0x5A3)},
+
+        // CRC-12
+        {CrcAlgorithm::Crc123Gpp,
+         CrcParameter::Create("CRC-12/3GPP", 12, 0x80F, 0x0, false, true, 0x0,
+                              0xDAF)},
+        {CrcAlgorithm::Crc12Cdma2000,
+         CrcParameter::Create("CRC-12/CDMA2000", 12, 0xF13, 0xFFF, false, false,
+                              0x0, 0xD4D)},
+        {CrcAlgorithm::Crc12Dect,
+         CrcParameter::Create("CRC-12/DECT", 12, 0x80F, 0x0, false, false, 0x0,
+                              0xF5B)},
+
+        // CRC-13
+        {CrcAlgorithm::Crc13Bbc,
+         CrcParameter::Create("CRC-13/BBC", 13, 0x1CF5, 0x0, false, false, 0x0,
+                              0x4FA)},
+
+        // CRC-14
+        {CrcAlgorithm::Crc14Darc,
+         CrcParameter::Create("CRC-14/DARC", 14, 0x805, 0x0, true, true, 0x0,
+                              0x82D)},
+
+        // CRC-15
+        {CrcAlgorithm::Crc15, CrcParameter::Create("CRC-15", 15, 0x4599, 0x0,
+                                                   false, false, 0x0, 0x59E)},
+        {CrcAlgorithm::Crc15Mpt1327,
+         CrcParameter::Create("CRC-15/MPT1327", 15, 0x6815, 0x0, false, false,
+                              0x1, 0x2566)},
+
+        // CRC-16
+        {CrcAlgorithm::Crc16CcittFalse,
+         CrcParameter::Create("CRC-16/CCITT-FALSE", 16, 0x1021, 0xFFFF, false,
+                              false, 0x0, 0x29B1)},
+        {CrcAlgorithm::Crc16Arc,
+         CrcParameter::Create("CRC-16/ARC", 16, 0x8005, 0x0, true, true, 0x0,
+                              0xBB3D)},
+        {CrcAlgorithm::Crc16AugCcitt,
+         CrcParameter::Create("CRC-16/AUG-CCITT", 16, 0x1021, 0x1D0F, false,
+                              false, 0x0, 0xE5CC)},
+        {CrcAlgorithm::Crc16Buypass,
+         CrcParameter::Create("CRC-16/BUYPASS", 16, 0x8005, 0x0, false, false,
+                              0x0, 0xFEE8)},
+        {CrcAlgorithm::Crc16Cdma2000,
+         CrcParameter::Create("CRC-16/CDMA2000", 16, 0xC867, 0xFFFF, false,
+                              false, 0x0, 0x4C06)},
+        {CrcAlgorithm::Crc16Dds110,
+         CrcParameter::Create("CRC-16/DDS-110", 16, 0x8005, 0x800D, false,
+                              false, 0x0, 0x9ECF)},
+        {CrcAlgorithm::Crc16DectR,
+         CrcParameter::Create("CRC-16/DECT-R", 16, 0x589, 0x0, false, false,
+                              0x1, 0x7E)},
+        {CrcAlgorithm::Crc16DectX,
+         CrcParameter::Create("CRC-16/DECT-X", 16, 0x589, 0x0, false, false,
+                              0x0, 0x7F)},
+        {CrcAlgorithm::Crc16Dnp,
+         CrcParameter::Create("CRC-16/DNP", 16, 0x3D65, 0x0, true, true, 0xFFFF,
+                              0xEA82)},
+        {CrcAlgorithm::Crc16En13757,
+         CrcParameter::Create("CRC-16/EN-13757", 16, 0x3D65, 0x0, false, false,
+                              0xFFFF, 0xC2B7)},
+        {CrcAlgorithm::Crc16Genibus,
+         CrcParameter::Create("CRC-16/GENIBUS", 16, 0x1021, 0xFFFF, false,
+                              false, 0xFFFF, 0xD64E)},
+        {CrcAlgorithm::Crc16Ibm,
+         CrcParameter::Create("CRC-16/IBM", 16, 0x8005, 0x0, true, true, 0x0,
+                              0xD64E)},
+        {CrcAlgorithm::Crc16Maxim,
+         CrcParameter::Create("CRC-16/MAXIM", 16, 0x8005, 0x0, true, true,
+                              0xFFFF, 0x44C2)},
+        {CrcAlgorithm::Crc16Mcrf4Xx,
+         CrcParameter::Create("CRC-16/MCRF4XX", 16, 0x1021, 0xFFFF, true, true,
+                              0x0, 0x6F91)},
+        {CrcAlgorithm::Crc16Riello,
+         CrcParameter::Create("CRC-16/RIELLO", 16, 0x1021, 0xB2AA, true, true,
+                              0x0, 0x63D0)},
+        {CrcAlgorithm::Crc16T10Dif,
+         CrcParameter::Create("CRC-16/T10-DIF", 16, 0x8BB7, 0x0, false, false,
+                              0x0, 0xD0DB)},
+        {CrcAlgorithm::Crc16Teledisk,
+         CrcParameter::Create("CRC-16/TELEDISK", 16, 0xA097, 0x0, false, false,
+                              0x0, 0xFB3)},
+        {CrcAlgorithm::Crc16Tms37157,
+         CrcParameter::Create("CRC-16/TMS37157", 16, 0x1021, 0x89EC, true, true,
+                              0x0, 0x26B1)},
+        {CrcAlgorithm::Crc16Usb,
+         CrcParameter::Create("CRC-16/USB", 16, 0x8005, 0xFFFF, true, true,
+                              0xFFFF, 0xB4C8)},
+        {CrcAlgorithm::CrcA, CrcParameter::Create("CRC-A", 16, 0x1021, 0xC6C6,
+                                                  true, true, 0x0, 0xBF05)},
+        {CrcAlgorithm::Crc16Kermit,
+         CrcParameter::Create("CRC-16/KERMIT", 16, 0x1021, 0x0, true, true, 0x0,
+                              0x2189)},
+        {CrcAlgorithm::Crc16Modbus,
+         CrcParameter::Create("CRC-16/MODBUS", 16, 0x8005, 0xFFFF, true, true,
+                              0x0, 0x4B37)},
+        {CrcAlgorithm::Crc16X25,
+         CrcParameter::Create("CRC-16/X-25", 16, 0x1021, 0xFFFF, true, true,
+                              0xFFFF, 0x906E)},
+        {CrcAlgorithm::Crc16Xmodem,
+         CrcParameter::Create("CRC-16/XMODEM", 16, 0x1021, 0x0, false, false,
+                              0x0, 0x31C3)},
+
+        // CRC-24
+        {CrcAlgorithm::Crc24,
+         CrcParameter::Create("CRC-24", 24, 0x864CFB, 0xB704CE, false, false,
+                              0x0, 0x21CF02)},
+        {CrcAlgorithm::Crc24FlexrayA,
+         CrcParameter::Create("CRC-24/FLEXRAY-A", 24, 0x5D6DCB, 0xFEDCBA, false,
+                              false, 0x0, 0x7979BD)},
+        {CrcAlgorithm::Crc24FlexrayB,
+         CrcParameter::Create("CRC-24/FLEXRAY-B", 24, 0x5D6DCB, 0xABCDEF, false,
+                              false, 0x0, 0x1F23B8)},
+
+        // CRC-31
+        {CrcAlgorithm::Crc31Philips,
+         CrcParameter::Create("CRC-31/PHILIPS", 31, 0x4C11DB7, 0x7FFFFFFF,
+                              false, false, 0x7FFFFFFF, 0xCE9E46C)},
+
+        // CRC-32
+        {CrcAlgorithm::Crc32,
+         CrcParameter::Create("CRC-32", 32, 0x04C11DB7, 0xFFFFFFFF, true, true,
+                              0xFFFFFFFF, 0xCBF43926)},
+        {CrcAlgorithm::Crc32Bzip2,
+         CrcParameter::Create("CRC-32/BZIP2", 32, 0x04C11DB7, 0xFFFFFFFF, false,
+                              false, 0xFFFFFFFF, 0xFC891918)},
+        {CrcAlgorithm::Crc32C,
+         CrcParameter::Create("CRC-32C", 32, 0x1EDC6F41, 0xFFFFFFFF, true, true,
+                              0xFFFFFFFF, 0xE3069283)},
+        {CrcAlgorithm::Crc32D,
+         CrcParameter::Create("CRC-32D", 32, 0xA833982B, 0xFFFFFFFF, true, true,
+                              0xFFFFFFFF, 0x87315576)},
+        {CrcAlgorithm::Crc32Jamcrc,
+         CrcParameter::Create("CRC-32/JAMCRC", 32, 0x04C11DB7, 0xFFFFFFFF, true,
+                              true, 0x00000000, 0x340BC6D9)},
+        {CrcAlgorithm::Crc32Mpeg2,
+         CrcParameter::Create("CRC-32/MPEG-2", 32, 0x04C11DB7, 0xFFFFFFFF,
+                              false, false, 0x00000000, 0x0376E6E7)},
+        {CrcAlgorithm::Crc32Posix,
+         CrcParameter::Create("CRC-32/POSIX", 32, 0x04C11DB7, 0x00000000, false,
+                              false, 0xFFFFFFFF, 0x765E7680)},
+        {CrcAlgorithm::Crc32Q,
+         CrcParameter::Create("CRC-32Q", 32, 0x814141AB, 0x00000000, false,
+                              false, 0x00000000, 0x3010BF7F)},
+        {CrcAlgorithm::Crc32Xfer,
+         CrcParameter::Create("CRC-32/XFER", 32, 0x000000AF, 0x00000000, false,
+                              false, 0x00000000, 0xBD0BE338)},
+
+        // CRC-40
+        {CrcAlgorithm::Crc40Gsm,
+         CrcParameter::Create("CRC-40/GSM", 40, 0x4820009, 0x0, false, false,
+                              0xFFFFFFFFFF, 0xD4164FC646)},
+
+        // CRC-64
+        {CrcAlgorithm::Crc64,
+         CrcParameter::Create("CRC-64", 64, 0x42F0E1EBA9EA3693, 0x00000000,
+                              false, false, 0x00000000, 0x6C40DF5F0B497347)},
+        {CrcAlgorithm::Crc64We,
+         CrcParameter::Create("CRC-64/WE", 64, 0x42F0E1EBA9EA3693,
+                              0xFFFFFFFFFFFFFFFF, false, false,
+                              0xFFFFFFFFFFFFFFFF, 0x62EC59E3F1A4F00A)},
+        {CrcAlgorithm::Crc64Xz,
+         CrcParameter::Create("CRC-64/XZ", 64, 0x42F0E1EBA9EA3693,
+                              0xFFFFFFFFFFFFFFFF, true, true,
+                              0xFFFFFFFFFFFFFFFF, 0x995DC9BBDF1939FA)}};
+  });
+  auto it = algos.find(algo);
+  if (it == algos.end()) {
+    return nullptr;
+  }
+  return it->second;
 }
 
 CrcCalculator::CrcCalculator(const CrcParameterPtr& param) : m_param(param) {
@@ -114,7 +339,7 @@ CrcCalculator::CrcCalculator(const CrcParameterPtr& param) : m_param(param) {
 CrcCalculator::CrcCalculator(uint8_t width, uint64_t polynomial,
                              uint64_t initValue, bool reflectIn,
                              bool reflectOut, uint64_t xorOut)
-    : m_param(std::make_shared<CrcParameter>(width, polynomial, initValue,
+    : m_param(std::make_shared<CrcParameter>("", width, polynomial, initValue,
                                              reflectIn, reflectOut, xorOut)) {
   m_currentValue = m_param->initialValue() & m_param->mask();
 }

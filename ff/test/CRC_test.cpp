@@ -20,8 +20,7 @@ USE_NS_FF
 TEST(CrcTest, CrcTest) {
   const char buf[] = "crc calulator test";
 
-  CrcCalculator crc(
-      CrcParameter::Create(16, 0x8005, 0x0000, true, true, 0x0000));
+  CrcCalculator crc(CrcParameter::Create(CrcAlgorithm::Crc16Ibm));
 
   auto re = crc.calc(buf, strlen(buf));
   cout << "crc16-ibm: 0x" << hex << uppercase << re << dec << endl;
